@@ -1,18 +1,11 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Bar, PageHead, RankBadge, Scatter, Seg } from "../components/ui";
-import { affil, pctCapped, players, signed, teamShort, useData, type Disc, type Player } from "../lib/data";
+import { AnimatePresence, motion } from "motion/react";
+import { Search } from "lucide-react";
+import { GrowBar, PageHead, RankBadge, Ring, Scatter, Seg, Select } from "../components/ui";
+import { affil, f1, players, shortName, signed, teamShort, useData, type Disc, type Player } from "../lib/data";
 
-type Key = "rank" | "pressure" | "withLift" | "lift" | "pTop10" | "pressureBalls" | "highBalls" | "evidence";
-const COLS: { key: Key; label: string; title: string }[] = [
-  { key: "pressure", label: "Pressure rating", title: "Expected value per 100 pressure balls against an average player" },
-  { key: "lift", label: "Demonstrated lift", title: "How much better or worse the player did under pressure than usual, shrunk for sample size. Shown as evidence; it did not predict future performance, so it is not in the rating" },
-  { key: "withLift", label: "With lift", title: "The rating if past lift were assumed to carry forward" },
-  { key: "pTop10", label: "P(top 10)", title: "Posterior probability of a true top-10 place among rated players" },
-  { key: "pressureBalls", label: "Pressure balls", title: "Deliveries with leverage index of 1 or more" },
-  { key: "highBalls", label: "High tier", title: "Deliveries with leverage index of 2 or more" },
-  { key: "evidence", label: "Conventional, under pressure", title: "Strike rate or economy on pressure balls" },
-];
+type Sort = "rank" | "lift" | "exposure" | "evidence";
 
 export default function Rankings() {
   const data = useData();
@@ -20,74 +13,84 @@ export default function Rankings() {
   const [sp, setSp] = useSearchParams();
   const disc = (sp.get("d") === "bowl" ? "bowl" : "bat") as Disc;
   const [q, setQ] = useState("");
-  const [team, setTeam] = useState("");
+  const [team, setTeam] = useState("all");
   const [pool, setPool] = useState<"rated" | "all">("rated");
-  const [sort, setSort] = useState<{ key: Key; dir: 1 | -1 }>({ key: "rank", dir: 1 });
+  const [sort, setSort] = useState<Sort>("rank");
+  const [hover, setHover] = useState<number | undefined>();
   const all = players(data, disc);
-  const teams = useMemo(() => [...new Set(all.map((p) => p.team).filter(Boolean))].sort() as string[], [all]);
-
-  const ev = (p: Player) => (disc === "bat" ? p.splits.Pressure?.sr : p.splits.Pressure?.econ) ?? null;
-  const rows = useMemo(() => {
-    const val = (p: Player): number => {
-      switch (sort.key) {
-        case "rank": return p.rank ?? 1e6 - p.pressure;
-        case "evidence": return ev(p) ?? -1e6;
-        default: return (p[sort.key] as number | null) ?? -1e6;
-      }
-    };
-    return all
-      .filter((p) => (pool === "all" || p.eligible) && (!team || p.team === team) && (!q || p.name.toLowerCase().includes(q.toLowerCase())))
-      .sort((a, b) => (val(a) - val(b)) * sort.dir);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [all, pool, team, q, sort, disc]);
   const rated = all.filter((p) => p.eligible);
-  const maxP = Math.max(...rated.map((p) => p.pressure));
-  const click = (key: Key) => setSort((s) => (s.key === key ? { key, dir: (s.dir * -1) as 1 | -1 } : { key, dir: key === "rank" ? 1 : -1 }));
+  const teams = useMemo(() => [...new Set(all.map((p) => p.team).filter(Boolean))].sort() as string[], [all]);
+  const ev = (p: Player) => (disc === "bat" ? p.splits.Pressure?.sr ?? null : p.splits.Pressure?.econ ?? null);
+
+  const rows = useMemo(() => {
+    const key = (p: Player): number => {
+      if (sort === "lift") return -p.lift;
+      if (sort === "exposure") return -p.highBalls;
+      if (sort === "evidence") { const v = ev(p); return v == null ? 1e9 : disc === "bat" ? -v : v; }
+      return p.rank ?? 1000 - p.pressure;
+    };
+    return all.filter((p) => (pool === "all" || p.eligible) && (team === "all" || p.team === team) && (!q || p.name.toLowerCase().includes(q.toLowerCase())))
+      .sort((a, b) => key(a) - key(b)).slice(0, pool === "all" ? 120 : 200);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [all, pool, team, q, sort, disc]);
+  const max = Math.max(...rated.map((p) => p.pressure));
 
   return (
     <>
-      <PageHead eyebrow="Rankings" title={disc === "bat" ? "Every rated batter" : "Every rated bowler"}>
-        Sort, filter and open any player. Players without a rank have too little High-pressure exposure to be rated there; their estimates are shown for reference.
+      <PageHead eyebrow="Leaderboards" title={<>Every rated {disc === "bat" ? "batter" : "bowler"}</>}>
+        Ranked on expected value under pressure. Tap anyone for the full scouting report.
       </PageHead>
-      <div className="toolbar">
+
+      <div className="row" style={{ alignItems: "end", gap: 14, marginBottom: 22 }}>
         <Seg label="Discipline" value={disc} onChange={(v) => setSp({ d: v })} options={[["bat", "Batters"], ["bowl", "Bowlers"]] as const} />
-        <Seg label="Pool" value={pool} onChange={setPool} options={[["rated", `Rated (${rated.length})`], ["all", `All listed (${all.length})`]] as const} />
-        <label className="field">Search<input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Player name" /></label>
-        <label className="field">IPL team<select value={team} onChange={(e) => setTeam(e.target.value)}><option value="">All teams</option>{teams.map((t) => <option key={t} value={t}>{teamShort[t] ?? t}</option>)}</select></label>
+        <Seg label="Pool" value={pool} onChange={setPool} options={[["rated", `Ranked · ${rated.length}`], ["all", "Everyone"]] as const} />
+        <div style={{ flex: "1 1 220px", maxWidth: 320 }}>
+          <span className="field-label">Search</span>
+          <div className="input-wrap"><Search /><input className="input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Player name" aria-label="Search players" /></div>
+        </div>
+        <Select label="IPL team" value={team} onChange={setTeam}
+          options={[{ value: "all", label: "All teams" }, ...teams.map((t) => ({ value: t, label: t, hint: teamShort[t] }))]} />
+      </div>
+
+      <div className="row" style={{ gap: 8, marginBottom: 16 }} role="group" aria-label="Sort by">
+        <span className="muted small" style={{ marginRight: 4 }}>Sort by</span>
+        {([["rank", "Rating"], ["evidence", disc === "bat" ? "Pressure strike rate" : "Pressure economy"], ["exposure", "High-pressure balls"], ["lift", "Lift under pressure"]] as const).map(([k, l]) => (
+          <button key={k} type="button" className="chip" aria-pressed={sort === k} onClick={() => setSort(k)}>{l}</button>
+        ))}
       </div>
 
       <div className="split">
-        <div className="panel table-wrap">
-          <table className="data">
-            <thead><tr>
-              <th aria-sort={sort.key === "rank" ? (sort.dir === 1 ? "ascending" : "descending") : "none"}><button onClick={() => click("rank")}>#</button></th>
-              <th>Player</th>
-              {COLS.map((c) => <th key={c.key} className="r" title={c.title} aria-sort={sort.key === c.key ? (sort.dir === 1 ? "ascending" : "descending") : "none"}><button onClick={() => click(c.key)}>{c.key === "evidence" ? (disc === "bat" ? "Pressure SR" : "Pressure econ") : c.label}</button></th>)}
-            </tr></thead>
-            <tbody>
+        <div className="card" style={{ padding: "16px 10px" }}>
+          <div className="lb-row lb-head" style={{ cursor: "default" }}>
+            <span>#</span><span>Player</span><span className="hide-sm">Pressure rating</span><span className="hide-sm" style={{ textAlign: "right" }}>{disc === "bat" ? "SR" : "Econ"}</span><span style={{ textAlign: "right" }}>Top 10</span>
+          </div>
+          <motion.div layout>
+            <AnimatePresence initial={false}>
               {rows.map((p) => (
-                <tr key={p.id} className="click" tabIndex={0} onClick={() => nav(`/player/${disc}/${p.id}`)} onKeyDown={(e) => e.key === "Enter" && nav(`/player/${disc}/${p.id}`)}>
-                  <td><RankBadge rank={p.rank} /></td>
-                  <td><span className="pname">{p.name}</span><div className="psub">{affil(p)}</div></td>
-                  <td className="r num" style={{ whiteSpace: "nowrap" }}><Bar value={p.pressure} max={maxP} /> <b style={{ display: "inline-block", minWidth: 44 }}>{signed(p.pressure)}</b></td>
-                  <td className="r num" style={{ color: p.lift >= 0 ? "var(--good)" : "var(--bad)" }}>{signed(p.lift)}</td>
-                  <td className="r num">{signed(p.withLift)}</td>
-                  <td className="r num">{p.eligible ? pctCapped(p.pTop10) : "–"}</td>
-                  <td className="r num">{p.pressureBalls}</td>
-                  <td className="r num">{p.highBalls}</td>
-                  <td className="r num">{ev(p)?.toFixed(disc === "bat" ? 1 : 2) ?? "–"}</td>
-                </tr>
+                <motion.div key={p.id} layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.22 }}
+                  className="lb-row" role="link" tabIndex={0} onMouseEnter={() => setHover(p.id)} onMouseLeave={() => setHover(undefined)}
+                  onFocus={() => setHover(p.id)} onClick={() => nav(`/player/${disc}/${p.id}`)} onKeyDown={(e) => e.key === "Enter" && nav(`/player/${disc}/${p.id}`)}>
+                  <RankBadge rank={p.rank} />
+                  <span><span className="pname">{shortName(p.name)}</span><div className="psub">{affil(p)}</div></span>
+                  <span className="hide-sm row" style={{ gap: 12, flexWrap: "nowrap" }}>
+                    <span style={{ flex: 1 }}><GrowBar value={Math.max(0, p.pressure)} max={max} color={p.eligible ? "var(--pink)" : "var(--tier-ord)"} /></span>
+                    <b className="num" style={{ width: 48, textAlign: "right" }}>{signed(p.pressure)}</b>
+                  </span>
+                  <span className="hide-sm num muted" style={{ textAlign: "right" }}>{disc === "bat" ? f1(ev(p)) : ev(p)?.toFixed(2) ?? "n/a"}</span>
+                  <span style={{ display: "flex", justifyContent: "flex-end" }}>{p.eligible ? <Ring p={p.pTop10} size={40} /> : <span className="tag">untested</span>}</span>
+                </motion.div>
               ))}
-              {rows.length === 0 && <tr><td colSpan={9} className="muted" style={{ padding: 28, textAlign: "center" }}>No players match. Clear the search or switch the pool to "All listed".</td></tr>}
-            </tbody>
-          </table>
+            </AnimatePresence>
+          </motion.div>
+          {rows.length === 0 && <p className="muted" style={{ padding: 28, textAlign: "center" }}>Nobody matches. Clear the search or switch to Everyone.</p>}
         </div>
-        <div className="panel panel-pad" style={{ position: "sticky", top: 78 }}>
-          <h3>Rating against demonstrated lift</h3>
-          <p className="muted small" style={{ margin: "4px 0 10px" }}>Left to right: how good the player is expected to be under pressure. Bottom to top: how much better or worse than usual the player has actually been there. {disc === "bat" ? "Batters barely leave the centre line." : "Bowlers spread more, but the spread did not repeat in unseen matches."} Lift is evidence, not part of the rating.</p>
-          <Scatter rows={rated} disc={disc} />
+        <div className="card pad stack" style={{ position: "sticky", top: 92 }}>
+          <h2 className="h3">Quality against lift</h2>
+          <p className="muted small">Right means better under pressure overall. Up means they did better than their usual level. Lift did not repeat in unseen matches, so it is shown, not scored.</p>
+          <Scatter rows={rated} disc={disc} highlight={hover} />
         </div>
       </div>
     </>
   );
 }
+

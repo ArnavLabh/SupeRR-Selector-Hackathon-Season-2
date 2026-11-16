@@ -36,7 +36,7 @@ Every availability judgement is therefore provisional.
 | Hetmyer rated 27th of 35 batters at pressure, the designated finisher | 78 runs at strike rate 113 in 2026; "failed in the finisher role" (S4, S7) |
 | Royals' middle order all in the bottom half (Parag 22, Hetmyer 27, Jurel 29, Jadeja 34) | "Rajasthan's biggest issue was the middle-order bridge" (S7) |
 | Only Archer rates in the top third of bowlers; Deshpande 56th of 64; Sandeep Sharma below the floor | "The bowling needs one more Indian death-overs option"; support around Archer "leaked" (S7); Sandeep economy 11.38 in 2026 (S4) |
-| Bishnoi has the largest negative pressure lift among Royals bowlers (−3.9) | Lost his place to Yash Raj Punja mid-season (S7) |
+| Bishnoi has the largest negative pressure lift among Royals bowlers (-3.9) | Lost his place to Yash Raj Punja mid-season (S7) |
 
 ## Where it complicates the picture
 

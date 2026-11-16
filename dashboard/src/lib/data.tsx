@@ -7,6 +7,7 @@ export interface Split {
   balls: number; runs: number; outs?: number; wkts?: number; sr: number | null;
   avg?: number | null; econ?: number | null; dot: number; bnd: number; sixes?: number; wpa: number;
 }
+export interface SplitLite { b: number; r: number; k: number }
 export interface LogRow { d: string; g: string; o: string; b: number; r: number; k: number; h: number; w: number }
 export interface SeasonRow { year: number; balls: number; wpa: number; value: number; sr?: number; runs?: number; econ?: number; wkts?: number }
 export interface Player {
@@ -22,6 +23,8 @@ export interface Player {
   splits: Partial<Record<Scope, Split>>;
   consistency?: { matches: number; positive: number; rate: number; medianWpa: number; totalWpa: number; seasons: number | null; seasonsPositive: number | null };
   boot?: { pTop10: number; rankLo: number; rankHi: number; sd: number };
+  phase?: Partial<Record<"Powerplay" | "Middle" | "Death", SplitLite>>;
+  vs?: Partial<Record<"Pace" | "Spin" | "LHB" | "RHB", SplitLite>>;
   seasons?: SeasonRow[];
   log?: LogRow[];
 }
@@ -44,6 +47,7 @@ export interface Summary {
   league: LeagueRow[]; tierPhase: { tier: string; phase: string; n: number }[];
   liDistribution: { innings: string; lo: number; hi: number; n: number }[];
   models: Record<Disc, ModelInfo>;
+  leagueSplits: Record<Disc, { phase: Record<string, SplitLite>; vs: Record<string, SplitLite> }>;
   validation?: {
     benchmarks: { model: string; scope: string; n_balls: number; log_loss: number; brier: number; auc: number }[];
     calibration: { n_balls: number; n_matches: number; predicted: number; actual: number; scope: string }[];
@@ -58,6 +62,7 @@ export interface Moment { date: string; comp: string; batting: string; bowling: 
 export interface Story { comp: string; date: string; batting: string; bowling: string; target: number; won: boolean; balls: { n: number; wp: number; li: number; over: number; w: boolean; runs: number }[] }
 export interface Auction {
   asOf: string; summary: string; confidence: string;
+  facts?: { k: string; v: string; note: string }[];
   squad: { name: string; role: string; status: string; note?: string }[];
   needs: { title: string; detail: string; evidence: string }[];
   targets: { id: number | null; name: string; disc: Disc; fit: string; tier: "Priority" | "Strong" | "Watch"; availability: string; why: string; risk: string }[];
@@ -84,9 +89,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .catch((e) => setErr(String(e.message ?? e)));
   }, []);
   if (err) return (
-    <div className="page"><div className="callout" role="alert"><strong>The data bundle did not load.</strong> {err}. Run <code>python -m pressure.pipeline export</code> and reload.</div></div>
+    <div className="card pad" role="alert"><b>The data did not load.</b> <span className="muted">{err}. Refresh the page to try again.</span></div>
   );
-  if (!data) return <div className="page" aria-busy="true"><div className="skeleton" style={{ height: 420 }} /></div>;
+  if (!data) return <div aria-busy="true" className="stack"><div className="skeleton" style={{ height: 160 }} /><div className="skeleton" style={{ height: 420 }} /></div>;
   return <Ctx.Provider value={data}>{children}</Ctx.Provider>;
 }
 
@@ -105,20 +110,31 @@ export function useLazy<T>(name: string): T | null {
 export const players = (b: Bundle, d: Disc) => (d === "bat" ? b.batters : b.bowlers);
 export const eligible = (b: Bundle, d: Disc) => players(b, d).filter((p) => p.eligible).sort((a, c) => (a.rank ?? 999) - (c.rank ?? 999));
 
-/* formatting */
-export const f1 = (x: number | null | undefined) => (x == null ? "–" : x.toFixed(1));
-export const f2 = (x: number | null | undefined) => (x == null ? "–" : x.toFixed(2));
-export const signed = (x: number | null | undefined, d = 1) => (x == null ? "–" : `${x > 0 ? "+" : x < 0 ? "−" : ""}${Math.abs(x).toFixed(d)}`);
-export const pct = (x: number | null | undefined, d = 0) => (x == null ? "–" : `${(100 * x).toFixed(d)}%`);
+/* formatting: plain ASCII minus, never an en or em dash */
+const NA = "n/a";
+export const f1 = (x: number | null | undefined) => (x == null ? NA : x.toFixed(1));
+export const f2 = (x: number | null | undefined) => (x == null ? NA : x.toFixed(2));
+export const signed = (x: number | null | undefined, d = 1) => (x == null ? NA : `${x > 0 ? "+" : x < 0 ? "-" : ""}${Math.abs(x).toFixed(d)}`);
+export const pct = (x: number | null | undefined, d = 0) => (x == null ? NA : `${(100 * x).toFixed(d)}%`);
 /** Probabilities from a finite posterior sample: never claim certainty. */
-export const pctCapped = (x: number | null | undefined) => (x == null ? "–" : x >= 0.995 ? ">99%" : x <= 0.005 ? "<1%" : `${(100 * x).toFixed(0)}%`);
+export const pctCapped = (x: number | null | undefined) => (x == null ? NA : x >= 0.995 ? ">99%" : x <= 0.005 ? "<1%" : `${(100 * x).toFixed(0)}%`);
 /** Display name without the disambiguating bracket, and with common short forms. */
-export const shortName = (n: string) => n.split(" (")[0].replace("Namboori Tilak Varma", "Tilak Varma");
-export const int = (x: number | null | undefined) => (x == null ? "–" : Math.round(x).toLocaleString("en-US"));
+export const shortName = (n: string) => n.split(" (")[0].replace("Namboori Tilak Varma", "Tilak Varma").replace("Lokesh Rahul", "KL Rahul");
+export const int = (x: number | null | undefined) => (x == null ? NA : Math.round(x).toLocaleString("en-US"));
 export const teamShort: Record<string, string> = {
   "Rajasthan Royals": "RR", "Mumbai Indians": "MI", "Chennai Super Kings": "CSK", "Royal Challengers Bengaluru": "RCB",
   "Kolkata Knight Riders": "KKR", "Sunrisers Hyderabad": "SRH", "Delhi Capitals": "DC", "Punjab Kings": "PBKS",
   "Gujarat Titans": "GT", "Lucknow Super Giants": "LSG",
 };
-export const affil = (p: Player) => [p.team ? `${teamShort[p.team] ?? p.team}${p.iplLastYear && p.iplLastYear < 2026 ? ` to ${p.iplLastYear}` : ""}` : null, p.country].filter(Boolean).join(" · ") || "–";
+export const teamCode = (p: Player) => (p.team ? teamShort[p.team] ?? p.team : null);
+export const affil = (p: Player) => [p.team ? `${teamCode(p)}${p.iplLastYear && p.iplLastYear < 2026 ? ` until ${p.iplLastYear}` : ""}` : null, p.country].filter(Boolean).join(" · ") || "International";
+/** Strike rate, economy and similar from a split. */
+export const sr = (s?: SplitLite) => (s && s.b ? (100 * s.r) / s.b : null);
+export const econ = (s?: SplitLite) => (s && s.b ? (6 * s.r) / s.b : null);
+export const perK = (s?: SplitLite) => (s && s.k ? s.b / s.k : null);
+/** Percentile of value v within xs (0 to 1). */
+export const percentile = (xs: number[], v: number) => xs.filter((x) => x <= v).length / Math.max(1, xs.length);
+export const role = (p: Player, d: Disc) => d === "bat"
+  ? `${p.hand === "LHB" ? "Left" : "Right"}-hand batter`
+  : (p.bowlType ?? (p.bowlKind === "Spin" ? "Spinner" : "Seamer"));
 export const discLabel = (d: Disc, n = 2) => (d === "bat" ? (n === 1 ? "batter" : "batters") : n === 1 ? "bowler" : "bowlers");

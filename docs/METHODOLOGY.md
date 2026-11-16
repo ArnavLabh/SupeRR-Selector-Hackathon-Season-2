@@ -10,7 +10,7 @@ For every delivery in innings 1 and 2 the pipeline derives, before the ball is b
 
 - `bl` balls left in the innings (innings length is 120, or the revised length in balls);
 - `wih` wickets in hand;
-- `score` (first innings) or `need` = target − score (chase), where target is the revised
+- `score` (first innings) or `need` = target - score (chase), where target is the revised
   target if one exists, otherwise first-innings total + 1;
 - `env`, the scoring environment: each IPL season, each T20I calendar year, pooled A-team events.
 
@@ -29,11 +29,11 @@ with powerplay and death interactions.
 **Dynamic programme.**
 
 ```
-V[b, w, r] = Σ_o p_o(b, w, r) · V[b−1, w − wkt_o, r − runs_o]        chase
+V[b, w, r] = Σ_o p_o(b, w, r) · V[b-1, w - wkt_o, r - runs_o]        chase
 V[·, ·, r ≤ 0] = 1;   V[0, ·, 1] = V[·, 0, 1] = 0.5 (tie);   otherwise 0 at b = 0 or w = 0
 
-W[b, w, x] = Σ_o p_o(b, w) · W[b−1, w − wkt_o, x + runs_o]           first innings
-W[0, ·, x] = W[·, 0, x] = 1 − V[N₂, 10, x + 1]
+W[b, w, x] = Σ_o p_o(b, w) · W[b-1, w - wkt_o, x + runs_o]           first innings
+W[0, ·, x] = W[·, 0, x] = 1 - V[N₂, 10, x + 1]
 ```
 
 **Cross-fitting.** Matches are assigned to five folds by a seeded permutation. The outcome model
@@ -46,7 +46,7 @@ decided, uninterrupted matches in a second cross-fit over the same folds.
 ## 3. Pressure
 
 ```
-leverage(state) = sd over outcomes of [ p(next state) − p(state) ]
+leverage(state) = sd over outcomes of [ p(next state) - p(state) ]
 LI = leverage / mean leverage over live deliveries
 ```
 
@@ -60,13 +60,13 @@ excluded from all player estimates.
 | Elevated | 1 ≤ LI < 2 |
 | High | LI ≥ 2 |
 
-Graded intensity: `s = clip(LI − 1, 0, 2)`.
+Graded intensity: `s = clip(LI - 1, 0, 2)`.
 
 ## 4. Value of a ball
 
 ```
-z_bat  =  [ p(state after bat runs and striker dismissal) − p(state) ] / leverage
-z_bowl = −[ p(state after bowler-charged runs and bowler wicket) − p(state) ] / leverage
+z_bat  =  [ p(state after bat runs and striker dismissal) - p(state) ] / leverage
+z_bowl = -[ p(state after bowler-charged runs and bowler wicket) - p(state) ] / leverage
 ```
 
 Both are winsorised at ±4. Credit rules are in [DATA_AUDIT.md](DATA_AUDIT.md).
@@ -83,7 +83,7 @@ z = Xβ + u_player + s·v_player + u_opp + s·v_opp + m_match + ε
 - Fixed effects `X`: intercept, `s`, innings, phase, innings × phase.
 - `u, v, m` are independent Gaussian random effects. Players with fewer than 60 deliveries share
   one pooled level.
-- Variance components by REML (Henderson's mixed-model equations, Nelder–Mead on log-variances).
+- Variance components by REML (Henderson's mixed-model equations, Nelder-Mead on log-variances).
 - For the two `v` components the restricted likelihood is evaluated on a grid of standard
   deviations with a flat prior, and the posterior mean variance replaces the REML value.
 - Posterior means and the exact posterior covariance of `(u_player, v_player)` come from the

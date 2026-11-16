@@ -158,3 +158,33 @@ def season_splits(b: pd.DataFrame, discipline: str) -> pd.DataFrame:
         t = t.rename(columns={"bowler_id": "player_id"})
         t["economy"] = 6 * t["runs"] / t["balls"].replace(0, np.nan)
     return t
+
+
+def phase_and_matchups(b: pd.DataFrame, discipline: str) -> dict:
+    """Live-ball splits by phase and by matchup, per player, plus league baselines.
+
+    Batting: balls faced, runs, dismissals by phase and against pace or spin.
+    Bowling: legal balls, runs conceded, wickets by phase and against left- or
+    right-handed batters. These are context for scouting, not rating inputs.
+    """
+    live = b[~b["dead"]]
+    if discipline == "bat":
+        d = live[live["bat_faced"]].assign(n=1)
+        own, val = "striker_id", {"n": "sum", "bat_runs": "sum", "bat_out": "sum"}
+        ren = {"n": "b", "bat_runs": "r", "bat_out": "k"}
+        split_col = "pace_or_spin"
+    else:
+        d = live.assign(n=live["legal"].astype(int))
+        own, val = "bowler_id", {"n": "sum", "bowl_runs": "sum", "bowl_wkt": "sum"}
+        ren = {"n": "b", "bowl_runs": "r", "bowl_wkt": "k"}
+        split_col = "batting_type"
+    out = {}
+    for key, col in (("phase", "phase"), ("vs", split_col)):
+        g = d.groupby([own, col], observed=True).agg(val).rename(columns=ren).reset_index()
+        per = {}
+        for r in g.itertuples(index=False):
+            per.setdefault(int(r[0]), {})[str(r[1])] = {"b": int(r.b), "r": int(r.r), "k": int(r.k)}
+        lg = d.groupby(col, observed=True).agg(val).rename(columns=ren)
+        out[key] = {"players": per,
+                    "league": {str(k): {"b": int(v.b), "r": int(v.r), "k": int(v.k)} for k, v in lg.iterrows()}}
+    return out

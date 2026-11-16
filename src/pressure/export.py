@@ -10,7 +10,7 @@ import json
 import numpy as np
 import pandas as pd
 
-from . import ratings, winprob
+from . import ratings, summaries, winprob
 from .config import DASHBOARD_DATA, MAX_BALLS, OUTPUTS, ROOT
 from .pipeline import _log, write_json
 
@@ -45,6 +45,7 @@ def _player_bundle(ctx, disc: str) -> list[dict]:
     boot = pd.read_csv(boot_path).set_index("player_id") if boot_path.exists() else None
     team_of = ctx["state"]["matches"].attrs["team_names"]
     balls = ctx["balls"]
+    pm = summaries.phase_and_matchups(balls, disc)
     own = "striker_id" if disc == "bat" else "bowler_id"
     opp_team = "bowling_team_id" if disc == "bat" else "batting_team_id"
     opp = balls.groupby([own, "match_id"])[opp_team].first()
@@ -113,6 +114,8 @@ def _player_bundle(ctx, disc: str) -> list[dict]:
                  **({"sr": _r(r.strike_rate, 1), "runs": int(r.runs)} if disc == "bat"
                     else {"econ": _r(r.economy, 2), "wkts": int(r.wickets)})}
                 for r in ss.itertuples()]
+        p["phase"] = pm["phase"]["players"].get(pid, {})
+        p["vs"] = pm["vs"]["players"].get(pid, {})
         if row.eligible:
             cm = contrib[contrib["player_id"] == pid].sort_values("match_date")
             log = []
@@ -235,6 +238,8 @@ def run(ctx: dict) -> None:
         "settings": meta["settings"], "liftWeight": meta["settings"]["lift_weight"], "calibrationCoefs": meta["calibration"],
         "league": _records(league), "tierPhase": _records(by_tier_phase),
         "liDistribution": _li_distribution(b),
+        "leagueSplits": {d: {k: v["league"] for k, v in summaries.phase_and_matchups(b, d).items()}
+                         for d in ("bat", "bowl")},
         "models": {d: {"variances": m["variances"], "remlVariances": m["fit"]["reml_variances"],
                        "lr": m["fit"]["pressure_posterior"]["own_pressure_lr"],
                        "lrP": m["fit"]["own_pressure_lr_p"],

@@ -31,17 +31,17 @@ TEAM = {"Rajasthan Royals": "RR", "Mumbai Indians": "MI", "Chennai Super Kings":
 
 def sg(x, d=1):
     if x is None or pd.isna(x):
-        return "–"
-    return f"{'+' if x > 0 else '−' if x < 0 else ''}{abs(x):.{d}f}"
+        return "n/a"
+    return f"{'+' if x > 0 else '-' if x < 0 else ''}{abs(x):.{d}f}"
 
 
 def pc(x, d=0):
-    return "–" if x is None or pd.isna(x) else f"{100 * x:.{d}f}%"
+    return "n/a" if x is None or pd.isna(x) else f"{100 * x:.{d}f}%"
 
 
 def pcap(x) -> str:
     """Probability from a finite posterior sample: never print certainty."""
-    return "–" if x is None or pd.isna(x) else (">99%" if x >= 0.995 else f"{100 * x:.0f}%")
+    return "n/a" if x is None or pd.isna(x) else (">99%" if x >= 0.995 else f"{100 * x:.0f}%")
 
 
 def img(name: str, width="100%") -> str:
@@ -114,7 +114,7 @@ def top_table(d, kind: str) -> str:
             f"<td class=r><b>{sg(r.pressure)}</b></td><td class=r>{sg(r.pressure_lo)} to {sg(r.pressure_hi)}</td>"
             f"<td class=r>{pcap(r.p_top10)} / {pcap(b.boot_p_top10)}</td><td class=r>{int(r.pressure_balls)}</td>"
             f"<td class=r>{int(r.high_balls)}</td>{ev}<td class=r>{sg(r.lift)}</td>"
-            f"<td class=r>{'–' if c is None else f'{int(c.positive_matches)}/{int(c.pressure_matches)}'}</td></tr>")
+            f"<td class=r>{'n/a' if c is None else f'{int(c.positive_matches)}/{int(c.pressure_matches)}'}</td></tr>")
     return f"<table class='data tight'><thead><tr>{head}</tr></thead><tbody>{''.join(rows)}</tbody></table>"
 
 
@@ -235,7 +235,7 @@ def build(d) -> str:
         f"<tr><td><b>{k}</b> <span class=sub>{lab}</span></td><td class=r>{pc(s['tierShares'][k], 1)}</td><td class=r>{pc(r.chase_share)}</td>"
         f"<td class=r>{pc(r.death_share)}</td><td class=r>{r.strike_rate:.0f}</td><td class=r>{r.dot_pct:.1f}</td>"
         f"<td class=r>{r.boundary_pct:.1f}</td><td class=r>{r.wicket_pct:.1f}</td><td class=r>{100 * r.mean_abs_wp_swing:.1f} pts</td></tr>"
-        for k, lab, r in (("Ordinary", "LI &lt; 1", od), ("Elevated", "LI 1–2", el), ("High", "LI ≥ 2", hi)))
+        for k, lab, r in (("Ordinary", "LI &lt; 1", od), ("Elevated", "LI 1 to 2", el), ("High", "LI ≥ 2", hi)))
 
     auction_html = auction_section(d) if d["auction"] else ""
 
@@ -256,7 +256,7 @@ def build(d) -> str:
 <p class="lede">The brief asks who delivers most reliably when it matters, relative to their usual level. This report defines "when it matters" for every one of {s['deliveries']:,} deliveries, measures what each player did with those deliveries on a scale that is comparable with ordinary play, and then asks the question that decides the ranking: does performing above your usual level under pressure repeat?</p>
 <div class="kpis">
   <div><b>{s['deliveries']:,}</b><span>deliveries, {s['matches']} matches, IPL and T20I, 2022 to 2026</span></div>
-  <div><b>{pc(s['tierShares']['High'], 1)}</b><span>of live deliveries are High pressure; {pc(hi.death_share)} of those fall in overs 16–20</span></div>
+  <div><b>{pc(s['tierShares']['High'], 1)}</b><span>of live deliveries are High pressure; {pc(hi.death_share)} of those fall in overs 16 to 20</span></div>
   <div><b>{pc(beat, 1)}</b><span>of 40 hold-out tests in which ignoring past pressure "lift" predicted better than using it</span></div>
   <div><b>{s['eligible']['bat']} + {s['eligible']['bowl']}</b><span>batters and bowlers with enough High-pressure exposure to be ranked</span></div>
 </div>
@@ -285,7 +285,7 @@ def build(d) -> str:
 <p class="lede">The Data Pack is the only source for the rankings. It was audited before any modelling; the audit is reproducible with <code>python -m pressure.audit</code>.</p>
 <div class="cols wide"><div>
 <table class="data"><thead><tr><th>Group</th><th class=r>Matches with ball data</th><th class=r>Deliveries</th></tr></thead><tbody>
-{''.join(f"<tr><td>{'IPL 2022–2026' if g['group']=='IPL' else 'T20 Internationals' if g['group']=='T20I' else 'A-team events (Emerging Asia Cup, Rising Stars)'}</td><td class=r>{g['matches']}</td><td class=r>{g['deliveries']:,}</td></tr>" for g in sorted(aud['by_group'], key=lambda g: -g['deliveries']))}
+{''.join(f"<tr><td>{'IPL 2022 to 2026' if g['group']=='IPL' else 'T20 Internationals' if g['group']=='T20I' else 'A-team events (Emerging Asia Cup, Rising Stars)'}</td><td class=r>{g['matches']}</td><td class=r>{g['deliveries']:,}</td></tr>" for g in sorted(aud['by_group'], key=lambda g: -g['deliveries']))}
 </tbody></table>
 <p>Ball data exists for {aud['matches_with_ball_data']} of {aud['rows']['matches']} matches ({aud['matches_without_ball_data']} were abandoned without a ball). There are no T20 World Cup matches in the pack; T20Is are bilateral series, tri-series and Asia Cups.</p>
 <h2>Checks</h2>
@@ -326,27 +326,27 @@ def build(d) -> str:
 <figure class="fig">{img('calibration', '88%')}<figcaption>When the model says 70%, the batting side wins about 70% of the time. Deciles of predicted probability, all predictions out of fold.</figcaption></figure>
 </div></div>
 <h2>3.2 Leverage, and three tiers</h2>
-<div class="formula">leverage(state) = standard deviation of [ WP(after ball) − WP(before ball) ] over the ball's possible outcomes &nbsp;&nbsp;·&nbsp;&nbsp; LI = leverage ÷ league-average leverage</div>
+<div class="formula">leverage(state) = standard deviation of [ WP(after ball) - WP(before ball) ] over the ball's possible outcomes &nbsp;&nbsp;·&nbsp;&nbsp; LI = leverage ÷ league-average leverage</div>
 <div class="cols"><div>
 <p>Leverage folds required rate, wickets in hand, balls remaining and closeness into one number through a single principle. It falls to zero when the contest is over (40 needed from 12 with two wickets left is not pressure), and it is the same number for the batter and the bowler. Balls where win probability is already beyond 98% are set aside as dead: they say nothing about handling a contest.</p>
 <figure class="fig">{img('pressure_map')}<figcaption>Leverage index across chase situations. The ridge is where the game is in the balance; it sharpens as the balls run out.</figcaption></figure>
 </div><div>
 <figure class="fig">{img('li_distribution')}<figcaption>Almost every first-innings ball is Ordinary: nobody yet knows what a par score is, so no single ball can move the result far.</figcaption></figure>
-<p>A scorer's rule of thumb (chase, overs 16–20, required rate 8 to 15) agrees with the index where it should: {pc(d['defn']['share_of_rule_balls_elevated_or_high'])} of balls passing the rule are Elevated or High. But only {pc(d['defn']['share_of_high_tier_meeting_rule'])} of High balls pass the rule, which misses tight finishes at lower rates and collapses in the middle overs.</p>
+<p>A scorer's rule of thumb (chase, overs 16 to 20, required rate 8 to 15) agrees with the index where it should: {pc(d['defn']['share_of_rule_balls_elevated_or_high'])} of balls passing the rule are Elevated or High. But only {pc(d['defn']['share_of_high_tier_meeting_rule'])} of High balls pass the rule, which misses tight finishes at lower rates and collapses in the middle overs.</p>
 </div></div>
 <h2>3.3 Does the definition separate pressure from ordinary play?</h2>
-<table class="data"><thead><tr><th>Tier</th><th class=r>Share of live balls</th><th class=r>In a chase</th><th class=r>Overs 16–20</th><th class=r>Strike rate</th><th class=r>Dot %</th><th class=r>Boundary %</th><th class=r>Wicket %</th><th class=r>Avg. swing per ball</th></tr></thead><tbody>{tier_rows}</tbody></table>
+<table class="data"><thead><tr><th>Tier</th><th class=r>Share of live balls</th><th class=r>In a chase</th><th class=r>Overs 16 to 20</th><th class=r>Strike rate</th><th class=r>Dot %</th><th class=r>Boundary %</th><th class=r>Wicket %</th><th class=r>Avg. swing per ball</th></tr></thead><tbody>{tier_rows}</tbody></table>
 <figure class="fig">{img('tiers', '92%')}<figcaption>Cricket changes in kind in the High tier: more boundaries, fewer dots, and wickets falling {hi.wicket_pct / od.wicket_pct:.1f} times as often.</figcaption></figure>
 <figure class="fig">{img('worm')}<figcaption>One chase, ball by ball. Pressure is not a phase of the innings; it comes and goes with the state of the match.</figcaption></figure>
 
 <h1><span class="no">4</span>Measuring performance</h1>
 <div class="cols"><div>
 <h2>4.1 Value of a ball</h2>
-<div class="formula">z = [ WP(after the credited outcome) − WP(before) ] ÷ leverage</div>
+<div class="formula">z = [ WP(after the credited outcome) - WP(before) ] ÷ leverage</div>
 <p>Under pressure the right shot depends on the situation: with four needed from six and one wicket left, a single is good and a slog is not. Win probability knows that; strike rate does not. Dividing by leverage standardises the result: across the league z has mean about 0 and standard deviation about 1 in every situation. Ordinary and pressure balls are then on one scale, which is what makes "pressure against usual level" a like-for-like subtraction. Values are winsorised at ±4.</p>
 <p>Raw win probability added was rejected as the unit: two or three last-over balls would decide a player's rating. Strike rate and economy splits are reported for every player as supporting evidence, not as the rating.</p>
 <h2>4.2 Graded intensity</h2>
-<p>The model does not use a yes/no pressure flag. Each ball carries an intensity s = LI − 1, floored at 0 and capped at 2. Elevated balls inform a player's response to pressure a little, High balls a lot, and nobody's estimate hinges on which side of a line one ball fell.</p>
+<p>The model does not use a yes/no pressure flag. Each ball carries an intensity s = LI - 1, floored at 0 and capped at 2. Elevated balls inform a player's response to pressure a little, High balls a lot, and nobody's estimate hinges on which side of a line one ball fell.</p>
 </div><div>
 <h2>4.3 The player model</h2>
 <div class="formula" style="font-size:9.6pt">z = league effects + player<sub>i</sub> + s·lift<sub>i</sub> + opponent<sub>j</sub> + s·lift<sub>j</sub> + match<sub>k</sub> + noise</div>
@@ -370,7 +370,7 @@ def build(d) -> str:
 <h2>5.1 In the data the model was fitted to</h2>
 <p>For bowlers, the spread in pressure lift is larger than chance alone suggests (likelihood-ratio p = {mw['lrP']:.3f}). For batters the most likely spread is zero (p = {mb['lrP']:.2f}). Because a zero estimate would overstate certainty, the model averages over the plausible range with a flat prior on the standard deviation, so each player receives a shrunk estimate of their lift.</p>
 <h2>5.2 In matches the model had not seen</h2>
-<p>Players were rated on one set of matches. Their pressure-weighted value was then measured in the remaining matches: 40 random half-splits and one split forward in time (rate on 2022–24, test on 2025–26).</p>
+<p>Players were rated on one set of matches. Their pressure-weighted value was then measured in the remaining matches: 40 random half-splits and one split forward in time (rate on 2022 to 24, test on 2025 to 26).</p>
 <ul>
 <li>Lift on its own has no predictive value (r = {ho.loc[('bat', LIFT), 'mean_r']:.2f} for batters, {ho.loc[('bowl', LIFT), 'mean_r']:.2f} for bowlers).</li>
 <li>Adding lift to a player's level makes the prediction worse, in {pc(ho.loc[('bat', PUB), 'share_beating_pressure_rating'], 1)} of splits for batters and {pc(ho.loc[('bowl', PUB), 'share_beating_pressure_rating'], 1)} for bowlers.</li>
@@ -461,8 +461,8 @@ def auction_section(d) -> str:
     for t in a["targets"]:
         tab = d["all_batters" if t["disc"] == "bat" else "all_bowlers"]
         r = tab[tab["player_id"] == t["id"]]
-        rk = "–" if r.empty or pd.isna(r["rank"].iloc[0]) else int(r["rank"].iloc[0])
-        rt = "–" if r.empty else sg(r["pressure"].iloc[0])
+        rk = "n/a" if r.empty or pd.isna(r["rank"].iloc[0]) else int(r["rank"].iloc[0])
+        rt = "n/a" if r.empty else sg(r["pressure"].iloc[0])
         cls = {"Priority": "p", "Strong": "n"}.get(t["tier"], "")
         rows += (f"<tr><td><b>{t['name']}</b><br><span class=sub>{t['fit']}</span></td><td><span class='tag {cls}'>{t['tier']}</span></td>"
                  f"<td class=r>{rk}</td><td class=r>{rt}</td><td>{t['why']}</td><td>{t['availability']}</td><td class=muted>{t['risk']}</td></tr>")
@@ -471,7 +471,7 @@ def auction_section(d) -> str:
     cav = "".join(f"<li>{c}</li>" for c in a["caveats"])
     return f"""
 <h1><span class="no">10</span>What it means for Rajasthan Royals</h1>
-<div class="callout"><b>Kept separate on purpose.</b> Sections 1 to 9 use only the supplied data and were frozen (git tag <code>primary-results-v1</code>) before any outside research. This section adds squad and auction context gathered afterwards, as of {a['asOf']}. Nothing here changed a rank. {a['confidence']}</div>
+<div class="callout">Sections 1 to 9 use only the supplied data; those results were fixed (git tag <code>primary-results-v1</code>) before this squad research began, on {a['asOf'].split(",")[0]}. {a['confidence']}</div>
 <p class="lede">{a['summary']}</p>
 <h2>10.1 Where the squad needs pressure performers</h2><ul>{needs}</ul>
 <h2>10.2 Targets</h2>

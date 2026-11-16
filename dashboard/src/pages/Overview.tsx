@@ -1,91 +1,193 @@
-import { Link } from "react-router-dom";
-import { IntervalLegend, IntervalList, PageHead, Stat } from "../components/ui";
-import { affil, eligible, int, pct, players, signed, useData, type Disc } from "../lib/data";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "motion/react";
+import { ArrowRight, Gavel, Activity } from "lucide-react";
+import { CountUp, EASE, GrowBar, RankBadge, Reveal, Ring } from "../components/ui";
+import { affil, eligible, pct, shortName, signed, useData, type Disc, type Player } from "../lib/data";
+
+function Podium({ rows, disc }: { rows: Player[]; disc: Disc }) {
+  const nav = useNavigate();
+  const order = [rows[1], rows[0], rows[2]];
+  const h = [128, 168, 108];
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0,1fr))", gap: 10, alignItems: "end" }}>
+      {order.map((p, i) => (
+        <motion.button key={p.id} type="button" onClick={() => nav(`/player/${disc}/${p.id}`)}
+          initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.12 * [1, 0, 2][i], duration: 0.5, ease: EASE }}
+          style={{ all: "unset", cursor: "pointer", display: "grid", gap: 10, justifyItems: "center", textAlign: "center" }} aria-label={`Rank ${p.rank}, ${p.name}, rating ${signed(p.pressure)}`}>
+          <span><span className="pname" style={{ fontSize: 15 }}>{shortName(p.name)}</span><div className="psub">{affil(p)}</div></span>
+          <span style={{ width: "100%", height: h[i], borderRadius: "14px 14px 6px 6px", display: "grid", placeItems: "center", alignContent: "center", gap: 6,
+            background: p.rank === 1 ? "linear-gradient(180deg, rgba(233,185,73,.28), rgba(233,185,73,.06))" : "linear-gradient(180deg, var(--s3), var(--s1))",
+            border: `1px solid ${p.rank === 1 ? "rgba(233,185,73,.45)" : "var(--line)"}` }}>
+            <RankBadge rank={p.rank} />
+            <span style={{ font: "750 26px/1 var(--head)" }}><CountUp value={p.pressure} format={(v) => signed(v)} /></span>
+          </span>
+        </motion.button>
+      ))}
+    </div>
+  );
+}
+
+function TopList({ disc }: { disc: Disc }) {
+  const data = useData();
+  const nav = useNavigate();
+  const rows = eligible(data, disc).slice(0, 10);
+  const max = rows[0].pressure;
+  return (
+    <div className="card pad stack" style={{ gap: 20 }}>
+      <div className="row between">
+        <h2 className="h3">{disc === "bat" ? "Batting" : "Bowling"} top 10</h2>
+        <Link to={`/rankings?d=${disc}`} className="small accent row" style={{ gap: 6 }}>Full leaderboard <ArrowRight size={15} /></Link>
+      </div>
+      <Podium rows={rows} disc={disc} />
+      <div className="stack" style={{ gap: 4 }}>
+        {rows.slice(3).map((p, i) => (
+          <div key={p.id} role="link" tabIndex={0} className="lb-row" style={{ gridTemplateColumns: "36px minmax(0,1.3fr) minmax(60px,1fr) 52px 44px", padding: "8px 10px" }}
+            onClick={() => nav(`/player/${disc}/${p.id}`)} onKeyDown={(e) => e.key === "Enter" && nav(`/player/${disc}/${p.id}`)}>
+            <RankBadge rank={p.rank} />
+            <span><span className="pname">{shortName(p.name)}</span><div className="psub">{affil(p)}</div></span>
+            <GrowBar value={p.pressure} max={max} delay={0.04 * i} />
+            <b className="num" style={{ textAlign: "right" }}>{signed(p.pressure)}</b>
+            <Ring p={p.pTop10} size={40} label={`${pct(p.pTop10)} chance of a true top-10 place`} />
+          </div>
+        ))}
+      </div>
+      <div className="legend small"><span>Bar: pressure rating</span><span>Ring: chance of a true top-10 place</span></div>
+    </div>
+  );
+}
+
+function PhaseShare() {
+  const { summary: s } = useData();
+  const high = s.tierPhase.filter((r) => r.tier === "High");
+  const tot = high.reduce((a, r) => a + r.n, 0);
+  return (
+    <div className="stack" style={{ gap: 10 }}>
+      {["Powerplay", "Middle", "Death"].map((ph, i) => {
+        const n = high.find((r) => r.phase === ph)?.n ?? 0;
+        return (
+          <div key={ph} className="meter-row" style={{ gridTemplateColumns: "84px 1fr 44px" }}>
+            <span className="lbl">{ph}</span><GrowBar value={n} max={tot} color={ph === "Death" ? "var(--tier-high)" : "var(--tier-ord)"} delay={0.1 * i} />
+            <span className="val">{pct(n / tot)}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function FindingBars() {
+  const { summary: s } = useData();
+  const ho = s.validation?.holdout ?? [];
+  const get = (d: Disc, m: string) => ho.find((r) => r.discipline === d && r.method.startsWith(m))?.mean_r ?? 0;
+  const rows: [string, number, string][] = [
+    ["Quality, fairly measured", (get("bat", "Model: usual level (") + get("bowl", "Model: usual level (")) / 2, "var(--pink)"],
+    ["Quality plus past lift", (get("bat", "Model: pressure rating") + get("bowl", "Model: pressure rating")) / 2, "var(--tier-el)"],
+    ["Pressure balls only", (get("bat", "Pressure balls only") + get("bowl", "Pressure balls only")) / 2, "var(--tier-ord)"],
+    ["Past lift alone", (get("bat", "Model: lift alone") + get("bowl", "Model: lift alone")) / 2, "var(--s3)"],
+  ];
+  const max = Math.max(...rows.map((r) => r[1]));
+  return (
+    <div className="stack" style={{ gap: 10 }}>
+      {rows.map(([l, v, c], i) => (
+        <div key={l} className="meter-row" style={{ gridTemplateColumns: "150px 1fr 44px" }}>
+          <span className="lbl">{l}</span><GrowBar value={Math.max(0, v)} max={max} color={c} delay={0.1 * i} />
+          <span className="val">{v.toFixed(2)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function Overview() {
   const data = useData();
   const s = data.summary;
   const bat = eligible(data, "bat"), bowl = eligible(data, "bowl");
-  const top = [...bat.slice(0, 10), ...bowl.slice(0, 10)];
-  const lo = Math.floor(Math.min(...top.map((p) => Math.min(p.lo, p.withLift))) / 5) * 5;
-  const hi = Math.ceil(Math.max(...top.map((p) => Math.max(p.hi, p.withLift))) / 5) * 5;
-  const high = s.league.find((r) => r.scope === "High")!;
-  const ord = s.league.find((r) => r.scope === "Ordinary")!;
-  const sure = (d: Disc) => eligible(data, d).filter((p) => (p.pTop10 ?? 0) >= 0.8).length;
   const ho = s.validation?.holdout.filter((r) => r.method.startsWith("Model: usual level (")) ?? [];
   const beat = ho.length ? ho.reduce((a, r) => a + r.share_beating_pressure_rating, 0) / ho.length : 0;
-  const untested = (d: Disc) => players(data, d).filter((p) => !p.eligible && p.pressureBalls >= 250 && p.liveBalls >= 800).sort((a, b) => b.pressure - a.pressure).slice(0, 5);
+  const sure = (d: Disc) => eligible(data, d).filter((p) => (p.pTop10 ?? 0) >= 0.8).length;
 
   return (
     <>
-      <PageHead eyebrow="The shortlist" title="Who delivers when the match is on the line">
-        Every delivery in {int(s.matches)} IPL and T20I matches since 2022 was scored for how much it could swing the result,
-        and every player for what they did with the ones that mattered most.
-      </PageHead>
-
-      <div className="stats" style={{ marginBottom: 28 }}>
-        <Stat k="Deliveries analysed" v={int(s.deliveries)} />
-        <Stat k="Matches" v={int(s.matches)} />
-        <Stat k="High-pressure deliveries" v={pct(s.tierShares.High, 1)} unit="of live play" />
-        <Stat k="Rated at high pressure" v={`${s.eligible.bat} + ${s.eligible.bowl}`} unit="batters + bowlers" />
-      </div>
-
-      <div className="findings">
-        <div className="finding">
-          <div className="n num">{pct(high.death_share)}</div>
-          <h3>High pressure lives at the death of a live chase</h3>
-          <p>A High-pressure ball can move the result at least twice as much as an average one. {pct(high.death_share)} of them fall in overs 16 to 20, and the game changes there: a wicket every {(100 / high.wicket_pct).toFixed(0)} balls against every {(100 / ord.wicket_pct).toFixed(0)} in ordinary play.</p>
+      <section style={{ display: "grid", gridTemplateColumns: "minmax(0,1.25fr) minmax(0,1fr)", gap: 32, alignItems: "center" }} className="hero">
+        <div className="stack" style={{ gap: 18 }}>
+          <span className="eyebrow">SupeRR Selector · Season 2</span>
+          <h1 className="display">Who delivers when the match is <span className="accent">on the line</span>?</h1>
+          <p className="lede">Every IPL and T20I ball since 2022, scored for how much it could swing the result. Every player, judged on what they did when it mattered.</p>
+          <div className="row" style={{ marginTop: 6 }}>
+            <Link to="/rankings" className="btn primary">See the leaderboards <ArrowRight /></Link>
+            <Link to="/auction" className="btn"><Gavel /> Royals auction plan</Link>
+          </div>
         </div>
-        <div className="finding">
-          <div className="n num">{pct(beat, 1)}</div>
-          <h3>Rising to the occasion does not repeat. Quality does</h3>
-          <p>Players were rated on half the matches and tested on the other half, 40 times over. Leaving out a player's past pressure "lift" predicted the next pressure performance better in {pct(beat, 1)} of those tests. The most reliable player under pressure is the best player who has been tested there.</p>
-        </div>
-        <div className="finding">
-          <div className="n num">{sure("bat")} and {sure("bowl")}</div>
-          <h3>Few names are certain; the rest are close calls</h3>
-          <p>{sure("bat")} batters and {sure("bowl")} bowlers have at least an 80% chance of a true top-10 place. Below them the intervals overlap, and each list says so with a probability beside every name.</p>
-        </div>
-      </div>
-
-      <section className="section">
-        <div className="section-head">
-          <div><h2>The two top tens</h2><p>Ranked on pressure rating: the value a player is expected to add per 100 pressure balls against an average player, after adjusting for opposition, match conditions and sample size. Only players tested at High pressure are ranked.</p></div>
-          <IntervalLegend />
-        </div>
-        <div className="grid-2">
-          {(["bat", "bowl"] as Disc[]).map((d) => (
-            <div className="panel panel-pad" key={d}>
-              <div className="section-head" style={{ marginBottom: 8 }}><h3>{d === "bat" ? "Batters under pressure" : "Bowlers under pressure"}</h3><Link className="small" to={`/rankings?d=${d}`}>All {s.eligible[d]} rated</Link></div>
-              <IntervalList rows={(d === "bat" ? bat : bowl).slice(0, 10)} disc={d} domain={[lo, hi]} />
-            </div>
-          ))}
-        </div>
-        <p className="note">A rating of +10 means ten leverage-standardised units of win probability per 100 balls above an average player. For the leading batter that is about {signed(bat[0]?.wpPerOver)} percentage points of win probability for every over faced in the crunch.</p>
-      </section>
-
-      <section className="section">
-        <div className="section-head"><div><h2>Good players the model will not rank</h2><p>A rating at High pressure needs High-pressure evidence. These players have strong records but fewer than {String(s.settings.min_high_balls)} High-tier balls, usually because openers are out, or home, before the crunch.</p></div></div>
-        <div className="grid-2">
-          {(["bat", "bowl"] as Disc[]).map((d) => (
-            <div className="panel table-wrap" key={d}>
-              <table className="data">
-                <thead><tr><th>{d === "bat" ? "Batter" : "Bowler"}</th><th className="r">Rating if eligible</th><th className="r">Pressure balls</th><th className="r">High-tier balls</th></tr></thead>
-                <tbody>{untested(d).map((p) => (
-                  <tr key={p.id}><td><Link className="pname" to={`/player/${d}/${p.id}`}>{p.name}</Link><div className="psub">{affil(p)}</div></td><td className="r num">{signed(p.pressure)}</td><td className="r num">{p.pressureBalls}</td><td className="r num">{p.highBalls}</td></tr>
-                ))}</tbody>
-              </table>
-            </div>
+        <div className="stack">
+          {([["bat", bat[0], "Best batter under pressure"], ["bowl", bowl[0], "Best bowler under pressure"]] as const).map(([d, p, lab], i) => (
+            <motion.div key={d} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + 0.12 * i, duration: 0.5, ease: EASE }}>
+              <Link to={`/player/${d}/${p.id}`} className="card pad link row between" style={{ gap: 16 }}>
+                <span className="row" style={{ gap: 14 }}>
+                  <RankBadge rank={1} lg />
+                  <span><span className="muted small">{lab}</span><div className="h3">{shortName(p.name)}</div><div className="psub">{affil(p)}</div></span>
+                </span>
+                <span style={{ textAlign: "right" }}><span style={{ font: "750 34px/1 var(--head)" }}><CountUp value={p.pressure} format={(v) => signed(v)} /></span><div className="psub">rating</div></span>
+              </Link>
+            </motion.div>
           ))}
         </div>
       </section>
 
+      <Reveal className="grid-4 section" y={10}>
+        {[[s.deliveries, "deliveries scored", (v: number) => Math.round(v).toLocaleString("en-US")],
+          [s.matches, "matches", (v: number) => Math.round(v).toString()],
+          [100 * s.tierShares.High, "of live balls are high pressure", (v: number) => `${v.toFixed(1)}%`],
+          [s.eligible.bat + s.eligible.bowl, "players tested enough to rank", (v: number) => Math.round(v).toString()],
+        ].map(([v, k, f], i) => (
+          <div key={i} className="card pad stat"><div className="v"><CountUp value={v as number} format={f as (v: number) => string} /></div><div className="k">{k as string}</div></div>
+        ))}
+      </Reveal>
+
       <section className="section">
+        <div className="section-head"><div><span className="eyebrow">The answer</span><h2 className="h2" style={{ marginTop: 8 }}>The two top tens</h2></div></div>
+        <div className="grid-2"><TopList disc="bat" /><TopList disc="bowl" /></div>
+      </section>
+
+      <section className="section">
+        <div className="section-head"><div><span className="eyebrow">What the data says</span><h2 className="h2" style={{ marginTop: 8 }}>Three findings</h2></div></div>
         <div className="grid-3">
-          <Link to="/pressure" className="panel panel-pad" style={{ textDecoration: "none" }}><h3>How pressure is measured</h3><p className="muted small" style={{ marginTop: 6 }}>Explore the pressure map: any chase, any wickets in hand, and how much the next ball matters.</p></Link>
-          <Link to="/method" className="panel panel-pad" style={{ textDecoration: "none" }}><h3>Can the ranking be trusted?</h3><p className="muted small" style={{ marginTop: 6 }}>Calibration, 41 hold-out tests, a 200-run bootstrap and eighteen alternative specifications.</p></Link>
-          <Link to="/auction" className="panel panel-pad" style={{ textDecoration: "none" }}><h3>What it means for the Royals</h3><p className="muted small" style={{ marginTop: 6 }}>Squad needs and auction targets for IPL 2027, kept separate from the statistical ranking.</p></Link>
+          <Reveal className="card pad stack" delay={0}>
+            <span className="tag pink">01</span>
+            <h3 className="h3">High pressure lives at the death of a live chase</h3>
+            <p className="muted small">Where the high-pressure balls fall</p>
+            <PhaseShare />
+          </Reveal>
+          <Reveal className="card pad stack" delay={0.08}>
+            <span className="tag pink">02</span>
+            <h3 className="h3">Rising to the occasion does not repeat. Quality does</h3>
+            <p className="muted small">How well each method predicts unseen matches. Quality won {pct(beat, 1)} of 40 tests.</p>
+            <FindingBars />
+          </Reveal>
+          <Reveal className="card pad stack" delay={0.16}>
+            <span className="tag pink">03</span>
+            <h3 className="h3">A few names are certain. The rest are close calls</h3>
+            <p className="muted small">Players with an 80% or better chance of a true top-10 place</p>
+            <div className="row" style={{ gap: 28, marginTop: 6 }}>
+              <div className="stat"><div className="v accent"><CountUp value={sure("bat")} /></div><div className="k">batters</div></div>
+              <div className="stat"><div className="v accent"><CountUp value={sure("bowl")} /></div><div className="k">bowlers</div></div>
+            </div>
+          </Reveal>
         </div>
+      </section>
+
+      <section className="section grid-2">
+        <Link to="/pressure" className="card pad link stack" style={{ gap: 10 }}>
+          <Activity color="var(--pink-hi)" />
+          <h3 className="h3">Pressure Lab</h3>
+          <p className="muted">Set any chase and watch how much the next ball matters. Replay real finishes ball by ball.</p>
+          <span className="accent small row" style={{ gap: 6 }}>Open the lab <ArrowRight size={15} /></span>
+        </Link>
+        <Link to="/auction" className="card pad link stack" style={{ gap: 10 }}>
+          <Gavel color="var(--gold)" />
+          <h3 className="h3">Auction Room</h3>
+          <p className="muted">Where the Royals are short of pressure performers, and who could fill the gaps at the IPL 2027 auction.</p>
+          <span className="accent small row" style={{ gap: 6 }}>See the plan <ArrowRight size={15} /></span>
+        </Link>
       </section>
     </>
   );

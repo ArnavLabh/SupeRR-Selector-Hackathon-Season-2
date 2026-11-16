@@ -1,72 +1,186 @@
-import { Link } from "react-router-dom";
-import { PageHead, RankBadge } from "../components/ui";
-import { players, signed, useData, useLazy, type Auction as AuctionData } from "../lib/data";
+import { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "motion/react";
+import { ArrowUpRight, ExternalLink, ShieldAlert, Target, Users } from "lucide-react";
+import { scaleLinear } from "d3-scale";
+import { EASE, GrowBar, PageHead, RankBadge, Reveal, Ring, Seg, useTip } from "../components/ui";
+import { eligible, players, shortName, signed, useData, useLazy, type Auction as A, type Disc, type Player } from "../lib/data";
 
-const TIER_TAG: Record<string, string> = { Priority: "pink", Strong: "navy", Watch: "" };
+const CALL: Record<string, string> = { Priority: "pink", Strong: "blue", Watch: "" };
+const AVAIL = (s: string) => {
+  const k = s.split(":")[0];
+  const map: Record<string, [string, string]> = {
+    Reported: ["Release tipped", "gold"], Unknown: ["No 2027 news yet", ""], Unlikely: ["Unlikely to be released", ""], "Likely in the pool": ["Likely in the auction", "good"],
+  };
+  return map[k] ?? [k, ""];
+};
+
+function SquadStrip({ disc }: { disc: Disc }) {
+  const data = useData();
+  const tip = useTip();
+  const nav = useNavigate();
+  const rows = eligible(data, disc);
+  const rr = rows.filter((p) => p.team === "Rajasthan Royals" && (p.iplLastYear ?? 0) >= 2026);
+  const W = 640, H = 136, m = { l: 36, r: 36 };
+  const x = scaleLinear().domain([Math.floor(Math.min(...rows.map((p) => p.pressure)) - 1), Math.ceil(Math.max(...rows.map((p) => p.pressure)) + 1)]).range([m.l, W - m.r]);
+  const cut = rows[9].pressure;
+  return (
+    <div className="card pad stack" style={{ gap: 12 }}>
+      <div className="row between"><h3 className="h3">{disc === "bat" ? "Batters" : "Bowlers"}</h3><span className="muted small">{rr.length} Royals among {rows.length} ranked</span></div>
+      <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Royals ${disc === "bat" ? "batters" : "bowlers"} against every ranked player`}>
+        <rect x={x(cut)} y={10} width={W - m.r - x(cut)} height={70} rx="8" fill="rgba(233,185,73,.08)" />
+        <text x={W - m.r - 6} y={24} textAnchor="end" style={{ fill: "var(--gold)" }}>Top-10 zone</text>
+        <line x1={m.l} x2={W - m.r} y1={60} y2={60} className="zero" />
+        {rows.map((p, i) => {
+          const mine = rr.includes(p);
+          const jitter = ((i * 37) % 9) - 4;
+          return (
+            <motion.circle key={p.id} cx={x(p.pressure)} cy={60 + (mine ? 0 : jitter * 2.4)} r={mine ? 8 : 4.5} fill={mine ? "var(--pink)" : "var(--blue-data)"} fillOpacity={mine ? 1 : 0.4}
+              stroke={mine ? "#fff" : "none"} strokeWidth="2" style={{ cursor: "pointer" }} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.01 * i }}
+              onClick={() => nav(`/player/${disc}/${p.id}`)} onMouseMove={(e) => tip.show(e, <><b>#{p.rank} {shortName(p.name)}</b>Rating {signed(p.pressure)}<br /><i>{p.team ?? p.country}</i></>)} onMouseLeave={tip.hide} />
+          );
+        })}
+        {[...rr].sort((a, b) => a.pressure - b.pressure).map((p, i) => {
+          const ly = [90, 108, 126][i % 3];
+          return <g key={p.id}><line x1={x(p.pressure)} x2={x(p.pressure)} y1={68} y2={ly - 12} stroke="var(--line-2)" />
+            <text className="lbl" x={x(p.pressure)} y={ly} textAnchor="middle">{shortName(p.name).split(" ").slice(-1)[0]}</text></g>;
+        })}
+      </svg>
+      <div className="legend small"><span><i className="dot" style={{ background: "var(--pink)" }} />Royals (2026 squad)</span><span><i className="dot" style={{ background: "var(--blue-data)", opacity: 0.5 }} />Rest of the league</span><span className="muted">Further right is better under pressure</span></div>
+      {tip.el}
+    </div>
+  );
+}
+
+function TargetCard({ t, p, i }: { t: A["targets"][number]; p?: Player; i: number }) {
+  const [label, tone] = AVAIL(t.availability);
+  const d = t.disc;
+  return (
+    <motion.div layout initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.35, delay: 0.04 * i, ease: EASE }}>
+      <Link to={p ? `/player/${d}/${p.id}` : "#"} className="card pad link stack" style={{ gap: 14, height: "100%" }}>
+        <div className="row between" style={{ alignItems: "start" }}>
+          <div className="row" style={{ gap: 12 }}>
+            {p && <RankBadge rank={p.rank} lg />}
+            <div><div className="h3">{t.name}</div><div className="psub">{t.fit}</div></div>
+          </div>
+          <span className={`tag ${CALL[t.tier]}`}>{t.tier}</span>
+        </div>
+        {p && (
+          <div className="row" style={{ gap: 22 }}>
+            <div className="stat sm"><div className="v">{signed(p.pressure)}</div><div className="k">rating</div></div>
+            <div className="stat sm"><div className="v">{d === "bat" ? p.splits.High?.sr?.toFixed(0) ?? "n/a" : p.splits.High?.econ?.toFixed(2) ?? "n/a"}</div><div className="k">{d === "bat" ? "SR in the crunch" : "econ in the crunch"}</div></div>
+            <Ring p={p.pTop10} size={52} label="Chance of a true top-10 place" />
+          </div>
+        )}
+        <p className="small" style={{ color: "var(--text-2)" }}>{t.why}</p>
+        <div className="stack" style={{ gap: 8, marginTop: "auto" }}>
+          <span className={`tag ${tone}`} style={{ justifySelf: "start" }}><Users size={13} />{label}</span>
+          <span className="small muted row" style={{ gap: 6, alignItems: "start", flexWrap: "nowrap" }}><ShieldAlert size={15} style={{ flex: "none", marginTop: 2 }} />{t.risk}</span>
+        </div>
+      </Link>
+    </motion.div>
+  );
+}
 
 export default function Auction() {
   const data = useData();
-  const a = useLazy<AuctionData>("auction");
-  if (!a) return <><PageHead eyebrow="Royals auction lens" title="What the ranking means for Rajasthan Royals" /><div className="skeleton" /></>;
-  const find = (id: number | null, d: "bat" | "bowl") => (id == null ? undefined : players(data, d).find((p) => p.id === id));
+  const a = useLazy<A>("auction");
+  const [fd, setFd] = useState<"all" | Disc>("all");
+  const find = (id: number | null, d: Disc) => (id == null ? undefined : players(data, d).find((p) => p.id === id));
+  const targets = useMemo(() => (a ? a.targets.filter((t) => fd === "all" || t.disc === fd) : []), [a, fd]);
+  const openers = ["Vaibhav Sooryavanshi", "Yashasvi Jaiswal"].map((n) => data.batters.find((p) => p.name === n)).filter(Boolean) as Player[];
+  if (!a) return <><PageHead eyebrow="Auction Room" title="The Royals' shopping list" /><div className="skeleton" /></>;
+
   return (
     <>
-      <PageHead eyebrow="Royals auction lens" title="What the ranking means for Rajasthan Royals">{a.summary}</PageHead>
-      <div className="callout"><strong>Kept separate on purpose.</strong> The rankings on the other pages come only from the supplied data and were frozen before any outside research. This page adds squad context gathered afterwards ({a.asOf}). Nothing here changed a rank. {a.confidence}</div>
+      <PageHead eyebrow="Auction Room · IPL 2027" title={<>The Royals' <span className="accent">shopping list</span></>}>{a.summary}</PageHead>
+
+      <Reveal className="grid-4" y={8}>
+        {(a.facts ?? []).slice(0, 4).map((f) => (
+          <div key={f.k} className="card pad stat"><div className="v">{f.v}</div><div className="k">{f.k} · {f.note.replace(/\s*\[S\d+\]/g, "")}</div></div>
+        ))}
+      </Reveal>
 
       <section className="section">
-        <div className="section-head"><div><h2>Where the squad needs pressure performers</h2></div></div>
-        <div className="grid-3">{a.needs.map((n, i) => (
-          <div className="panel panel-pad" key={i}><span className="tag gold">Need {i + 1}</span><h3 style={{ margin: "10px 0 6px" }}>{n.title}</h3><p className="small" style={{ color: "var(--ink-2)" }}>{n.detail}</p><p className="note">{n.evidence}</p></div>
-        ))}</div>
+        <div className="section-head"><div><span className="eyebrow">From the data</span><h2 className="h2" style={{ marginTop: 8 }}>Where the squad stands</h2><p className="sub">Every ranked player on one line. The Royals' middle order sits left of the pack, and only Archer reaches the right half of the bowlers.</p></div></div>
+        <div className="grid-2"><SquadStrip disc="bat" /><SquadStrip disc="bowl" /></div>
+        {openers.length > 0 && (
+          <div className="card pad row" style={{ marginTop: 16, gap: 18 }}>
+            <span className="tag gold">Blind spot</span>
+            <span style={{ flex: 1, minWidth: 240 }} className="small">
+              {openers.map((p, i) => <span key={p.id}>{i > 0 && " and "}<Link to={`/player/bat/${p.id}`} className="accent">{shortName(p.name)}</Link> (usual level {signed(p.usual)}, {p.highBalls} high-pressure balls)</span>)} are elite openers the data has hardly seen in a tight finish. Not a reason to buy, but a reason not to assume.
+            </span>
+          </div>
+        )}
       </section>
 
       <section className="section">
-        <div className="section-head"><div><h2>Targets</h2><p>Statistical case from the model; fit and availability from research. Availability is the least certain column and is labelled accordingly.</p></div></div>
-        <div className="panel table-wrap">
+        <div className="section-head"><div><span className="eyebrow">The gaps</span><h2 className="h2" style={{ marginTop: 8 }}>What to shop for</h2></div></div>
+        <div className="grid-2">
+          {a.needs.slice(0, 2).map((n, i) => (
+            <Reveal key={i} delay={0.08 * i} className="card pad stack">
+              <span className="row" style={{ gap: 12 }}>
+                <span style={{ display: "grid", placeItems: "center", width: 44, height: 44, borderRadius: 12, background: i ? "rgba(91,140,255,.16)" : "rgba(234,26,133,.16)", color: i ? "#cfdcff" : "var(--pink-hi)" }}><Target size={20} /></span>
+                <h3 className="h3">{n.title}</h3>
+              </span>
+              <p style={{ color: "var(--text-2)" }}>{n.detail}</p>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-head">
+          <div><span className="eyebrow">The targets</span><h2 className="h2" style={{ marginTop: 8 }}>Who could fill them</h2><p className="sub">Ranked by the model, filtered for players with a realistic route to Jaipur.</p></div>
+          <Seg label="Filter targets" value={fd} onChange={setFd} options={[["all", "All"], ["bat", "Batting"], ["bowl", "Bowling"]] as const} />
+        </div>
+        <motion.div layout className="grid-3">
+          <AnimatePresence mode="popLayout">
+            {targets.map((t, i) => <TargetCard key={t.name} t={t} p={find(t.id, t.disc)} i={i} />)}
+          </AnimatePresence>
+        </motion.div>
+      </section>
+
+      <section className="section grid-2">
+        <div className="card pad stack" style={{ gap: 14 }}>
+          <h2 className="h3">Rated highly, but out of reach</h2>
+          {a.notAvailable.map((n) => (
+            <div key={n.name} style={{ borderTop: "1px solid var(--line)", paddingTop: 12 }}><b>{n.name}</b><p className="small muted" style={{ marginTop: 4 }}>{n.reason.replace(/\s*\[S\d+\]/g, "")}</p></div>
+          ))}
+        </div>
+        <div className="card pad stack" style={{ gap: 14 }}>
+          <h2 className="h3">Read this before bidding</h2>
+          {a.caveats.map((c, i) => <div key={i} className="row" style={{ alignItems: "start", gap: 10, flexWrap: "nowrap" }}><span className="dot" style={{ background: "var(--gold)", marginTop: 8 }} /><p className="small" style={{ color: "var(--text-2)" }}>{c.replace(/\s*\[S\d+\]/g, "")}</p></div>)}
+          <div style={{ marginTop: 6 }}><span className="field-label">Royals in the ratings</span>
+            <div className="stack" style={{ gap: 8 }}>
+              {[...eligible(data, "bat"), ...eligible(data, "bowl")].filter((p) => p.team === "Rajasthan Royals" && (p.iplLastYear ?? 0) >= 2026).map((p) => {
+                const d: Disc = data.batters.includes(p) ? "bat" : "bowl";
+                const pool = eligible(data, d);
+                return <Link key={`${d}${p.id}`} to={`/player/${d}/${p.id}`} className="meter-row" style={{ gridTemplateColumns: "140px 1fr 70px" }}>
+                  <span className="lbl">{shortName(p.name)} <span className="muted small">{d === "bat" ? "bat" : "bowl"}</span></span>
+                  <GrowBar value={pool.length - (p.rank ?? pool.length)} max={pool.length - 1} color="var(--pink)" />
+                  <span className="val">{p.rank} / {pool.length}</span></Link>;
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-head"><div><span className="eyebrow">Sources</span><h2 className="h2" style={{ marginTop: 8 }}>Where the squad facts come from</h2><p className="sub">{a.confidence}</p></div></div>
+        <div className="card table-wrap">
           <table className="data">
-            <thead><tr><th>Player</th><th>Call</th><th className="r">Pressure rank</th><th className="r">Rating</th><th>Fit for the Royals</th><th>Availability</th><th>Risk</th></tr></thead>
-            <tbody>{a.targets.map((t, i) => { const p = find(t.id, t.disc); return (
-              <tr key={i}>
-                <td>{p ? <Link className="pname" to={`/player/${t.disc}/${p.id}`}>{t.name}</Link> : <span className="pname">{t.name}</span>}<div className="psub">{t.fit}</div></td>
-                <td><span className={`tag ${TIER_TAG[t.tier]}`}>{t.tier}</span></td>
-                <td className="r">{p ? <RankBadge rank={p.rank} /> : "–"}</td>
-                <td className="r num">{p ? signed(p.pressure) : "–"}</td>
-                <td className="small" style={{ maxWidth: 340 }}>{t.why}</td>
-                <td className="small" style={{ maxWidth: 220 }}>{t.availability}</td>
-                <td className="small muted" style={{ maxWidth: 240 }}>{t.risk}</td>
-              </tr>); })}</tbody>
+            <thead><tr><th>#</th><th>Source</th><th>Publisher</th><th>Date</th><th>Type</th></tr></thead>
+            <tbody>{a.sources.map((s) => (
+              <tr key={s.id}>
+                <td className="num muted">{s.id}</td>
+                <td className="strong"><a href={s.url} target="_blank" rel="noreferrer" className="row" style={{ gap: 6, flexWrap: "nowrap" }}>{s.title}<ExternalLink size={13} style={{ flex: "none", opacity: 0.6 }} /></a></td>
+                <td>{s.publisher}</td><td className="num">{s.date}</td>
+                <td><span className={`tag ${s.kind === "Confirmed" ? "good" : s.kind === "Reported" ? "blue" : "gold"}`}>{s.kind}</span></td>
+              </tr>))}</tbody>
           </table>
         </div>
-      </section>
-
-      <section className="section">
-        <div className="grid-2">
-          <div>
-            <div className="section-head"><h2>Royals players in the ratings</h2></div>
-            <div className="panel table-wrap"><table className="data">
-              <thead><tr><th>Player</th><th>Role</th><th>Status</th></tr></thead>
-              <tbody>{a.squad.map((s, i) => <tr key={i}><td className="pname">{s.name}</td><td className="small">{s.role}</td><td className="small">{s.status}{s.note && <div className="psub">{s.note}</div>}</td></tr>)}</tbody>
-            </table></div>
-          </div>
-          <div>
-            <div className="section-head"><h2>Highly rated, not realistic targets</h2></div>
-            <div className="panel table-wrap"><table className="data">
-              <thead><tr><th>Player</th><th>Why not</th></tr></thead>
-              <tbody>{a.notAvailable.map((s, i) => <tr key={i}><td className="pname">{s.name}</td><td className="small">{s.reason}</td></tr>)}</tbody>
-            </table></div>
-            <div className="section-head" style={{ marginTop: 28 }}><h2>Caveats</h2></div>
-            <ul className="prose" style={{ paddingLeft: 18, margin: 0 }}>{a.caveats.map((c, i) => <li key={i} style={{ marginBottom: 6 }}>{c}</li>)}</ul>
-          </div>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="section-head"><div><h2>Sources</h2><p>Publication dates as shown by the publisher. "Confirmed" marks official or directly reported facts; "Reported" marks media reports; "Speculative" marks previews and predictions.</p></div></div>
-        <div className="panel table-wrap"><table className="data">
-          <thead><tr><th>#</th><th>Source</th><th>Publisher</th><th>Date</th><th>Kind</th></tr></thead>
-          <tbody>{a.sources.map((s) => <tr key={s.id}><td className="num">{s.id}</td><td><a href={s.url} target="_blank" rel="noreferrer">{s.title}</a></td><td>{s.publisher}</td><td className="num">{s.date}</td><td><span className="tag">{s.kind}</span></td></tr>)}</tbody>
-        </table></div>
+        <p className="muted small" style={{ marginTop: 14 }}>Rankings use only the competition data. Squad details were gathered afterwards from the sources above, as of {a.asOf.split(",")[0]}. <Link to="/rankings" className="accent row" style={{ display: "inline-flex", gap: 4 }}>Open the leaderboards <ArrowUpRight size={14} /></Link></p>
       </section>
     </>
   );

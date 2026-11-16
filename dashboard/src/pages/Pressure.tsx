@@ -1,27 +1,30 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { scaleLinear } from "d3-scale";
-import { PageHead, Seg, Stat, useTip } from "../components/ui";
-import { f1, int, pct, useData, useLazy, type Moment, type PressureMap, type Story } from "../lib/data";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { Pause, Play, RotateCcw, Zap } from "lucide-react";
+import { CountUp, GrowBar, PageHead, Reveal, Seg, useTip } from "../components/ui";
+import { f1, pct, useData, useLazy, type Moment, type PressureMap, type Story } from "../lib/data";
 
 const tierOf = (li: number) => (li >= 2 ? "High" : li >= 1 ? "Elevated" : "Ordinary");
-const TIER_COLOR: Record<string, string> = { Ordinary: "var(--tier-ordinary)", Elevated: "var(--tier-elevated)", High: "var(--tier-high)" };
-
-/* pink sequential ramp for leverage; navy-to-pink diverging for win probability */
-function liColor(li: number): [number, number, number] {
-  if (li <= 0) return [239, 238, 245];
-  const stops: [number, [number, number, number]][] = [[0, [246, 240, 246]], [1, [240, 196, 220]], [2, [224, 92, 160]], [3, [190, 18, 100]], [5, [110, 8, 62]]];
-  for (let i = 1; i < stops.length; i++) if (li <= stops[i][0]) {
-    const [a, ca] = stops[i - 1], [b, cb] = stops[i]; const t = (li - a) / (b - a);
-    return [0, 1, 2].map((k) => Math.round(ca[k] + t * (cb[k] - ca[k]))) as [number, number, number];
+const TIER: Record<string, string> = { Ordinary: "var(--tier-ord)", Elevated: "var(--tier-el)", High: "var(--tier-high)" };
+type RGB = [number, number, number];
+const lerp = (stops: [number, RGB][], v: number): RGB => {
+  for (let i = 1; i < stops.length; i++) if (v <= stops[i][0]) {
+    const [a, ca] = stops[i - 1], [b, cb] = stops[i], t = (v - a) / (b - a);
+    return [0, 1, 2].map((k) => Math.round(ca[k] + t * (cb[k] - ca[k]))) as RGB;
   }
   return stops[stops.length - 1][1];
-}
-function wpColor(wp: number): [number, number, number] {
-  const t = wp / 100, mid: [number, number, number] = [236, 236, 242];
-  const end: [number, number, number] = t < 0.5 ? [30, 48, 122] : [200, 22, 108];
-  const k = Math.abs(t - 0.5) * 2;
-  return [0, 1, 2].map((i) => Math.round(mid[i] + k * (end[i] - mid[i]))) as [number, number, number];
-}
+};
+const LI_STOPS: [number, RGB][] = [[0, [22, 30, 82]], [1, [96, 52, 118]], [2, [194, 64, 138]], [3, [255, 107, 181]], [5, [255, 220, 238]]];
+const WP_STOPS: [number, RGB][] = [[0, [91, 140, 255]], [50, [36, 44, 98]], [100, [240, 56, 143]]];
+
+const SCENARIOS = [
+  { label: "Last-over thriller", need: 12, bl: 6, wk: 3 },
+  { label: "Death-overs squeeze", need: 40, bl: 24, wk: 5 },
+  { label: "Cruising", need: 60, bl: 48, wk: 8 },
+  { label: "Lost cause", need: 40, bl: 12, wk: 2 },
+  { label: "Powerplay start", need: 180, bl: 114, wk: 10 },
+];
 
 function MapPanel({ map }: { map: PressureMap }) {
   const [env, setEnv] = useState<"IPL-2026" | "T20I-2026">("IPL-2026");
@@ -32,7 +35,7 @@ function MapPanel({ map }: { map: PressureMap }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const nB = map.ballsLeft.length, nN = map.need.length;
   const grid = map.envs[env];
-  const W = 600, H = 380, m = { l: 50, r: 12, t: 10, b: 42 };
+  const W = 600, H = 380, m = { l: 46, r: 10, t: 10, b: 40 };
   const x = scaleLinear().domain([120, 0]).range([m.l, W - m.r]);
   const y = scaleLinear().domain([0, 240]).range([H - m.b, m.t]);
 
@@ -40,9 +43,8 @@ function MapPanel({ map }: { map: PressureMap }) {
     const cv = canvas.current; if (!cv) return;
     const ctx = cv.getContext("2d")!; const img = ctx.createImageData(nB, nN);
     for (let j = 0; j < nN; j++) for (let i = 0; i < nB; i++) {
-      // canvas x: balls left descending (start of chase on the left); y: need descending from top
       const bi = nB - 1 - i, ni = nN - 1 - j;
-      const c = metric === "li" ? liColor(grid.li[wk - 1][bi][ni] / 10) : wpColor(grid.wp[wk - 1][bi][ni]);
+      const c = metric === "li" ? lerp(LI_STOPS, grid.li[wk - 1][bi][ni] / 10) : lerp(WP_STOPS, grid.wp[wk - 1][bi][ni]);
       const o = 4 * (j * nB + i); img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2]; img.data[o + 3] = 255;
     }
     ctx.putImageData(img, 0, 0);
@@ -54,214 +56,212 @@ function MapPanel({ map }: { map: PressureMap }) {
   };
   const cur = at(need, bl);
   const dead = cur.wp < 2 || cur.wp > 98;
+  const tier = dead ? "Settled" : tierOf(cur.li);
   const move = (e: React.MouseEvent<SVGRectElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
-    const fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
-    setBl(Math.max(1, Math.round(120 - fx * 120))); setNeed(Math.max(1, Math.round(240 - fy * 240)));
+    setBl(Math.max(1, Math.round(120 - ((e.clientX - r.left) / r.width) * 120)));
+    setNeed(Math.max(1, Math.round(240 - ((e.clientY - r.top) / r.height) * 240)));
   };
-  const rr = (6 * need) / bl;
 
   return (
-    <div className="split">
-      <div className="panel panel-pad">
-        <div className="toolbar" style={{ marginBottom: 10 }}>
-          <Seg label="Colour by" value={metric} onChange={setMetric} options={[["li", "Pressure"], ["wp", "Win probability"]] as const} />
-          <Seg label="Scoring environment" value={env} onChange={setEnv} options={[["IPL-2026", "IPL 2026"], ["T20I-2026", "T20Is 2026"]] as const} />
-          <label className="field" style={{ minWidth: 190 }}>Wickets in hand: {wk}<input type="range" min={1} max={10} value={wk} onChange={(e) => setWk(+e.target.value)} /></label>
+    <div className="split" style={{ gridTemplateColumns: "minmax(0,1.6fr) minmax(0,1fr)" }}>
+      <div className="card pad stack" style={{ gap: 14 }}>
+        <div className="row between">
+          <Seg label="Colour by" value={metric} onChange={setMetric} options={[["li", "Pressure"], ["wp", "Win chance"]] as const} />
+          <Seg label="Scoring era" value={env} onChange={setEnv} options={[["IPL-2026", "IPL 2026"], ["T20I-2026", "T20I 2026"]] as const} />
         </div>
-        <div style={{ position: "relative" }}>
-          <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Pressure across chase situations: runs needed against balls left">
-            <foreignObject x={m.l} y={m.t} width={W - m.l - m.r} height={H - m.t - m.b}>
-              <canvas ref={canvas} width={nB} height={nN} style={{ width: "100%", height: "100%", imageRendering: "auto", display: "block", borderRadius: 4 }} />
-            </foreignObject>
-            {[120, 96, 72, 48, 24, 0].map((t) => <g key={t}><text x={x(t)} y={H - m.b + 16} textAnchor="middle">{t}</text></g>)}
-            {[0, 60, 120, 180, 240].map((t) => <text key={t} x={m.l - 8} y={y(t) + 4} textAnchor="end">{t}</text>)}
-            {[6, 9, 12, 15].map((r) => {
-              // runs needed = r/6 per ball; the line starts where it meets the top of the map
-              const b0 = Math.min(120, (240 * 6) / r), n0 = (r * b0) / 6;
-              return <g key={r}><line x1={x(b0)} y1={y(n0)} x2={x(0)} y2={y(0)} stroke="rgba(14,20,51,.4)" strokeWidth="1" />
-                <text x={x(b0) + (b0 < 120 ? 4 : 6)} y={y(n0) + (b0 < 120 ? 14 : -5)} fill="var(--ink)">{r} an over</text></g>;
-            })}
-            <text className="axis-title" x={(m.l + W - m.r) / 2} y={H - 8} textAnchor="middle">Balls left in the chase</text>
-            <text className="axis-title" transform={`translate(14 ${(m.t + H - m.b) / 2}) rotate(-90)`} textAnchor="middle">Runs needed</text>
-            <circle cx={x(bl)} cy={y(Math.min(240, need))} r="7" fill="none" stroke="var(--navy)" strokeWidth="2.5" />
-            <circle cx={x(bl)} cy={y(Math.min(240, need))} r="9.5" fill="none" stroke="#fff" strokeWidth="1.5" />
-            <rect x={m.l} y={m.t} width={W - m.l - m.r} height={H - m.t - m.b} fill="transparent" style={{ cursor: "crosshair" }} onMouseMove={(e) => e.buttons === 1 && move(e)} onClick={move} />
-          </svg>
+        <div>
+          <div className="row between small" style={{ marginBottom: 2 }}><span className="field-label" style={{ margin: 0 }}>Wickets in hand</span><b className="num">{wk}</b></div>
+          <input type="range" className="range" min={1} max={10} value={wk} onChange={(e) => setWk(+e.target.value)} aria-label="Wickets in hand" style={{ ["--fill" as string]: `${((wk - 1) / 9) * 100}%` }} />
         </div>
-        <div className="legend" style={{ marginTop: 6 }}>
-          {metric === "li" ? <>
-            <span><i className="dot" style={{ background: "rgb(239,238,245)" }} />Settled (dead ball)</span>
-            <span><i className="dot" style={{ background: "rgb(240,196,220)" }} />Average ball (index 1)</span>
-            <span><i className="dot" style={{ background: "rgb(224,92,160)" }} />High tier begins (2)</span>
-            <span><i className="dot" style={{ background: "rgb(110,8,62)" }} />5 and above</span>
-          </> : <>
-            <span><i className="dot" style={{ background: "rgb(30,48,122)" }} />Chasing side losing</span>
-            <span><i className="dot" style={{ background: "rgb(236,236,242)" }} />Even</span>
-            <span><i className="dot" style={{ background: "rgb(200,22,108)" }} />Chasing side winning</span>
-          </>}
-          <span className="muted">Click or drag on the map to set the situation</span>
-        </div>
+        <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Pressure across every chase situation: runs needed against balls left">
+          <foreignObject x={m.l} y={m.t} width={W - m.l - m.r} height={H - m.t - m.b}>
+            <canvas ref={canvas} width={nB} height={nN} style={{ width: "100%", height: "100%", display: "block", borderRadius: 8 }} />
+          </foreignObject>
+          {[120, 96, 72, 48, 24, 0].map((t) => <text key={t} x={x(t)} y={H - m.b + 16} textAnchor="middle">{t}</text>)}
+          {[0, 60, 120, 180, 240].map((t) => <text key={t} x={m.l - 8} y={y(t) + 4} textAnchor="end">{t}</text>)}
+          {[6, 9, 12, 15].map((r) => {
+            const b0 = Math.min(120, (240 * 6) / r), n0 = (r * b0) / 6;
+            return <g key={r}><line x1={x(b0)} y1={y(n0)} x2={x(0)} y2={y(0)} stroke="rgba(255,255,255,.28)" strokeWidth="1" strokeDasharray="4 4" />
+              <text x={x(b0) + 4} y={y(n0) + (b0 < 120 ? 14 : -5)} style={{ fill: "rgba(255,255,255,.7)" }}>{r} an over</text></g>;
+          })}
+          <text className="axis-title" x={(m.l + W - m.r) / 2} y={H - 6} textAnchor="middle">Balls left in the chase</text>
+          <text className="axis-title" transform={`translate(12 ${(m.t + H - m.b) / 2}) rotate(-90)`} textAnchor="middle">Runs needed</text>
+          <motion.g animate={{ x: x(bl), y: y(Math.min(240, need)) }} transition={{ type: "spring", stiffness: 300, damping: 28 }}>
+            <circle r="13" fill="none" stroke="#fff" strokeOpacity=".35" strokeWidth="6" />
+            <circle r="8" fill="none" stroke="#fff" strokeWidth="2.5" />
+          </motion.g>
+          <rect x={m.l} y={m.t} width={W - m.l - m.r} height={H - m.t - m.b} fill="transparent" style={{ cursor: "crosshair" }} onMouseMove={(e) => e.buttons === 1 && move(e)} onClick={move} />
+        </svg>
+        <div className="legend small">{metric === "li"
+          ? <><span><i className="dot" style={{ background: "rgb(22,30,82)" }} />Settled</span><span><i className="dot" style={{ background: "rgb(96,52,118)" }} />Average ball</span><span><i className="dot" style={{ background: "rgb(194,64,138)" }} />High pressure begins</span><span><i className="dot" style={{ background: "rgb(255,220,238)" }} />5x average</span></>
+          : <><span><i className="dot" style={{ background: "rgb(91,140,255)" }} />Chasing side losing</span><span><i className="dot" style={{ background: "rgb(240,56,143)" }} />Chasing side winning</span></>}
+          <span className="muted">Click or drag anywhere on the map</span></div>
       </div>
 
-      <div className="panel panel-pad">
-        <h3>The situation</h3>
-        <div className="readout" style={{ margin: "12px 0 16px" }}>
-          <label className="field">Runs needed<input type="number" min={1} max={240} value={need} onChange={(e) => setNeed(Math.max(1, Math.min(240, +e.target.value || 1)))} /></label>
-          <label className="field">Balls left<input type="number" min={1} max={120} value={bl} onChange={(e) => setBl(Math.max(1, Math.min(120, +e.target.value || 1)))} /></label>
+      <div className="stack">
+        <div className="card pad stack" style={{ gap: 16 }}>
+          <span className="field-label" style={{ margin: 0 }}>Try a situation</span>
+          <div className="row" style={{ gap: 8 }}>
+            {SCENARIOS.map((s) => <button key={s.label} type="button" className="chip" aria-pressed={need === s.need && bl === s.bl && wk === s.wk} onClick={() => { setNeed(s.need); setBl(s.bl); setWk(s.wk); }}>{s.label}</button>)}
+          </div>
         </div>
-        <p style={{ fontSize: 16, fontWeight: 600 }}>{need} needed from {bl} ball{bl === 1 ? "" : "s"}, {wk} wicket{wk === 1 ? "" : "s"} in hand</p>
-        <p className="muted small">Required rate {rr.toFixed(1)} an over</p>
-        <div className="stats" style={{ margin: "16px 0" }}>
-          <Stat k="Chasing side wins" v={`${cur.wp}%`} />
-          <Stat k="Leverage index" v={dead ? "0" : f1(cur.li)} unit={dead ? "" : "× average ball"} />
-        </div>
-        <span className="tag" style={{ background: dead ? "var(--sunken)" : cur.li >= 2 ? "var(--pink-soft)" : "var(--sunken)", color: !dead && cur.li >= 2 ? "var(--tier-top)" : "var(--ink-2)", fontSize: 13, padding: "4px 12px" }}>
-          <i className="dot" style={{ background: dead ? "var(--line-strong)" : TIER_COLOR[tierOf(cur.li)] }} />{dead ? "Settled: excluded from ratings" : `${tierOf(cur.li)} pressure`}
-        </span>
-        <p className="note">{dead ? "With the result at 98% or beyond, the ball tells us nothing about how a player handles a contest." : cur.li >= 2 ? "This ball can move the result at least twice as far as an average delivery. It counts fully toward a player's pressure rating." : cur.li >= 1 ? "Above average. It counts toward the pressure rating in proportion to its index." : "Below average. It contributes to a player's usual level only."}</p>
-        <div className="legend" style={{ marginTop: 14, flexDirection: "column", alignItems: "flex-start" }}>
-          <span className="muted">Try: 12 from 6 with 3 in hand · 60 from 36 with 8 in hand · 40 from 12 with 2 in hand</span>
+        <div className="card pad stack" style={{ gap: 18, background: `radial-gradient(130% 120% at 100% 0%, ${dead ? "transparent" : tier === "High" ? "rgba(255,107,181,.22)" : tier === "Elevated" ? "rgba(194,64,138,.16)" : "transparent"}, transparent 60%), var(--s1)` }}>
+          <div>
+            <div style={{ font: "750 26px/1.15 var(--head)" }}>{need} off {bl} ball{bl === 1 ? "" : "s"}</div>
+            <div className="muted small">{wk} wicket{wk === 1 ? "" : "s"} in hand · needs {((6 * need) / bl).toFixed(1)} an over</div>
+          </div>
+          <div className="grid-2" style={{ gap: 12 }}>
+            <div className="stat"><div className="v">{cur.wp}%</div><div className="k">Chasing side wins</div></div>
+            <div className="stat"><div className="v">{dead ? "0" : f1(cur.li)}<small>x</small></div><div className="k">An average ball's swing</div></div>
+          </div>
+          <AnimatePresence mode="wait">
+            <motion.div key={tier} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="row" style={{ gap: 10 }}>
+              <span className="tag" style={{ background: dead ? "var(--s3)" : TIER[tier], color: tier === "High" ? "#2a0718" : "#fff", height: 30, fontSize: 13.5 }}><Zap size={14} />{dead ? "Settled" : `${tier} pressure`}</span>
+              <span className="small muted">{dead ? "The result is decided. Ignored in ratings." : tier === "High" ? "Counts fully toward ratings." : tier === "Elevated" ? "Counts partly toward ratings." : "Counts as ordinary play."}</span>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </div>
   );
 }
 
-function Worm({ story }: { story: Story }) {
+function Replay({ stories }: { stories: Story[] }) {
+  const [si, setSi] = useState(0);
+  const st = stories[si];
+  const n = st.balls.length;
+  const [idx, setIdx] = useState(n);
+  const [playing, setPlaying] = useState(false);
+  const reduce = useReducedMotion();
   const tip = useTip();
-  const W = 1100, H = 260, m = { l: 44, r: 12, t: 12, b: 34 };
-  const n = story.balls.length;
+  useEffect(() => { setIdx(n); setPlaying(false); }, [si, n]);
+  useEffect(() => {
+    if (!playing) return;
+    // User-started playback runs even with reduced motion: it is the content, not decoration.
+    const t = setInterval(() => setIdx((i) => { if (i >= n) { setPlaying(false); return n; } return i + 1; }), reduce ? 40 : 70);
+    return () => clearInterval(t);
+  }, [playing, n, reduce]);
+  const W = 1100, H = 280, m = { l: 44, r: 12, t: 14, b: 34 };
   const x = scaleLinear().domain([1, n + 1]).range([m.l, W - m.r]);
   const y = scaleLinear().domain([0, 100]).range([H - m.b, m.t]);
   const bw = (W - m.l - m.r) / (n + 1);
-  // each point is the win probability before that ball; the last point is the result
-  const pts = [...story.balls.map((b) => [b.n, b.wp]), [n + 1, story.won ? 100 : 0]];
-  const path = pts.map(([bn, wp], i) => `${i ? "L" : "M"}${x(bn).toFixed(1)},${y(wp).toFixed(1)}`).join("");
-  const overs = [...new Set(story.balls.map((b) => b.over))];
+  const pts = useMemo(() => [...st.balls.map((b) => [b.n, b.wp] as const), [n + 1, st.won ? 100 : 0] as const], [st, n]);
+  const shown = pts.slice(0, Math.max(1, idx + (idx >= n ? 1 : 0)));
+  const path = shown.map(([bn, wp], i) => `${i ? "L" : "M"}${x(bn).toFixed(1)},${y(wp).toFixed(1)}`).join("");
+  const curBall = st.balls[Math.max(0, Math.min(n - 1, idx - 1))];
+  const done = idx >= n;
+  const abbr = (t: string) => t.split(" ").map((w) => w[0]).join("");
   return (
-    <>
-      <div className="table-wrap"><svg className="chart" style={{ minWidth: 640 }} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Win probability of ${story.batting} through the chase, with pressure tier of each ball`}>
-        {story.balls.map((b) => { const t = tierOf(b.li); return t === "Ordinary" ? null : <rect key={b.n} x={x(b.n) - bw / 2} y={m.t} width={bw + 0.5} height={H - m.t - m.b} fill={t === "High" ? "var(--tier-high)" : "var(--tier-elevated)"} opacity={t === "High" ? 0.26 : 0.14} />; })}
-        {[0, 25, 50, 75, 100].map((t) => <g key={t}><line className={t === 50 ? "zero" : "grid"} x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} /><text x={m.l - 6} y={y(t) + 4} textAnchor="end">{t}%</text></g>)}
-        {overs.filter((o) => o % 2 === 0).map((o) => { const first = story.balls.find((b) => b.over === o)!; return <text key={o} x={x(first.n)} y={H - m.b + 16} textAnchor="middle">{o}</text>; })}
-        <text className="axis-title" x={(m.l + W - m.r) / 2} y={H - 4} textAnchor="middle">Over of the chase</text>
-        <path d={path} fill="none" stroke="var(--navy)" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-        {story.balls.filter((b) => b.w).map((b) => <circle key={b.n} cx={x(b.n)} cy={y(b.wp)} r="4.5" fill="var(--surface)" stroke="var(--navy)" strokeWidth="2" />)}
-        {story.balls.map((b) => <rect key={b.n} x={x(b.n) - bw / 2} y={m.t} width={bw} height={H - m.t - m.b} fill="transparent" onMouseMove={(e) => tip.show(e, <><b>Over {b.over}: {b.w ? "wicket" : `${b.runs} run${b.runs === 1 ? "" : "s"}`}</b>{story.batting} {b.wp.toFixed(0)}% before the ball<br />Leverage index {b.li.toFixed(1)} <i>({tierOf(b.li)})</i></>)} onMouseLeave={tip.hide} />)}
-      </svg></div>
-      <div className="legend" style={{ marginTop: 6 }}>
-        <span><i className="key-line" style={{ borderColor: "var(--navy)" }} />{story.batting} win probability</span>
-        <span><i className="dot" style={{ background: "var(--tier-elevated)", opacity: 0.5 }} />Elevated</span>
-        <span><i className="dot" style={{ background: "var(--tier-high)", opacity: 0.6 }} />High</span>
-        <span><i className="key-ring" style={{ borderColor: "var(--navy)" }} />Wicket</span>
+    <div className="card pad stack" style={{ gap: 18 }}>
+      <div className="row between">
+        <Seg label="Match" value={String(si)} onChange={(v) => setSi(+v)} options={stories.map((s, i) => [String(i), `${abbr(s.batting)} v ${abbr(s.bowling)} ${s.date.slice(0, 4)}`] as const)} />
+        <div className="row" style={{ gap: 8 }}>
+          <button type="button" className="btn primary" onClick={() => { if (done) setIdx(0); setPlaying((p) => !p || done); }} aria-label={playing ? "Pause replay" : "Play replay"}>
+            {playing ? <><Pause /> Pause</> : <><Play /> {done ? "Replay the chase" : "Resume"}</>}
+          </button>
+          <button type="button" className="btn" onClick={() => { setPlaying(false); setIdx(n); }} aria-label="Show full chase"><RotateCcw /> Full chase</button>
+        </div>
       </div>
+      <div className="grid-4" style={{ gap: 12 }}>
+        <div className="stat sm"><div className="v">{st.batting}</div><div className="k">chasing {st.target} v {st.bowling}</div></div>
+        <div className="stat sm"><div className="v num">Over {curBall.over}</div><div className="k">ball {Math.min(idx, n)} of {n}</div></div>
+        <div className="stat sm"><div className="v num">{done ? (st.won ? 100 : 0) : curBall.wp.toFixed(0)}%</div><div className="k">win chance</div></div>
+        <div className="stat sm"><div className="v" style={{ color: done ? (st.won ? "var(--good)" : "var(--bad)") : TIER[tierOf(curBall.li)] }}>{done ? (st.won ? "Chased" : "Defended") : tierOf(curBall.li)}</div><div className="k">{done ? st.comp : "pressure on this ball"}</div></div>
+      </div>
+      <div className="table-wrap"><svg className="chart" style={{ minWidth: 620 }} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Win probability of ${st.batting} ball by ball`}>
+        {st.balls.slice(0, idx).map((b) => { const t = tierOf(b.li); return t === "Ordinary" ? null : <rect key={b.n} x={x(b.n) - bw / 2} y={m.t} width={bw + 0.6} height={H - m.t - m.b} fill={TIER[t]} opacity={t === "High" ? 0.32 : 0.16} />; })}
+        {[0, 25, 50, 75, 100].map((t) => <g key={t}><line className={t === 50 ? "zero" : "grid"} x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} /><text x={m.l - 6} y={y(t) + 4} textAnchor="end">{t}%</text></g>)}
+        {[...new Set(st.balls.map((b) => b.over))].filter((o) => o % 2 === 0).map((o) => { const f = st.balls.find((b) => b.over === o)!; return <text key={o} x={x(f.n)} y={H - m.b + 16} textAnchor="middle">{o}</text>; })}
+        <text className="axis-title" x={(m.l + W - m.r) / 2} y={H - 4} textAnchor="middle">Over</text>
+        <path d={path} fill="none" stroke="#fff" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+        {st.balls.slice(0, idx).filter((b) => b.w).map((b) => <circle key={b.n} cx={x(b.n)} cy={y(b.wp)} r="5" fill="var(--s1)" stroke="var(--pink-hi)" strokeWidth="2.5" />)}
+        {!done && <circle cx={x(shown[shown.length - 1][0])} cy={y(shown[shown.length - 1][1])} r="6" fill="#fff" />}
+        {done && st.balls.map((b) => <rect key={b.n} x={x(b.n) - bw / 2} y={m.t} width={bw} height={H - m.t - m.b} fill="transparent"
+          onMouseMove={(e) => tip.show(e, <><b>Over {b.over}: {b.w ? "wicket" : `${b.runs} run${b.runs === 1 ? "" : "s"}`}</b>{b.wp.toFixed(0)}% before the ball<br /><i>{tierOf(b.li)} pressure, {b.li.toFixed(1)}x average</i></>)} onMouseLeave={tip.hide} />)}
+      </svg></div>
+      <div className="legend small"><span><i className="dot" style={{ background: "#fff" }} />Win chance</span><span><i className="dot" style={{ background: "var(--tier-el)" }} />Elevated</span><span><i className="dot" style={{ background: "var(--tier-high)" }} />High</span><span><i className="dot" style={{ border: "2px solid var(--pink-hi)" }} />Wicket</span></div>
       {tip.el}
-    </>
+    </div>
   );
 }
 
-function Distribution() {
+function TierCompare() {
   const { summary: s } = useData();
-  const tip = useTip();
-  const bins = useMemo(() => {
-    const m = new Map<number, { lo: number; hi: number; first: number; chase: number }>();
-    for (const r of s.liDistribution) { const b = m.get(r.lo) ?? { lo: r.lo, hi: r.hi, first: 0, chase: 0 }; b[r.innings as "first" | "chase"] = r.n; m.set(r.lo, b); }
-    return [...m.values()].sort((a, b) => a.lo - b.lo);
-  }, [s]);
-  const W = 640, H = 250, mg = { l: 50, r: 12, t: 12, b: 42 };
-  const x = scaleLinear().domain([0, 4.25]).range([mg.l, W - mg.r]);
-  const y = scaleLinear().domain([0, Math.max(...bins.map((b) => b.first + b.chase))]).range([H - mg.b, mg.t]).nice();
+  const [mt, setMt] = useState<"wicket_pct" | "boundary_pct" | "dot_pct" | "strike_rate">("wicket_pct");
+  const rows = s.league.filter((r) => ["Ordinary", "Elevated", "High"].includes(r.scope));
+  const max = Math.max(...rows.map((r) => r[mt])) * 1.1;
+  const unit = mt === "strike_rate" ? "" : "%";
   return (
-    <>
-      <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Distribution of leverage index across live deliveries, split by innings">
-        {y.ticks(4).map((t) => <g key={t}><line className="grid" x1={mg.l} x2={W - mg.r} y1={y(t)} y2={y(t)} /><text x={mg.l - 6} y={y(t) + 4} textAnchor="end">{t >= 1000 ? `${t / 1000}K` : t}</text></g>)}
-        {bins.map((b) => {
-          const x0 = x(b.lo) + 1, w = x(b.hi) - x(b.lo) - 2;
-          return <g key={b.lo} onMouseMove={(e) => tip.show(e, <><b>Leverage index {b.lo.toFixed(2)} to {b.lo >= 4 ? "4+" : b.hi.toFixed(2)}</b>First innings: {int(b.first)} balls<br />Chase: {int(b.chase)} balls</>)} onMouseLeave={tip.hide}>
-            <rect x={x0} y={y(b.first)} width={w} height={y(0) - y(b.first)} fill="var(--c-usual)" />
-            <rect x={x0} y={y(b.first + b.chase)} width={w} height={Math.max(0, y(b.first) - y(b.first + b.chase) - 2)} rx="3" fill="var(--c-pressure)" />
-            <rect x={x0} y={mg.t} width={w} height={H - mg.t - mg.b} fill="transparent" />
-          </g>;
-        })}
-        {[1, 2].map((t) => <g key={t}><line x1={x(t)} x2={x(t)} y1={mg.t} y2={H - mg.b} stroke="var(--ink)" strokeWidth="1" /><text x={x(t) + 5} y={mg.t + 10} className="lbl">{t === 1 ? "Elevated" : "High"}</text></g>)}
-        {[0, 1, 2, 3, 4].map((t) => <text key={t} x={x(t)} y={H - mg.b + 16} textAnchor="middle">{t === 4 ? "4+" : t}</text>)}
-        <text className="axis-title" x={(mg.l + W - mg.r) / 2} y={H - 6} textAnchor="middle">Leverage index (1 = average ball)</text>
-      </svg>
-      <div className="legend"><span><i className="dot" style={{ background: "var(--c-usual)" }} />First innings</span><span><i className="dot" style={{ background: "var(--c-pressure)" }} />Chase</span></div>
-      {tip.el}
-    </>
+    <div className="card pad stack" style={{ gap: 20 }}>
+      <div className="row" style={{ gap: 8 }}>
+        {([["wicket_pct", "Wickets"], ["boundary_pct", "Boundaries"], ["dot_pct", "Dot balls"], ["strike_rate", "Strike rate"]] as const).map(([k, l]) => (
+          <button key={k} type="button" className="chip" aria-pressed={mt === k} onClick={() => setMt(k)}>{l}</button>))}
+      </div>
+      <div className="stack" style={{ gap: 14 }}>
+        {rows.map((r, i) => (
+          <div key={r.scope + mt} className="meter-row" style={{ gridTemplateColumns: "110px 1fr 70px" }}>
+            <span className="row" style={{ gap: 8 }}><i className="dot" style={{ background: TIER[r.scope] }} /><b>{r.scope}</b></span>
+            <GrowBar value={r[mt]} max={max} height={14} color={TIER[r.scope]} delay={0.06 * i} />
+            <span className="val">{r[mt].toFixed(1)}{unit}</span>
+          </div>
+        ))}
+      </div>
+      <div className="grid-3" style={{ gap: 12 }}>
+        {rows.map((r) => <div key={r.scope} className="stat sm"><div className="v">{pct(s.tierShares[r.scope], 1)}</div><div className="k">of live balls are {r.scope.toLowerCase()}</div></div>)}
+      </div>
+    </div>
   );
 }
 
 export default function Pressure() {
-  const { summary: s } = useData();
   const map = useLazy<PressureMap>("pressure_map");
   const mo = useLazy<{ moments: Moment[]; stories: Story[] }>("moments");
-  const [si, setSi] = useState(0);
-  const tiers = s.league.filter((r) => ["Ordinary", "Elevated", "High"].includes(r.scope));
-  const def = s.validation?.definition;
-
+  const { summary: s } = useData();
+  const high = s.league.find((r) => r.scope === "High")!;
+  const ord = s.league.find((r) => r.scope === "Ordinary")!;
   return (
     <>
-      <PageHead eyebrow="Pressure, defined" title="Pressure is how far the next ball can move the result">
-        For every delivery we ask one question: across everything this ball could produce, how much does the win probability change?
-        That spread is the ball's leverage. Divided by the average ball's, it is the leverage index.
+      <PageHead eyebrow="Pressure Lab" title={<>Pressure is how far the next ball can <span className="accent">swing</span> the match</>}>
+        Every ball is priced by a win model. The bigger the possible swing, the higher the pressure.
       </PageHead>
 
-      <div className="callout prose" style={{ maxWidth: "none" }}>
-        <p><strong>Why not a rule such as "death overs and ten an over"?</strong> Rules need hand-picked cut-offs and break at the edges: 40 needed from 12 with two wickets left passes most rules, yet the match is gone. Leverage folds required rate, wickets in hand, balls left and closeness into one number, drops to zero when the contest is over, and is identical for the batter and the bowler.</p>
+      <div className="grid-3" style={{ marginBottom: 28 }}>
+        <Reveal className="card pad stat"><div className="v"><CountUp value={100 * high.death_share} format={(v) => `${v.toFixed(0)}%`} /></div><div className="k">of high-pressure balls fall in overs 16 to 20</div></Reveal>
+        <Reveal delay={0.06} className="card pad stat"><div className="v">1 in <CountUp value={100 / high.wicket_pct} /></div><div className="k">high-pressure balls takes a wicket, against 1 in {Math.round(100 / ord.wicket_pct)} normally</div></Reveal>
+        <Reveal delay={0.12} className="card pad stat"><div className="v"><CountUp value={100 * high.chase_share} format={(v) => `${v.toFixed(0)}%`} /></div><div className="k">of them come in a chase, when the target is known</div></Reveal>
       </div>
 
-      <section className="section">
-        <div className="section-head"><div><h2>The pressure map</h2><p>Any chase situation, priced by the win-probability model. The bright ridge is where the game is in the balance; it sharpens as the balls run out.</p></div></div>
-        {map ? <MapPanel map={map} /> : <div className="skeleton" style={{ height: 460 }} />}
+      <section>
+        <div className="section-head"><div><h2 className="h2">The pressure map</h2><p className="sub">Every chase situation at once. The bright ridge is where the game hangs in the balance.</p></div></div>
+        {map ? <MapPanel map={map} /> : <div className="skeleton" style={{ height: 480 }} />}
       </section>
 
       <section className="section">
-        <div className="section-head"><div><h2>Three tiers that play differently</h2><p>If the definition is meaningful, cricket should look different as the index rises. It does.</p></div></div>
-        <div className="split">
-          <div className="panel table-wrap">
-            <table className="data">
-              <thead><tr><th>Tier</th><th className="r">Share of live balls</th><th className="r">In a chase</th><th className="r">Overs 16–20</th><th className="r">Strike rate</th><th className="r">Dot %</th><th className="r">Boundary %</th><th className="r">Wicket %</th><th className="r">Avg. swing per ball</th></tr></thead>
-              <tbody>{tiers.map((r) => (
-                <tr key={r.scope}>
-                  <td><span style={{ display: "inline-flex", gap: 8, alignItems: "center", fontWeight: 600 }}><i className="dot" style={{ background: TIER_COLOR[r.scope] }} />{r.scope}</span><div className="psub">{r.scope === "Ordinary" ? "index below 1" : r.scope === "Elevated" ? "index 1 to 2" : "index 2 or more"}</div></td>
-                  <td className="r num">{pct(s.tierShares[r.scope], 1)}</td><td className="r num">{pct(r.chase_share)}</td><td className="r num">{pct(r.death_share)}</td>
-                  <td className="r num">{f1(r.strike_rate)}</td><td className="r num">{f1(r.dot_pct)}</td><td className="r num">{f1(r.boundary_pct)}</td><td className="r num">{f1(r.wicket_pct)}</td><td className="r num">{(100 * r.mean_abs_wp_swing).toFixed(1)} pts</td>
-                </tr>))}</tbody>
-            </table>
-            <p className="note" style={{ padding: "0 14px 14px" }}>
-              {def && <>A scorer's rule of thumb ({def.rule}) agrees with the model where it should: {pct(def.share_of_rule_balls_elevated_or_high)} of balls that pass the rule are Elevated or High. But only {pct(def.share_of_high_tier_meeting_rule)} of High balls pass the rule, because the rule misses tight finishes at lower required rates and collapses in the middle overs.</>}
-            </p>
-          </div>
-          <div className="panel panel-pad">
-            <h3>Where the pressure is</h3>
-            <p className="muted small" style={{ margin: "4px 0 8px" }}>Almost every first-innings ball is Ordinary. Nobody yet knows what a par score is, so no single ball can move the result far.</p>
-            <Distribution />
-          </div>
-        </div>
+        <div className="section-head"><div><h2 className="h2">Replay a finish</h2><p className="sub">Three of the tightest IPL chases in the data, ball by ball. Shaded balls are pressure moments.</p></div></div>
+        {mo ? <Replay stories={mo.stories} /> : <div className="skeleton" style={{ height: 380 }} />}
       </section>
 
       <section className="section">
-        <div className="section-head"><div><h2>A chase, ball by ball</h2><p>Three of the tightest IPL finishes in the data. Shaded bands mark Elevated and High pressure deliveries.</p></div>
-          {mo && <Seg label="Match" value={String(si)} onChange={(v) => setSi(+v)} options={mo.stories.map((st, i) => [String(i), `${st.batting.split(" ").map((w) => w[0]).join("")} v ${st.bowling.split(" ").map((w) => w[0]).join("")}, ${st.date.slice(0, 4)}`] as const)} />}
-        </div>
-        {mo && mo.stories[si] ? <div className="panel panel-pad"><p style={{ marginBottom: 8 }}><strong>{mo.stories[si].batting}</strong> chasing {mo.stories[si].target} against {mo.stories[si].bowling}, {mo.stories[si].comp}, {mo.stories[si].date}. {mo.stories[si].won ? "Chase completed." : "Chase failed."}</p><Worm story={mo.stories[si]} /></div> : <div className="skeleton" />}
+        <div className="section-head"><div><h2 className="h2">The game changes under pressure</h2><p className="sub">League-wide, by pressure level.</p></div></div>
+        <TierCompare />
       </section>
 
       <section className="section">
-        <div className="section-head"><div><h2>The most pressured deliveries in the data</h2><p>One per match, highest leverage index first. The cap on intensity means none of these counts for more than a ball at index 3 in a player's rating.</p></div></div>
-        <div className="panel table-wrap">
-          <table className="data">
-            <thead><tr><th>Match</th><th>Situation</th><th>Batter and bowler</th><th>Outcome</th><th className="r">Index</th><th className="r">Win probability</th></tr></thead>
-            <tbody>{mo?.moments.slice(0, 12).map((r, i) => (
-              <tr key={i}><td><span style={{ fontWeight: 600 }}>{r.batting} v {r.bowling}</span><div className="psub">{r.comp} · {r.date}</div></td>
-                <td className="num">{r.need} from {r.ballsLeft}, {r.wkts} in hand</td><td>{r.striker}<div className="psub">off {r.bowler}</div></td><td>{r.outcome}</td>
-                <td className="r num" style={{ fontWeight: 650 }}>{f1(r.li)}</td><td className="r num">{r.wp}% → {r.wpAfter}%</td></tr>))}</tbody>
-          </table>
+        <div className="section-head"><div><h2 className="h2">The biggest moments</h2><p className="sub">The single most pressured ball in each match, highest first.</p></div></div>
+        <div className="grid-3">
+          {mo?.moments.slice(0, 9).map((r, i) => (
+            <Reveal key={i} delay={0.04 * (i % 3)} className="card pad stack" >
+              <div className="row between"><span className="tag pink"><Zap size={13} />{r.li.toFixed(1)}x</span><span className="muted small num">{r.date}</span></div>
+              <div><b>{r.batting} v {r.bowling}</b><div className="psub">{r.comp}</div></div>
+              <div style={{ font: "700 20px/1.2 var(--head)" }}>{r.need} off {r.ballsLeft}, {r.wkts} wicket{r.wkts === 1 ? "" : "s"} left</div>
+              <div className="small muted">{r.striker} facing {r.bowler}: <b style={{ color: "var(--text)" }}>{r.outcome}</b></div>
+              <div className="row small" style={{ gap: 8 }}><span className="num">{r.wp}%</span><GrowBar value={r.wpAfter} max={100} height={6} /><span className="num">{r.wpAfter}%</span></div>
+            </Reveal>
+          ))}
         </div>
       </section>
     </>
   );
 }
+

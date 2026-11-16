@@ -35,7 +35,7 @@ plt.rcParams.update({
     "xtick.color": INK3, "ytick.color": INK3, "xtick.labelsize": 8.5, "ytick.labelsize": 8.5,
     "text.color": INK, "legend.frameon": False, "legend.fontsize": 8.5,
     "figure.dpi": 110, "savefig.dpi": 220, "savefig.bbox": "tight", "savefig.pad_inches": 0.06,
-    "svg.fonttype": "none",
+    "svg.fonttype": "none", "axes.unicode_minus": False,
 })
 
 

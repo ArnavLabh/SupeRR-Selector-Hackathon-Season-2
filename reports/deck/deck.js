@@ -6,6 +6,8 @@ const pptxgen = require("pptxgenjs");
 const D = JSON.parse(fs.readFileSync(path.join(__dirname, "data.json"), "utf8"));
 const OUT = path.join(__dirname, "..", "Pressure_Index_Executive_Deck.pptx");
 const FIG = (n) => path.join(D.figures, `${n}.png`);
+const URL_FILE = path.join(__dirname, "..", "dashboard_url.txt");
+const DASH = fs.existsSync(URL_FILE) ? fs.readFileSync(URL_FILE, "utf8").trim().replace(/^https?:\/\//, "").replace(/\/$/, "") : "";
 
 const HEX = {
   navy: "101B4D", navy2: "1B2A6B", pink: "E5177B", pinkDeep: "D4146F", pinkSoft: "FBE6F1",
@@ -34,7 +36,7 @@ const C = pres.SchemeColor;
 const W = 13.333, M = 0.6;
 
 const pct = (x, d = 0) => `${(100 * x).toFixed(d)}%`;
-const sg = (x, d = 1) => `${x > 0 ? "+" : x < 0 ? "−" : ""}${Math.abs(x).toFixed(d)}`;
+const sg = (x, d = 1) => `${x > 0 ? "+" : x < 0 ? "-" : ""}${Math.abs(x).toFixed(d)}`;
 
 // ------------------------------------------------------------------ layouts
 pres.defineSlideMaster({
@@ -89,7 +91,7 @@ pres.addSection({ title: "Answer" });
     tb(s, b, { x: M + i * 3.9, y: 5.0, w: 3.6, h: 0.7, fontSize: 34, bold: true, color: i === 2 ? HEX.gold : HEX.white });
     tb(s, l, { x: M + i * 3.9, y: 5.72, w: 3.4, h: 0.7, fontSize: 13, color: "AAB1D9" });
   });
-  tb(s, "Arnav Labhasetwar · github.com/ArnavLabh/SupeRR-Selector-Hackathon-Season-2", { x: M, y: 6.85, w: 10, h: 0.3, fontSize: 11, color: "AAB1D9" });
+  tb(s, `Arnav Labhasetwar${DASH ? ` · ${DASH}` : ""} · github.com/ArnavLabh/SupeRR-Selector-Hackathon-Season-2`, { x: M, y: 6.85, w: 12, h: 0.3, fontSize: 11, color: "AAB1D9" });
   s.addNotes("The brief: find who delivers most reliably when it matters, relative to their usual level. We price every ball for how much it can move the result, measure what each player did with those balls, and then test which way of rating players actually predicts pressure performance in matches the rating has not seen.");
 }
 
@@ -254,7 +256,7 @@ pres.addSection({ title: "Royals" });
     tb(s, n.title, { x: M + 0.2, y: y + 0.12, w: 4.6, h: 0.4, fontSize: 15, bold: true, color: HEX.ink });
     tb(s, n.detail, { x: M + 0.2, y: y + 0.52, w: 4.6, h: 1.0, fontSize: 11.5 });
   });
-  tb(s, `Kept separate: rankings were frozen before this research (${D.asOf}). Retention lists were not yet public, so availability is a judgement from reporting.`,
+  tb(s, `Rankings were fixed before this research (${D.asOf}). Retention lists were not yet public, so availability is a judgement from reporting.`,
     { x: M, y: 5.3, w: 5.0, h: 1.0, fontSize: 11, color: HEX.muted });
   const head = ["Target", "Role", "Rank", "Call", "Availability"].map((t) => ({ text: t, options: { bold: true, color: HEX.muted, fontSize: 11 } }));
   const tierFill = { Priority: HEX.pinkSoft, Strong: "E6E9F8", Watch: HEX.paper };
@@ -281,7 +283,7 @@ pres.addSection({ title: "Royals" });
     { text: "For the Royals: a crunch-tested middle-order batter and a second pressure bowler beside Archer.", options: { bullet: true, breakLine: true } },
     { text: "Revisit availability once retentions are published on 17 November 2026.", options: { bullet: true } },
   ], { x: M, y: 3.4, w: 10.5, h: 2.6, fontSize: 18, color: "DCDFF0", paraSpaceAfter: 10 });
-  tb(s, "Dashboard, methodology report, code and data outputs: github.com/ArnavLabh/SupeRR-Selector-Hackathon-Season-2", { x: M, y: 6.75, w: 11, h: 0.35, fontSize: 12, color: "AAB1D9" });
+  tb(s, `${DASH ? `Live dashboard: ${DASH}   ·   ` : ""}Code and report: github.com/ArnavLabh/SupeRR-Selector-Hackathon-Season-2`, { x: M, y: 6.75, w: 12, h: 0.35, fontSize: 12, color: "AAB1D9" });
   s.addNotes("Close on the decision rule for the auction table: rank by fairly adjusted quality, require real exposure to high pressure, and treat a player's past lift under pressure as record rather than forecast.");
 }
 

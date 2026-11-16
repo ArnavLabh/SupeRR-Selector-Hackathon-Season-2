@@ -26,19 +26,19 @@ REMARK = (
 VIDEO = """\
 **Share Your Journey: video script (about 50 seconds)**
 
-*[0–8 s, face to camera]*
+*[0 to 8 s, face to camera]*
 Every T20 fan has a name they trust when the game is on the line. I wanted to find out whether the data agrees.
 
-*[8–20 s, screen recording: the pressure map on the dashboard]*
+*[8 to 20 s, screen recording: the pressure map on the dashboard]*
 So I priced every one of two hundred thousand deliveries for how much it could swing the result. That's pressure. Here, needing 24 off 12 is more than three times an average ball.
 
-*[20–35 s, screen: the hold-out chart on the Method page]*
+*[20 to 35 s, screen: the hold-out chart on the Method page]*
 The surprise came when I tested it. Players who'd lifted under pressure in one half of the matches didn't do it again in the other half. Forty times over. What repeated was quality.
 
-*[35–48 s, screen: the two top-10 lists]*
+*[35 to 48 s, screen: the two top-10 lists]*
 So my lists are the best players, measured fairly, who've actually been tested in the crunch. Suryakumar, Klaasen and Tim David with the bat; Narine, Bumrah and Varun with the ball.
 
-*[48–55 s, face to camera]*
+*[48 to 55 s, face to camera]*
 Thanks to @rajasthanroyals and @unstop.world for a brilliant problem.
 """
 
