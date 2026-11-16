@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowLeft, Flame, Gauge, ShieldCheck, Sparkles, Swords, Target, TrendingUp } from "lucide-react";
 import { scaleBand, scaleLinear } from "d3-scale";
-import { CountUp, EASE, GrowBar, RankBadge, Reveal, Ring, Seg, searchPlayers, usePlayerIndex, useTip } from "../components/ui";
+import { CountUp, EASE, GrowBar, RankBadge, Reveal, Ring, Seg, searchPlayers, usePlayerIndex, useTip, useSeen } from "../components/ui";
 import { affil, econ, eligible, f1, pct, pctCapped, percentile, players, role, shortName, signed, sr, useData, type Disc, type Player, type Scope, type SplitLite } from "../lib/data";
 
 const TIER: Record<string, string> = { Ordinary: "var(--tier-ord)", Elevated: "var(--tier-el)", High: "var(--tier-high)" };
@@ -96,6 +96,7 @@ function Profile({ p, d, pool }: { p: Player; d: Disc; pool: Player[] }) {
 }
 
 function SplitBars({ p, d, kind }: { p: Player; d: Disc; kind: "phase" | "vs" }) {
+  const [seenRef, seen] = useSeen<SVGSVGElement>();
   const { summary: s } = useData();
   const tip = useTip();
   const keys = kind === "phase" ? ["Powerplay", "Middle", "Death"] : d === "bat" ? ["Pace", "Spin"] : ["RHB", "LHB"];
@@ -110,7 +111,7 @@ function SplitBars({ p, d, kind }: { p: Player; d: Disc; kind: "phase" | "vs" })
   const bw = x.bandwidth() / 2 - 3;
   return (
     <>
-      <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${d === "bat" ? "Strike rate" : "Economy"} by ${kind === "phase" ? "phase" : "matchup"}, player against league`}>
+      <svg ref={seenRef} className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${d === "bat" ? "Strike rate" : "Economy"} by ${kind === "phase" ? "phase" : "matchup"}, player against league`}>
         {y.ticks(4).map((t) => <g key={t}><line className={t === 0 ? "zero" : "grid"} x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} /><text x={m.l - 6} y={y(t) + 4} textAnchor="end">{t}</text></g>)}
         {keys.map((k) => {
           const a = val(mine(k)), b = val(base(k)), x0 = x(k)!;
@@ -118,8 +119,8 @@ function SplitBars({ p, d, kind }: { p: Player; d: Disc; kind: "phase" | "vs" })
           return (
             <g key={k} onMouseMove={(e) => tip.show(e, <><b>{label(k)}</b>{a == null ? "No balls" : `${d === "bat" ? "SR" : "Econ"} ${d === "bat" ? a.toFixed(0) : a.toFixed(2)} from ${mine(k)!.b} balls`}<br /><i>League {d === "bat" ? b!.toFixed(0) : b!.toFixed(2)}</i></>)} onMouseLeave={tip.hide}>
               <rect x={x0 - 4} y={m.t} width={x.bandwidth() + 8} height={H - m.b - m.t} fill="transparent" />
-              {a != null && <motion.rect x={x0} y={y(a)} height={y(0) - y(a)} width={bw} rx="4" fill={better ? "var(--pink)" : "var(--tier-el)"} style={{ transformBox: "fill-box", transformOrigin: "bottom" }} initial={{ scaleY: 0 }} whileInView={{ scaleY: 1 }} viewport={{ once: true }} transition={{ duration: 0.7, ease: EASE }} />}
-              {b != null && <motion.rect x={x0 + bw + 6} y={y(b)} height={y(0) - y(b)} width={bw} rx="4" fill="var(--blue-data)" fillOpacity="0.5" style={{ transformBox: "fill-box", transformOrigin: "bottom" }} initial={{ scaleY: 0 }} whileInView={{ scaleY: 1 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.08, ease: EASE }} />}
+              {a != null && <motion.rect x={x0} y={y(a)} height={y(0) - y(a)} width={bw} rx="4" fill={better ? "var(--pink)" : "var(--tier-el)"} style={{ transformBox: "fill-box", transformOrigin: "bottom" }} initial={{ scaleY: 0 }} animate={seen ? { scaleY: 1 } : undefined} transition={{ duration: 0.7, ease: EASE }} />}
+              {b != null && <motion.rect x={x0 + bw + 6} y={y(b)} height={y(0) - y(b)} width={bw} rx="4" fill="var(--blue-data)" fillOpacity="0.5" style={{ transformBox: "fill-box", transformOrigin: "bottom" }} initial={{ scaleY: 0 }} animate={seen ? { scaleY: 1 } : undefined} transition={{ duration: 0.7, delay: 0.08, ease: EASE }} />}
               {a != null && <text className="lbl" x={x0 + bw / 2} y={y(a) - 6} textAnchor="middle">{d === "bat" ? a.toFixed(0) : a.toFixed(1)}</text>}
               <text x={x0 + x.bandwidth() / 2} y={H - 10} textAnchor="middle" style={{ fill: "var(--text-2)" }}>{label(k)}</text>
             </g>
@@ -160,6 +161,7 @@ function Ladder({ p, d }: { p: Player; d: Disc }) {
 }
 
 function Timeline({ p, d }: { p: Player; d: Disc }) {
+  const [seenRef, seen] = useSeen<SVGSVGElement>();
   const tip = useTip();
   const log = (p.log ?? []).filter((r) => r.b >= 3);
   if (!log.length) return <p className="muted">Match-by-match detail is shown for ranked players.</p>;
@@ -172,7 +174,7 @@ function Timeline({ p, d }: { p: Player; d: Disc }) {
   log.forEach((r, i) => { const yr = r.d.slice(0, 4); if (!years.has(yr)) years.set(yr, i); });
   return (
     <>
-      <div className="table-wrap"><svg className="chart" style={{ minWidth: 620 }} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Win probability added on pressure balls, match by match">
+      <div className="table-wrap"><svg ref={seenRef} className="chart" style={{ minWidth: 620 }} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Win probability added on pressure balls, match by match">
         {y.ticks(4).map((t) => <g key={t}><line className={t === 0 ? "zero" : "grid"} x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} /><text x={m.l - 6} y={y(t) + 4} textAnchor="end">{signed(t * 100, 0)}</text></g>)}
         {[...years].map(([yr, i]) => <g key={yr}><line className="grid" x1={x(i)! - 2} x2={x(i)! - 2} y1={m.t} y2={H - m.b + 4} /><text x={x(i)! + 3} y={H - 6}>{yr}</text></g>)}
         {log.map((r, i) => {
@@ -182,7 +184,7 @@ function Timeline({ p, d }: { p: Player; d: Disc }) {
               <rect x={x(i)!} y={m.t} width={x.bandwidth()} height={H - m.b - m.t} fill="transparent" />
               <motion.rect x={cx} width={bw} rx={Math.min(4, bw / 2)} fill={r.w >= 0 ? (r.h ? "var(--tier-high)" : "var(--tier-el)") : "var(--blue-data)"} fillOpacity={r.w >= 0 ? 1 : 0.55}
                 y={Math.min(y0, y1)} height={Math.max(1.5, Math.abs(y1 - y0))} style={{ transformBox: "fill-box", transformOrigin: r.w >= 0 ? "bottom" : "top" }}
-                initial={{ scaleY: 0 }} whileInView={{ scaleY: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: Math.min(0.6, i * 0.006), ease: EASE }} />
+                initial={{ scaleY: 0 }} animate={seen ? { scaleY: 1 } : undefined} transition={{ duration: 0.5, delay: Math.min(0.6, i * 0.006), ease: EASE }} />
             </g>
           );
         })}

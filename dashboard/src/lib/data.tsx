@@ -72,11 +72,22 @@ export interface Auction {
 }
 export interface Bundle { summary: Summary; batters: Player[]; bowlers: Player[] }
 
-async function get<T>(name: string): Promise<T> {
-  const r = await fetch(`/data/${name}.json`);
-  if (!r.ok) throw new Error(`Could not load ${name}.json (${r.status})`);
-  return r.json();
+const cache = new Map<string, Promise<unknown>>();
+const ready = new Map<string, unknown>();
+/** Fetch a data file once per session; later calls reuse the same promise. */
+export function get<T>(name: string): Promise<T> {
+  if (!cache.has(name)) {
+    const p = fetch(`/data/${name}.json`).then((r) => {
+      if (!r.ok) throw new Error(`Could not load ${name}.json (${r.status})`);
+      return r.json();
+    }).then((d) => { ready.set(name, d); return d; });
+    p.catch(() => cache.delete(name));
+    cache.set(name, p);
+  }
+  return cache.get(name) as Promise<T>;
 }
+/** Warm the cache for data used on other pages. */
+export const prefetchData = () => ["pressure_map", "moments", "auction"].forEach((n) => { get(n).catch(() => undefined); });
 
 const Ctx = createContext<Bundle | null>(null);
 
@@ -102,7 +113,8 @@ export function useData(): Bundle {
 }
 
 export function useLazy<T>(name: string): T | null {
-  const [v, setV] = useState<T | null>(null);
+  // Already loaded: render immediately, no skeleton flash.
+  const [v, setV] = useState<T | null>(() => (ready.get(name) as T) ?? null);
   useEffect(() => { let on = true; get<T>(name).then((d) => on && setV(d)).catch(() => on && setV(null)); return () => { on = false; }; }, [name]);
   return v;
 }

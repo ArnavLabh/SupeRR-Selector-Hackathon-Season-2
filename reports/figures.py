@@ -22,9 +22,11 @@ OUT = ROOT / "outputs"
 DATA = ROOT / "dashboard" / "public" / "data"
 FIG = ROOT / "reports" / "figures"
 
-INK, INK2, INK3, LINE = "#0e1433", "#434a6b", "#6d7392", "#e2e1ec"
-NAVY, PINK, BLUE, GOLD, GREY = "#101b4d", "#e5177b", "#3a57c4", "#d9b45b", "#a9adc4"
-TIER = {"Ordinary": "#c4c6d6", "Elevated": "#d98fb9", "High": "#d4146f"}
+# Dark theme, matching the dashboard. BG is the page colour of the report and deck.
+BG, SURF = "#060b26", "#0c1440"
+INK, INK2, INK3, LINE = "#f3f5ff", "#bac1e6", "#8c94c2", "#1e2a66"
+NAVY, PINK, BLUE, GOLD, GREY = "#ffffff", "#f0388f", "#5b8cff", "#e9b949", "#4a5490"
+TIER = {"Ordinary": "#7a4870", "Elevated": "#c2408a", "High": "#ff6bb5"}
 
 plt.rcParams.update({
     "font.family": ["Inter", "Segoe UI", "Arial", "DejaVu Sans"], "font.size": 9.5,
@@ -34,15 +36,15 @@ plt.rcParams.update({
     "grid.color": LINE, "grid.linewidth": 0.8, "axes.axisbelow": True,
     "xtick.color": INK3, "ytick.color": INK3, "xtick.labelsize": 8.5, "ytick.labelsize": 8.5,
     "text.color": INK, "legend.frameon": False, "legend.fontsize": 8.5,
-    "figure.dpi": 110, "savefig.dpi": 220, "savefig.bbox": "tight", "savefig.pad_inches": 0.06,
+    "figure.dpi": 110, "figure.facecolor": BG, "axes.facecolor": BG, "savefig.facecolor": BG, "savefig.dpi": 220, "savefig.bbox": "tight", "savefig.pad_inches": 0.06,
     "svg.fonttype": "none", "axes.unicode_minus": False,
 })
 
 
 def _save(fig, name):
     FIG.mkdir(parents=True, exist_ok=True)
-    fig.savefig(FIG / f"{name}.png", facecolor="white")
-    fig.savefig(FIG / f"{name}.svg", facecolor="white")
+    fig.savefig(FIG / f"{name}.png", facecolor=BG)
+    fig.savefig(FIG / f"{name}.svg", facecolor=BG)
     plt.close(fig)
 
 
@@ -60,9 +62,9 @@ def top10(kind: str):
     fig, ax = plt.subplots(figsize=(6.2, 3.9))
     y = np.arange(len(t))
     ax.hlines(y, t["pressure_lo"], t["pressure_hi"], color=PINK, alpha=0.32, lw=6, capstyle="round")
-    ax.scatter(t["with_lift"], y, s=44, facecolor="white", edgecolor=BLUE, lw=1.6, zorder=3,
+    ax.scatter(t["with_lift"], y, s=44, facecolor=BG, edgecolor=BLUE, lw=1.6, zorder=3,
                label="If past pressure lift carried forward")
-    ax.scatter(t["pressure"], y, s=62, color=PINK, edgecolor="white", lw=1.4, zorder=4,
+    ax.scatter(t["pressure"], y, s=62, color=PINK, edgecolor=BG, lw=1.4, zorder=4,
                label="Pressure rating (80% interval)")
     ax.set_yticks(y, [f"{int(r)}  {_short(n)}" for r, n in zip(t["rank"], t["player"])])
     ax.tick_params(axis="y", length=0, labelsize=9.5, labelcolor=INK)
@@ -122,7 +124,7 @@ def calibration():
     ax.plot([0, 1], [0, 1], color=INK3, lw=0.9)
     for scope, col in (("Chase", PINK), ("First innings", BLUE)):
         d = c[c["scope"] == scope]
-        ax.plot(d["predicted"], d["actual"], "-o", color=col, ms=5.5, mec="white", mew=1.2, lw=1.8,
+        ax.plot(d["predicted"], d["actual"], "-o", color=col, ms=5.5, mec=BG, mew=1.2, lw=1.8,
                 label=scope)
     ax.set_xlabel("Predicted win probability (out of fold)")
     ax.set_ylabel("Batting side actually won")
@@ -168,7 +170,7 @@ def stability(kind: str):
     fig, ax = plt.subplots(figsize=(5.4, 4.0))
     y = np.arange(len(b))
     ax.hlines(y, b["boot_rank_lo"], b["boot_rank_hi"], color=PINK, alpha=0.32, lw=6, capstyle="round")
-    ax.scatter(b["rank"], y, s=52, color=PINK, edgecolor="white", lw=1.3, zorder=3)
+    ax.scatter(b["rank"], y, s=52, color=PINK, edgecolor=BG, lw=1.3, zorder=3)
     ax.axvline(10.5, color=INK, lw=0.9)
     ax.set_yticks(y, [f"{int(r)}  {_short(n)}" for r, n in zip(b["rank"], b["player"])])
     ax.tick_params(axis="y", length=0, labelcolor=INK)
@@ -187,14 +189,13 @@ def pressure_map(wih: int = 6, env: str = "IPL-2026"):
     m = json.loads((DATA / "pressure_map.json").read_text(encoding="utf-8"))
     li = np.array(m["envs"][env]["li"][wih - 1]).T / 10.0       # need x balls-left
     cmap = LinearSegmentedColormap.from_list("li", [
-        (0, "#efeef5"), (0.001, "#f6f0f6"), (0.2, "#f0c4dc"), (0.4, "#e05ca0"), (0.6, "#be1264"),
-        (1, "#6e083e")])
+        (0, "#161e52"), (0.2, "#603476"), (0.4, "#c2408a"), (0.6, "#ff6bb5"), (1, "#ffdcee")])
     fig, ax = plt.subplots(figsize=(6.0, 3.6))
     im = ax.imshow(li, origin="lower", aspect="auto", cmap=cmap, vmin=0, vmax=5,
                    extent=[m["ballsLeft"][0] - 1, m["ballsLeft"][-1] + 1, 1, 241])
     ax.invert_xaxis()
     for rr in (6, 9, 12, 15):
-        ax.plot([120, 0], [min(240, rr * 20), 0], color=INK, lw=0.6, alpha=0.45)
+        ax.plot([120, 0], [min(240, rr * 20), 0], color=INK, lw=0.6, alpha=0.4, ls="--")
         ax.text(118, min(236, rr * 20) - 9, f"{rr} an over", fontsize=7.5, color=INK)
     ax.set_xlabel("Balls left in the chase"); ax.set_ylabel("Runs needed")
     ax.set_xticks(range(0, 121, 24)); ax.grid(False)
@@ -210,8 +211,8 @@ def rating_vs_lift(kind: str):
     fig, ax = plt.subplots(figsize=(4.3, 3.5))
     top = t["rank"] <= 10
     ax.axhline(0, color=INK3, lw=0.8)
-    ax.scatter(t.loc[~top, "pressure"], t.loc[~top, "lift"], s=26, color=GREY, edgecolor="white", lw=0.8)
-    ax.scatter(t.loc[top, "pressure"], t.loc[top, "lift"], s=44, color=PINK, edgecolor="white", lw=1)
+    ax.scatter(t.loc[~top, "pressure"], t.loc[~top, "lift"], s=26, color=GREY, edgecolor=BG, lw=0.8)
+    ax.scatter(t.loc[top, "pressure"], t.loc[top, "lift"], s=44, color=PINK, edgecolor=BG, lw=1)
     for r in t[t["rank"] <= 4].itertuples():
         ax.annotate(_short(r.player).split()[-1], (r.pressure, r.lift), xytext=(-5, 6),
                     textcoords="offset points", fontsize=8, fontweight="bold", ha="right")
@@ -233,7 +234,7 @@ def worm():
                        alpha=0.28 if r.li >= 2 else 0.16, lw=0)
     ax.plot(d["n"], d["wp"], color=NAVY, lw=1.8)
     w = d[d["w"]]
-    ax.scatter(w["n"], w["wp"], s=30, facecolor="white", edgecolor=NAVY, lw=1.5, zorder=3)
+    ax.scatter(w["n"], w["wp"], s=30, facecolor=BG, edgecolor=PINK, lw=1.5, zorder=3)
     ax.axhline(50, color=INK3, lw=0.8)
     ax.set_ylim(0, 100); ax.set_xlim(0.5, len(d) + 0.5)
     firsts = d.groupby("over")["n"].first()

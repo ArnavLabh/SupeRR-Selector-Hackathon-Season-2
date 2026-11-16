@@ -21,7 +21,10 @@ export function useTip() {
 /* -------------------------------------------------------------- motion helpers */
 export function CountUp({ value, format = (v) => v.toFixed(0), duration = 0.9 }: { value: number; format?: (v: number) => string; duration?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-40px" });
+  const [late, setLate] = useState(false);
+  const seenNow = useInView(ref, { once: true, amount: 0.05 });
+  useEffect(() => { const t = setTimeout(() => setLate(true), 1600); return () => clearTimeout(t); }, []);
+  const inView = seenNow || late;
   const reduce = useReducedMotion();
   useEffect(() => {
     const el = ref.current;
@@ -34,11 +37,21 @@ export function CountUp({ value, format = (v) => v.toFixed(0), duration = 0.9 }:
   return <span ref={ref} className="num">{format(0)}</span>;
 }
 
+/** True once the element scrolls into view, or after a short failsafe delay, so content can never stay hidden. */
+export function useSeen<T extends Element>(failsafeMs = 1600) {
+  const ref = useRef<T>(null);
+  const inView = useInView(ref, { once: true, amount: 0.05 });
+  const [late, setLate] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setLate(true), failsafeMs); return () => clearTimeout(t); }, [failsafeMs]);
+  return [ref, inView || late] as const;
+}
+
 export function Reveal({ children, delay = 0, y = 14, className }: { children: ReactNode; delay?: number; y?: number; className?: string }) {
   const reduce = useReducedMotion();
+  const [ref, seen] = useSeen<HTMLDivElement>();
   return (
-    <motion.div className={className} initial={{ opacity: 0, y: reduce ? 0 : y }} whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.45, delay, ease: EASE }}>
+    <motion.div ref={ref} className={className} initial={{ opacity: 0, y: reduce ? 0 : y }} animate={seen ? { opacity: 1, y: 0 } : undefined}
+      transition={{ duration: 0.45, delay, ease: EASE }}>
       {children}
     </motion.div>
   );
@@ -47,9 +60,10 @@ export function Reveal({ children, delay = 0, y = 14, className }: { children: R
 /** A horizontal bar that grows to `value / max` when it enters the viewport. */
 export function GrowBar({ value, max, color = "var(--pink)", height = 8, delay = 0, track = "var(--s3)" }: { value: number; max: number; color?: string; height?: number; delay?: number; track?: string }) {
   const f = Math.max(0, Math.min(1, value / max));
+  const [ref, seen] = useSeen<HTMLDivElement>();
   return (
-    <div className="bar" style={{ height, background: track }}>
-      <motion.span style={{ background: color }} initial={{ scaleX: 0 }} whileInView={{ scaleX: f }} viewport={{ once: true }}
+    <div ref={ref} className="bar" style={{ height, background: track }}>
+      <motion.span style={{ background: color }} initial={{ scaleX: 0 }} animate={{ scaleX: seen ? f : 0 }}
         transition={{ duration: 0.8, delay, ease: EASE }} />
     </div>
   );
@@ -58,12 +72,13 @@ export function GrowBar({ value, max, color = "var(--pink)", height = 8, delay =
 /** Probability ring. */
 export function Ring({ p, size = 44, label }: { p: number | null | undefined; size?: number; label?: string }) {
   const r = size / 2 - 4, c = 2 * Math.PI * r, v = Math.max(0, Math.min(1, p ?? 0));
+  const [ref, seen] = useSeen<HTMLSpanElement>();
   return (
-    <span style={{ position: "relative", display: "inline-grid", placeItems: "center", width: size, height: size }} aria-label={label ?? `${pctCapped(p)} chance`}>
+    <span ref={ref} style={{ position: "relative", display: "inline-grid", placeItems: "center", width: size, height: size }} aria-label={label ?? `${pctCapped(p)} chance`}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(-90deg)" }} aria-hidden="true">
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--s3)" strokeWidth="4" />
         <motion.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={v >= 0.8 ? "var(--pink)" : v >= 0.5 ? "var(--tier-el)" : "var(--tier-ord)"} strokeWidth="4" strokeLinecap="round"
-          strokeDasharray={c} initial={{ strokeDashoffset: c }} whileInView={{ strokeDashoffset: c * (1 - v) }} viewport={{ once: true }} transition={{ duration: 0.9, ease: EASE }} />
+          strokeDasharray={c} initial={{ strokeDashoffset: c }} animate={{ strokeDashoffset: seen ? c * (1 - v) : c }} transition={{ duration: 0.9, ease: EASE }} />
       </svg>
       <span style={{ position: "absolute", font: `700 ${size > 50 ? 15 : 11.5}px/1 var(--head)` }} className="num">{pctCapped(p).replace(">99%", "99+")}</span>
     </span>
@@ -198,7 +213,6 @@ const NAV = [
 export function Shell({ children }: { children: ReactNode }) {
   const [search, setSearch] = useState(false);
   const loc = useLocation();
-  const reduce = useReducedMotion();
   useEffect(() => {
     const k = (e: KeyboardEvent) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setSearch((s) => !s); } };
     window.addEventListener("keydown", k);
@@ -231,12 +245,9 @@ export function Shell({ children }: { children: ReactNode }) {
       </header>
       <AnimatePresence>{search && <Palette onClose={() => setSearch(false)} />}</AnimatePresence>
       <main id="main">
-        <AnimatePresence mode="wait">
-          <motion.div key={loc.pathname} className="page" initial={{ opacity: 0, y: reduce ? 0 : 10 }} animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, transition: { duration: 0.12 } }} transition={{ duration: 0.3, ease: EASE }}>
-            {children}
-          </motion.div>
-        </AnimatePresence>
+        {/* A plain CSS fade-in on each route. Unlike an exit-then-enter transition it cannot be
+            left half-finished when navigation is interrupted. */}
+        <div key={loc.pathname} className="page page-in">{children}</div>
       </main>
       <footer className="footer">
         <span className="row"><img src="/brand/rr-logo.svg" alt="" width="22" height="34" /><span><b>Arnav Labhasetwar</b><br />SupeRR Selector Season 2</span></span>
@@ -272,6 +283,7 @@ export const Val = ({ x, d = 1 }: { x: number | null | undefined; d?: number }) 
 
 /* -------------------------------------------------------------- rating against lift */
 export function Scatter({ rows, disc, highlight }: { rows: Player[]; disc: Disc; highlight?: number }) {
+  const [seenRef, seen] = useSeen<SVGSVGElement>();
   const tip = useTip();
   const nav = useNavigate();
   const W = 460, H = 380, m = { l: 44, r: 14, t: 14, b: 40 };
@@ -281,7 +293,7 @@ export function Scatter({ rows, disc, highlight }: { rows: Player[]; disc: Disc;
   const y = scaleLinear().domain([-ext, ext]).range([H - m.b, m.t]);
   return (
     <>
-      <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Rating against pressure lift for rated ${disc === "bat" ? "batters" : "bowlers"}`}>
+      <svg ref={seenRef} className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Rating against pressure lift for rated ${disc === "bat" ? "batters" : "bowlers"}`}>
         {x.ticks(6).map((t) => <g key={t}><line className={t === 0 ? "zero" : "grid"} x1={x(t)} x2={x(t)} y1={m.t} y2={H - m.b} /><text x={x(t)} y={H - m.b + 16} textAnchor="middle">{signed(t, 0)}</text></g>)}
         {y.ticks(6).map((t) => <g key={t}><line className={t === 0 ? "zero" : "grid"} x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} /><text x={m.l - 8} y={y(t) + 4} textAnchor="end">{signed(t, 0)}</text></g>)}
         <text className="axis-title" x={(m.l + W - m.r) / 2} y={H - 4} textAnchor="middle">Pressure rating</text>
@@ -290,7 +302,7 @@ export function Scatter({ rows, disc, highlight }: { rows: Player[]; disc: Disc;
           const top = (p.rank ?? 99) <= 10, hl = p.id === highlight;
           return (
             <motion.g key={p.id} role="link" tabIndex={0} style={{ cursor: "pointer" }} aria-label={`${p.name}: rating ${signed(p.pressure)}, lift ${signed(p.lift)}`}
-              initial={{ opacity: 0, scale: 0.4 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.01 * i, duration: 0.3 }}
+              initial={{ opacity: 0, scale: 0.4 }} animate={seen ? { opacity: 1, scale: 1 } : undefined} transition={{ delay: 0.01 * i, duration: 0.3 }}
               onClick={() => nav(`/player/${disc}/${p.id}`)} onKeyDown={(e) => e.key === "Enter" && nav(`/player/${disc}/${p.id}`)}
               onMouseMove={(e) => tip.show(e, <><b>{p.rank ? `#${p.rank} ` : ""}{shortName(p.name)}</b>Rating {signed(p.pressure)} · lift {signed(p.lift)}</>)} onMouseLeave={tip.hide}>
               <circle cx={x(p.pressure)} cy={y(p.lift)} r="12" fill="transparent" />

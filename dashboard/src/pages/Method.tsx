@@ -2,7 +2,7 @@ import { useState } from "react";
 import { scaleLinear } from "d3-scale";
 import { AnimatePresence, motion } from "motion/react";
 import { Calculator, ChevronDown, Database, Gauge, Users } from "lucide-react";
-import { EASE, GrowBar, PageHead, Reveal, Seg, useTip } from "../components/ui";
+import { EASE, GrowBar, PageHead, Reveal, Seg, useTip, useSeen } from "../components/ui";
 import { eligible, pct, pctCapped, shortName, useData, type Disc } from "../lib/data";
 
 const STEPS = [
@@ -13,6 +13,7 @@ const STEPS = [
 ];
 
 function Calibration() {
+  const [seenRef, seen] = useSeen<SVGSVGElement>();
   const { summary: s } = useData();
   const tip = useTip();
   const rows = s.validation?.calibration ?? [];
@@ -20,11 +21,11 @@ function Calibration() {
   const x = scaleLinear().domain([0, 1]).range([m.l, W - m.r]), y = scaleLinear().domain([0, 1]).range([H - m.b, m.t]);
   const ser: [string, string][] = [["Chase", "var(--pink)"], ["First innings", "var(--blue-data)"]];
   return (<>
-    <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Predicted against actual win rate">
+    <svg ref={seenRef} className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Predicted against actual win rate">
       {[0, 0.25, 0.5, 0.75, 1].map((t) => <g key={t}><line className="grid" x1={x(t)} x2={x(t)} y1={m.t} y2={H - m.b} /><line className="grid" x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} /><text x={x(t)} y={H - m.b + 16} textAnchor="middle">{t * 100}%</text><text x={m.l - 6} y={y(t) + 4} textAnchor="end">{t * 100}%</text></g>)}
       <line x1={x(0)} y1={y(0)} x2={x(1)} y2={y(1)} stroke="rgba(255,255,255,.35)" strokeDasharray="4 4" />
       {ser.map(([n, c]) => { const d = rows.filter((r) => r.scope === n); return <g key={n}>
-        <motion.path d={d.map((r, i) => `${i ? "L" : "M"}${x(r.predicted)},${y(r.actual)}`).join("")} fill="none" stroke={c} strokeWidth="2.5" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 1, ease: EASE }} />
+        <motion.path d={d.map((r, i) => `${i ? "L" : "M"}${x(r.predicted)},${y(r.actual)}`).join("")} fill="none" stroke={c} strokeWidth="2.5" initial={{ pathLength: 0 }} animate={seen ? { pathLength: 1 } : undefined} transition={{ duration: 1, ease: EASE }} />
         {d.map((r, i) => <circle key={i} cx={x(r.predicted)} cy={y(r.actual)} r="5" fill={c} stroke="var(--s1)" strokeWidth="2" onMouseMove={(e) => tip.show(e, <><b>{n}</b>Model said {pct(r.predicted)}; side won {pct(r.actual)}<br /><i>{r.n_matches} matches</i></>)} onMouseLeave={tip.hide} />)}
       </g>; })}
       <text className="axis-title" x={(m.l + W - m.r) / 2} y={H - 6} textAnchor="middle">Model's win chance</text>
@@ -60,18 +61,19 @@ function Prediction({ disc }: { disc: Disc }) {
 }
 
 function Stability({ disc }: { disc: Disc }) {
+  const [seenRef, seen] = useSeen<HTMLDivElement>();
   const data = useData();
   const rows = eligible(data, disc).slice(0, 12);
   const n = eligible(data, disc).length;
   const x = scaleLinear().domain([1, Math.min(n, 36)]).range([0, 100]).clamp(true);
   return (
-    <div className="stack" style={{ gap: 6 }}>
+    <div ref={seenRef} className="stack" style={{ gap: 6 }}>
       {rows.map((p, i) => (
         <div key={p.id} style={{ display: "grid", gridTemplateColumns: "150px 1fr 52px", gap: 12, alignItems: "center" }}>
           <span className="small" style={{ color: i < 10 ? "var(--text)" : "var(--muted)" }}>{p.rank}. {shortName(p.name)}</span>
           <span style={{ position: "relative", height: 18 }}>
             <span style={{ position: "absolute", left: `${x(10.5)}%`, top: -2, bottom: -2, borderLeft: "1px dashed var(--line-2)" }} />
-            {p.boot && <motion.span initial={{ opacity: 0, scaleX: 0 }} whileInView={{ opacity: 1, scaleX: 1 }} viewport={{ once: true }} transition={{ delay: 0.03 * i, duration: 0.5 }}
+            {p.boot && <motion.span initial={{ opacity: 0, scaleX: 0 }} animate={seen ? { opacity: 1, scaleX: 1 } : undefined} transition={{ delay: 0.03 * i, duration: 0.5 }}
               style={{ position: "absolute", top: 6, height: 6, borderRadius: 3, left: `${x(p.boot.rankLo)}%`, width: `${Math.max(1.5, x(p.boot.rankHi) - x(p.boot.rankLo))}%`, background: "rgba(234,26,133,.4)", transformOrigin: "left" }} />}
             <span style={{ position: "absolute", top: 3, width: 12, height: 12, borderRadius: "50%", left: `calc(${x(p.rank!)}% - 6px)`, background: "var(--pink)", boxShadow: "0 0 0 2px var(--s1)" }} />
           </span>

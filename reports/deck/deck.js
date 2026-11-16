@@ -6,21 +6,24 @@ const pptxgen = require("pptxgenjs");
 const D = JSON.parse(fs.readFileSync(path.join(__dirname, "data.json"), "utf8"));
 const OUT = path.join(__dirname, "..", "Pressure_Index_Executive_Deck.pptx");
 const FIG = (n) => path.join(D.figures, `${n}.png`);
+const LOGO = path.join(__dirname, "rr-logo.png");
+const TITLE_BG = path.join(__dirname, "title-bg.png");
 const URL_FILE = path.join(__dirname, "..", "dashboard_url.txt");
 const DASH = fs.existsSync(URL_FILE) ? fs.readFileSync(URL_FILE, "utf8").trim().replace(/^https?:\/\//, "").replace(/\/$/, "") : "";
 
+// Dark theme, matching the dashboard.
 const HEX = {
-  navy: "101B4D", navy2: "1B2A6B", pink: "E5177B", pinkDeep: "D4146F", pinkSoft: "FBE6F1",
-  gold: "D9B45B", goldSoft: "F5ECD6", ink: "0E1433", ink2: "434A6B", muted: "6D7392",
-  paper: "F5F4F9", white: "FFFFFF", line: "E2E1EC", blue: "3A57C4",
-  tOrd: "C4C6D6", tEl: "D98FB9", tHigh: "D4146F",
+  bg: "060B26", navy: "060B26", navy2: "254AA5", pink: "F0388F", pinkDeep: "FF4FA6", pinkSoft: "2A1036",
+  gold: "E9B949", goldSoft: "2B2412", ink: "F3F5FF", ink2: "BAC1E6", muted: "8C94C2",
+  paper: "0C1440", white: "FFFFFF", line: "1E2A66", blue: "5B8CFF",
+  tOrd: "7A4870", tEl: "C2408A", tHigh: "FF6BB5",
 };
 const THEME = {
   name: "Pressure Index",
   headFontFace: "Calibri",
   bodyFontFace: "Calibri",
   colors: {
-    dk1: HEX.ink, lt1: HEX.white, dk2: HEX.navy, lt2: HEX.paper,
+    dk1: HEX.bg, lt1: HEX.white, dk2: HEX.paper, lt2: HEX.ink,
     accent1: HEX.pink, accent2: HEX.navy2, accent3: HEX.gold, accent4: HEX.blue,
     accent5: HEX.tEl, accent6: HEX.muted, hlink: HEX.navy2, folHlink: HEX.ink2,
   },
@@ -41,20 +44,22 @@ const sg = (x, d = 1) => `${x > 0 ? "+" : x < 0 ? "-" : ""}${Math.abs(x).toFixed
 // ------------------------------------------------------------------ layouts
 pres.defineSlideMaster({
   title: "DARK",
-  background: { color: HEX.navy },
+  background: { path: TITLE_BG },
   objects: [
+    { image: { path: LOGO, x: 11.55, y: 0.55, w: 1.12, h: 1.69, altText: "Rajasthan Royals" } },
     { placeholder: { options: { name: "kicker", type: "body", x: M, y: 0.7, w: 9, h: 0.4, fontSize: 13, bold: true, color: "F48CC0", charSpacing: 2 }, text: "" } },
     { placeholder: { options: { name: "title", type: "title", x: M, y: 1.15, w: 10.5, h: 1.9, fontSize: 44, bold: true, color: HEX.white, valign: "top", align: "left" }, text: "" } },
   ],
 });
 pres.defineSlideMaster({
   title: "CONTENT",
-  background: { color: HEX.white },
+  background: { color: HEX.bg },
   margin: [0.5, 0.6, 0.6, 0.6],
   objects: [
     { placeholder: { options: { name: "kicker", type: "body", x: M, y: 0.38, w: 10, h: 0.32, fontSize: 12, bold: true, color: HEX.pinkDeep, charSpacing: 2 }, text: "" } },
     { placeholder: { options: { name: "title", type: "title", x: M, y: 0.68, w: 12.1, h: 0.85, fontSize: 30, bold: true, color: HEX.ink, valign: "top", align: "left" }, text: "" } },
-    { text: { text: "Pressure Index · SupeRR Selector Season 2", options: { x: M, y: 7.05, w: 6, h: 0.3, fontSize: 9, color: HEX.muted } } },
+    { image: { path: LOGO, x: 12.42, y: 0.32, w: 0.4, h: 0.6, altText: "Rajasthan Royals" } },
+    { text: { text: "Pressure Index · SupeRR Selector Season 2 · Arnav Labhasetwar", options: { x: M, y: 7.05, w: 7, h: 0.3, fontSize: 9, color: HEX.muted } } },
   ],
   slideNumber: { x: 12.3, y: 7.05, w: 0.5, h: 0.3, fontSize: 9, color: HEX.muted, align: "right" },
 });
@@ -105,7 +110,7 @@ pres.addSection({ title: "Answer" });
     tb(s, lab, { x: x + 0.3, y: 1.8, w: 3, h: 0.4, fontSize: 18, bold: true, color: HEX.ink });
     tb(s, "Rating   P(top 10)", { x: x + w - 2.45, y: 1.86, w: 2.2, h: 0.3, fontSize: 11, color: HEX.muted, align: "right" });
     const body = rows.map((r) => [
-      { text: String(r.rank), options: { bold: true, color: r.rank <= 3 ? "3B2B05" : HEX.white, fill: { color: r.rank <= 3 ? HEX.gold : HEX.navy }, align: "center" } },
+      { text: String(r.rank), options: { bold: true, color: r.rank <= 3 ? "3B2B05" : HEX.white, fill: { color: r.rank <= 3 ? HEX.gold : HEX.navy2 }, align: "center" } },
       { text: [{ text: r.name, options: { bold: true, color: HEX.ink, breakLine: true } }, { text: r.team, options: { fontSize: 10, color: HEX.muted } }] },
       { text: sg(r.rating), options: { bold: true, align: "right", color: HEX.ink } },
       { text: r.p10 >= 0.995 ? ">99%" : pct(r.p10), options: { align: "right", color: HEX.ink2 } },
@@ -171,7 +176,7 @@ pres.addSection({ title: "Method" });
   ];
   steps.forEach(([h, b], i) => {
     const x = M + i * 3.05;
-    s.addShape(pres.shapes.OVAL, { x, y: 1.85, w: 0.62, h: 0.62, fill: { color: i === 3 ? HEX.pink : HEX.navy }, line: { color: i === 3 ? HEX.pink : HEX.navy } });
+    s.addShape(pres.shapes.OVAL, { x, y: 1.85, w: 0.62, h: 0.62, fill: { color: i === 3 ? HEX.pink : HEX.navy2 }, line: { color: i === 3 ? HEX.pink : HEX.navy2 } });
     tb(s, String(i + 1), { x, y: 1.85, w: 0.62, h: 0.62, fontSize: 20, bold: true, color: HEX.white, align: "center", valign: "middle" });
     tb(s, h, { x, y: 2.7, w: 2.8, h: 0.7, fontSize: 17, bold: true, color: HEX.ink });
     tb(s, b, { x, y: 3.45, w: 2.8, h: 2.2, fontSize: 13.5 });
@@ -259,7 +264,7 @@ pres.addSection({ title: "Royals" });
   tb(s, `Rankings were fixed before this research (${D.asOf}). Retention lists were not yet public, so availability is a judgement from reporting.`,
     { x: M, y: 5.3, w: 5.0, h: 1.0, fontSize: 11, color: HEX.muted });
   const head = ["Target", "Role", "Rank", "Call", "Availability"].map((t) => ({ text: t, options: { bold: true, color: HEX.muted, fontSize: 11 } }));
-  const tierFill = { Priority: HEX.pinkSoft, Strong: "E6E9F8", Watch: HEX.paper };
+  const tierFill = { Priority: HEX.pinkSoft, Strong: "16224F", Watch: HEX.paper };
   const rows = D.targets.map((t) => [
     { text: t.name, options: { bold: true, color: HEX.ink } },
     { text: t.fit, options: { fontSize: 10.5, color: HEX.ink2 } },

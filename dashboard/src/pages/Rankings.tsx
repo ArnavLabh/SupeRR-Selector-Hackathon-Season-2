@@ -14,7 +14,7 @@ export default function Rankings() {
   const disc = (sp.get("d") === "bowl" ? "bowl" : "bat") as Disc;
   const [q, setQ] = useState("");
   const [team, setTeam] = useState("all");
-  const [pool, setPool] = useState<"rated" | "all">("rated");
+  const [pool, setPool] = useState<"top10" | "rated" | "all">(() => (sp.get("pool") === "all" ? "all" : sp.get("pool") === "rated" ? "rated" : "top10"));
   const [sort, setSort] = useState<Sort>("rank");
   const [hover, setHover] = useState<number | undefined>();
   const all = players(data, disc);
@@ -29,7 +29,7 @@ export default function Rankings() {
       if (sort === "evidence") { const v = ev(p); return v == null ? 1e9 : disc === "bat" ? -v : v; }
       return p.rank ?? 1000 - p.pressure;
     };
-    return all.filter((p) => (pool === "all" || p.eligible) && (team === "all" || p.team === team) && (!q || p.name.toLowerCase().includes(q.toLowerCase())))
+    return all.filter((p) => (pool === "all" || (pool === "top10" ? p.eligible && (p.rank ?? 99) <= 10 : p.eligible)) && (team === "all" || p.team === team) && (!q || p.name.toLowerCase().includes(q.toLowerCase())))
       .sort((a, b) => key(a) - key(b)).slice(0, pool === "all" ? 120 : 200);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [all, pool, team, q, sort, disc]);
@@ -42,8 +42,8 @@ export default function Rankings() {
       </PageHead>
 
       <div className="row" style={{ alignItems: "end", gap: 14, marginBottom: 22 }}>
-        <Seg label="Discipline" value={disc} onChange={(v) => setSp({ d: v })} options={[["bat", "Batters"], ["bowl", "Bowlers"]] as const} />
-        <Seg label="Pool" value={pool} onChange={setPool} options={[["rated", `Ranked · ${rated.length}`], ["all", "Everyone"]] as const} />
+        <Seg label="Discipline" value={disc} onChange={(v) => setSp({ d: v, pool })} options={[["bat", "Batters"], ["bowl", "Bowlers"]] as const} />
+        <Seg label="Show" value={pool} onChange={setPool} options={[["top10", "Top 10"], ["rated", `All ranked · ${rated.length}`], ["all", "Everyone"]] as const} />
         <div style={{ flex: "1 1 220px", maxWidth: 320 }}>
           <span className="field-label">Search</span>
           <div className="input-wrap"><Search /><input className="input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Player name" aria-label="Search players" /></div>
@@ -82,7 +82,7 @@ export default function Rankings() {
               ))}
             </AnimatePresence>
           </motion.div>
-          {rows.length === 0 && <p className="muted" style={{ padding: 28, textAlign: "center" }}>Nobody matches. Clear the search or switch to Everyone.</p>}
+          {rows.length === 0 && <p className="muted" style={{ padding: 28, textAlign: "center" }}>Nobody matches{pool === "top10" ? " in the top 10" : ""}. Clear the search or widen the list.</p>}
         </div>
         <div className="card pad stack" style={{ position: "sticky", top: 92 }}>
           <h2 className="h3">Quality against lift</h2>

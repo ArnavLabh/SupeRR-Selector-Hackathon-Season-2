@@ -1,18 +1,19 @@
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowRight, Gavel, Activity } from "lucide-react";
-import { CountUp, EASE, GrowBar, RankBadge, Reveal, Ring } from "../components/ui";
+import { CountUp, EASE, GrowBar, RankBadge, Reveal, Ring, useSeen } from "../components/ui";
 import { affil, eligible, pct, shortName, signed, useData, type Disc, type Player } from "../lib/data";
 
 function Podium({ rows, disc }: { rows: Player[]; disc: Disc }) {
+  const [seenRef, seen] = useSeen<HTMLDivElement>();
   const nav = useNavigate();
   const order = [rows[1], rows[0], rows[2]];
   const h = [128, 168, 108];
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0,1fr))", gap: 10, alignItems: "end" }}>
+    <div ref={seenRef} style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0,1fr))", gap: 10, alignItems: "end" }}>
       {order.map((p, i) => (
         <motion.button key={p.id} type="button" onClick={() => nav(`/player/${disc}/${p.id}`)}
-          initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.12 * [1, 0, 2][i], duration: 0.5, ease: EASE }}
+          initial={{ opacity: 0, y: 24 }} animate={seen ? { opacity: 1, y: 0 } : undefined} transition={{ delay: 0.12 * [1, 0, 2][i], duration: 0.5, ease: EASE }}
           style={{ all: "unset", cursor: "pointer", display: "grid", gap: 10, justifyItems: "center", textAlign: "center" }} aria-label={`Rank ${p.rank}, ${p.name}, rating ${signed(p.pressure)}`}>
           <span><span className="pname" style={{ fontSize: 15 }}>{shortName(p.name)}</span><div className="psub">{affil(p)}</div></span>
           <span style={{ width: "100%", height: h[i], borderRadius: "14px 14px 6px 6px", display: "grid", placeItems: "center", alignContent: "center", gap: 6,
@@ -36,7 +37,7 @@ function TopList({ disc }: { disc: Disc }) {
     <div className="card pad stack" style={{ gap: 20 }}>
       <div className="row between">
         <h2 className="h3">{disc === "bat" ? "Batting" : "Bowling"} top 10</h2>
-        <Link to={`/rankings?d=${disc}`} className="small accent row" style={{ gap: 6 }}>Full leaderboard <ArrowRight size={15} /></Link>
+        <Link to={`/rankings?d=${disc}&pool=rated`} className="small accent row" style={{ gap: 6 }}>Full leaderboard <ArrowRight size={15} /></Link>
       </div>
       <Podium rows={rows} disc={disc} />
       <div className="stack" style={{ gap: 4 }}>

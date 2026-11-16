@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowUpRight, ExternalLink, ShieldAlert, Target, Users } from "lucide-react";
 import { scaleLinear } from "d3-scale";
-import { EASE, GrowBar, PageHead, RankBadge, Reveal, Ring, Seg, useTip } from "../components/ui";
+import { EASE, GrowBar, PageHead, RankBadge, Reveal, Ring, Seg, useTip, useSeen } from "../components/ui";
 import { eligible, players, shortName, signed, useData, useLazy, type Auction as A, type Disc, type Player } from "../lib/data";
 
 const CALL: Record<string, string> = { Priority: "pink", Strong: "blue", Watch: "" };
@@ -16,6 +16,7 @@ const AVAIL = (s: string) => {
 };
 
 function SquadStrip({ disc }: { disc: Disc }) {
+  const [seenRef, seen] = useSeen<SVGSVGElement>();
   const data = useData();
   const tip = useTip();
   const nav = useNavigate();
@@ -27,7 +28,7 @@ function SquadStrip({ disc }: { disc: Disc }) {
   return (
     <div className="card pad stack" style={{ gap: 12 }}>
       <div className="row between"><h3 className="h3">{disc === "bat" ? "Batters" : "Bowlers"}</h3><span className="muted small">{rr.length} Royals among {rows.length} ranked</span></div>
-      <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Royals ${disc === "bat" ? "batters" : "bowlers"} against every ranked player`}>
+      <svg ref={seenRef} className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Royals ${disc === "bat" ? "batters" : "bowlers"} against every ranked player`}>
         <rect x={x(cut)} y={10} width={W - m.r - x(cut)} height={70} rx="8" fill="rgba(233,185,73,.08)" />
         <text x={W - m.r - 6} y={24} textAnchor="end" style={{ fill: "var(--gold)" }}>Top-10 zone</text>
         <line x1={m.l} x2={W - m.r} y1={60} y2={60} className="zero" />
@@ -36,7 +37,7 @@ function SquadStrip({ disc }: { disc: Disc }) {
           const jitter = ((i * 37) % 9) - 4;
           return (
             <motion.circle key={p.id} cx={x(p.pressure)} cy={60 + (mine ? 0 : jitter * 2.4)} r={mine ? 8 : 4.5} fill={mine ? "var(--pink)" : "var(--blue-data)"} fillOpacity={mine ? 1 : 0.4}
-              stroke={mine ? "#fff" : "none"} strokeWidth="2" style={{ cursor: "pointer" }} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.01 * i }}
+              stroke={mine ? "#fff" : "none"} strokeWidth="2" style={{ cursor: "pointer" }} initial={{ opacity: 0 }} animate={seen ? { opacity: 1 } : undefined} transition={{ delay: 0.01 * i }}
               onClick={() => nav(`/player/${disc}/${p.id}`)} onMouseMove={(e) => tip.show(e, <><b>#{p.rank} {shortName(p.name)}</b>Rating {signed(p.pressure)}<br /><i>{p.team ?? p.country}</i></>)} onMouseLeave={tip.hide} />
           );
         })}

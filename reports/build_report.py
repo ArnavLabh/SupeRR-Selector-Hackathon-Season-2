@@ -44,6 +44,13 @@ def pcap(x) -> str:
     return "n/a" if x is None or pd.isna(x) else (">99%" if x >= 0.995 else f"{100 * x:.0f}%")
 
 
+def logo_tag() -> str:
+    svg = ROOT / "dashboard" / "public" / "brand" / "rr-logo.svg"
+    if not svg.exists():
+        return ""
+    return f'<img class="logo" alt="Rajasthan Royals" src="data:image/svg+xml;base64,{base64.b64encode(svg.read_bytes()).decode()}">'
+
+
 def img(name: str, width="100%") -> str:
     svg = (FIG / f"{name}.png").read_bytes()
     return (f'<img src="data:image/png;base64,{base64.b64encode(svg).decode()}" '
@@ -141,56 +148,65 @@ def sentence(d, kind: str, r) -> str:
 
 
 CSS = """
-@page { size: A4; margin: 17mm 16mm 18mm 16mm; }
-@page :first { margin: 0; }
+/* Dark theme matching the dashboard. Chrome leaves @page margins unpainted, so the page
+   margin is zero and the margins are recreated by a table frame whose header and footer
+   repeat on every printed page. */
+@page { size: A4; margin: 0; }
 * { box-sizing: border-box; }
-html { font-family: Inter, 'Segoe UI', Arial, sans-serif; font-size: 9.6pt; line-height: 1.5; color: #0e1433; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-body { margin: 0; }
-h1 { font-size: 19pt; line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 6pt; break-before: page; padding-top: 2pt; }
-h1 .no { color: #d4146f; font-weight: 700; margin-right: 8pt; }
-h2 { font-size: 11.5pt; margin: 14pt 0 4pt; letter-spacing: -0.01em; break-after: avoid; }
-h3 { font-size: 9.6pt; margin: 9pt 0 2pt; break-after: avoid; }
+html, body { background: #060b26; margin: 0; }
+html { font-family: Inter, 'Segoe UI', Arial, sans-serif; font-size: 9.6pt; line-height: 1.55; color: #e4e7f7; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+table.frame { width: 100%; border-collapse: collapse; }
+table.frame > thead td, table.frame > tfoot td { padding: 0; }
+table.frame > tbody > tr > td { padding: 0 16mm; }
+.sp-top { height: 16mm; } .sp-bot { height: 15mm; }
+h1 { font-size: 20pt; line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 6pt; break-before: page; color: #fff; }
+h1 .no { color: #ff4fa6; font-weight: 700; margin-right: 8pt; }
+h2 { font-size: 11.5pt; margin: 14pt 0 4pt; letter-spacing: -0.01em; break-after: avoid; color: #fff; }
+h3 { font-size: 9.6pt; margin: 9pt 0 2pt; break-after: avoid; color: #fff; }
 p { margin: 0 0 6.5pt; }
-.lede { font-size: 11pt; color: #434a6b; line-height: 1.5; margin-bottom: 10pt; }
-.muted, .sub { color: #6d7392; } .sub { font-size: 7.8pt; }
+b, strong { color: #fff; }
+.lede { font-size: 11pt; color: #bac1e6; line-height: 1.5; margin-bottom: 10pt; }
+.muted, .sub { color: #8c94c2; } .sub { font-size: 7.8pt; }
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16pt; }
 .cols.wide { grid-template-columns: 1.25fr 1fr; }
 .fig { margin: 6pt 0 8pt; break-inside: avoid; }
-.fig figcaption, .cap { font-size: 8pt; color: #6d7392; margin-top: 3pt; }
+.fig img { border-radius: 6pt; }
+.fig figcaption, .cap { font-size: 8pt; color: #8c94c2; margin-top: 3pt; }
 figure { margin: 0; }
-.callout { background: #efeef5; border-radius: 6pt; padding: 9pt 11pt; margin: 8pt 0; break-inside: avoid; }
-.callout.pink { background: #fbe6f1; }
-.callout b { color: #0e1433; }
+.callout { background: #0c1440; border: 0.6pt solid #1e2a66; border-radius: 8pt; padding: 9pt 11pt; margin: 8pt 0; break-inside: avoid; color: #bac1e6; }
+.callout.pink { background: rgba(234,26,133,.14); border-color: rgba(234,26,133,.4); }
 table.data { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin: 4pt 0 6pt; font-variant-numeric: tabular-nums; break-inside: avoid; }
-table.data th { text-align: left; font-weight: 600; font-size: 7.6pt; color: #6d7392; padding: 4pt 5pt; border-bottom: 1pt solid #cfcee0; vertical-align: bottom; line-height: 1.25; }
-table.data td { padding: 4pt 5pt; border-bottom: 0.6pt solid #e2e1ec; vertical-align: middle; }
+table.data th { text-align: left; font-weight: 600; font-size: 7.4pt; color: #8c94c2; padding: 4pt 5pt; border-bottom: 0.8pt solid #2a3778; vertical-align: bottom; line-height: 1.25; text-transform: uppercase; letter-spacing: 0.03em; }
+table.data td { padding: 4pt 5pt; border-bottom: 0.6pt solid #1a2560; vertical-align: middle; color: #d3d8f0; }
 table.data .r { text-align: right; }
 table.tight td { padding: 3.2pt 4pt; } table.tight th { padding: 3.2pt 4pt; }
-tr.hl td { background: #fbe6f1; font-weight: 600; }
-.rk { display: inline-block; min-width: 15pt; text-align: center; padding: 1pt 3pt; border-radius: 4pt; background: #101b4d; color: #fff; font-weight: 700; font-size: 8pt; }
-.rk.g { background: #d9b45b; color: #3b2b05; }
-ol.ev { padding-left: 15pt; margin: 4pt 0; } ol.ev li { margin-bottom: 3.5pt; font-size: 8.8pt; }
+tr.hl td { background: rgba(234,26,133,.16); font-weight: 600; color: #fff; }
+.rk { display: inline-block; min-width: 15pt; text-align: center; padding: 1pt 3pt; border-radius: 4pt; background: #254aa5; color: #fff; font-weight: 700; font-size: 8pt; }
+.rk.g { background: #e9b949; color: #2b1f02; }
+ol.ev { padding-left: 15pt; margin: 4pt 0; } ol.ev li { margin-bottom: 3.5pt; font-size: 8.8pt; color: #c7cce9; }
 ul { padding-left: 14pt; margin: 3pt 0 7pt; } li { margin-bottom: 2.5pt; }
-code { font-family: Consolas, monospace; font-size: 8.4pt; background: #efeef5; padding: 0 3pt; border-radius: 3pt; }
-.formula { font-family: 'Cambria Math', Cambria, Georgia, serif; font-size: 10.5pt; background: #f5f4f9; border-radius: 5pt; padding: 6pt 10pt; margin: 5pt 0 7pt; }
-.cover { height: 297mm; background: #101b4d; color: #f3f2fa; padding: 30mm 22mm 20mm; display: flex; flex-direction: column; break-after: page; }
-.cover .eyebrow { color: #f48cc0; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; font-size: 9pt; }
+li::marker { color: #ff4fa6; }
+code { font-family: Consolas, monospace; font-size: 8.4pt; background: #18256a; color: #e4e7f7; padding: 0 3pt; border-radius: 3pt; }
+.formula { font-family: 'Cambria Math', Cambria, Georgia, serif; font-size: 10.5pt; background: #0c1440; border: 0.6pt solid #1e2a66; color: #fff; border-radius: 6pt; padding: 6pt 10pt; margin: 5pt 0 7pt; }
+.cover { height: 297mm; background: radial-gradient(120% 80% at 100% 0%, rgba(234,26,133,.22), transparent 55%), #060b26; color: #f3f2fa; padding: 22mm 22mm 18mm; display: flex; flex-direction: column; break-after: page; }
+.cover .logo { height: 26mm; width: auto; margin-bottom: 10mm; align-self: flex-start; }
+.cover .eyebrow { color: #ff4fa6; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; font-size: 9pt; }
 .cover h1 { font-size: 38pt; line-height: 1.05; letter-spacing: -0.03em; margin: 12pt 0 12pt; break-before: auto; color: #fff; }
-.cover .dek { font-size: 13pt; color: #c5cae6; max-width: 135mm; line-height: 1.45; }
-.cover .lists { display: grid; grid-template-columns: 1fr 1fr; gap: 14mm; margin-top: 18mm; }
-.cover .lists h2 { color: #d9b45b; font-size: 9pt; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 6pt; }
+.cover .dek { font-size: 13pt; color: #bac1e6; max-width: 135mm; line-height: 1.45; }
+.cover .lists { display: grid; grid-template-columns: 1fr 1fr; gap: 14mm; margin-top: 16mm; }
+.cover .lists h2 { color: #e9b949; font-size: 9pt; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 6pt; }
 .cover ol { list-style: none; padding: 0; margin: 0; }
-.cover ol li { display: flex; gap: 8pt; padding: 3.6pt 0; border-bottom: 0.6pt solid rgba(255,255,255,.14); font-size: 11pt; margin: 0; }
-.cover ol li span:first-child { color: #f48cc0; font-weight: 700; width: 14pt; font-variant-numeric: tabular-nums; }
+.cover ol li { display: flex; gap: 8pt; padding: 3.6pt 0; border-bottom: 0.6pt solid rgba(255,255,255,.12); font-size: 11pt; margin: 0; }
+.cover ol li span:first-child { color: #ff4fa6; font-weight: 700; width: 14pt; font-variant-numeric: tabular-nums; }
 .cover ol li span:last-child { margin-left: auto; color: #aab1d9; font-variant-numeric: tabular-nums; font-size: 9.5pt; }
 .cover .foot { margin-top: auto; font-size: 9pt; color: #aab1d9; display: flex; justify-content: space-between; align-items: flex-end; }
-.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10pt; margin: 8pt 0 10pt; }
-.kpis div { border-top: 1.4pt solid #101b4d; padding-top: 4pt; }
-.kpis b { font-size: 15pt; letter-spacing: -0.02em; display: block; line-height: 1.2; }
-.kpis span { font-size: 8pt; color: #6d7392; }
-.tag { display: inline-block; font-size: 7.4pt; font-weight: 600; padding: 0.5pt 5pt; border-radius: 8pt; background: #efeef5; color: #434a6b; }
-.tag.p { background: #fbe6f1; color: #7e0b45; } .tag.n { background: #e6e9f8; color: #1b2a6b; }
-a { color: #1b2a6b; }
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8pt; margin: 8pt 0 10pt; }
+.kpis div { background: #0c1440; border: 0.6pt solid #1e2a66; border-radius: 8pt; padding: 7pt 9pt; }
+.kpis b { font-size: 16pt; letter-spacing: -0.02em; display: block; line-height: 1.2; color: #fff; }
+.kpis span { font-size: 8pt; color: #8c94c2; }
+.tag { display: inline-block; font-size: 7.4pt; font-weight: 600; padding: 0.5pt 5pt; border-radius: 8pt; background: #18256a; color: #bac1e6; }
+.tag.p { background: rgba(234,26,133,.2); color: #ffd6ea; } .tag.n { background: rgba(91,140,255,.2); color: #cfdcff; }
+a { color: #ff8ec4; }
 """
 
 
@@ -242,6 +258,7 @@ def build(d) -> str:
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Pressure Index: methodology report</title><style>{CSS}</style></head><body>
 
 <section class="cover">
+  {logo_tag()}
   <div class="eyebrow">SupeRR Selector Season 2 · Round 1 methodology report</div>
   <h1>The most reliable players under pressure</h1>
   <p class="dek">A leverage-based pressure index, a context-neutral measure of what each ball was worth, and a ranking chosen by how well it predicts pressure performance in matches it has not seen.</p>
@@ -252,6 +269,7 @@ def build(d) -> str:
   <div class="foot"><div>{AUTHOR}<br>{pd.Timestamp.now():%d %B %Y}</div><div style="text-align:right">{('Dashboard: ' + DASHBOARD_URL + '<br>') if DASHBOARD_URL else ''}Code: {REPO_URL}</div></div>
 </section>
 
+<table class="frame"><thead><tr><td><div class="sp-top"></div></td></tr></thead><tfoot><tr><td><div class="sp-bot"></div></td></tr></tfoot><tbody><tr><td>
 <h1 style="break-before:auto"><span class="no">1</span>Summary</h1>
 <p class="lede">The brief asks who delivers most reliably when it matters, relative to their usual level. This report defines "when it matters" for every one of {s['deliveries']:,} deliveries, measures what each player did with those deliveries on a scale that is comparable with ordinary play, and then asks the question that decides the ranking: does performing above your usual level under pressure repeat?</p>
 <div class="kpis">
@@ -450,6 +468,7 @@ def build(d) -> str:
 </tbody></table>
 <p class="cap">Method references: leverage index (Tango, Lichtman and Dolphin, <i>The Book</i>, 2007); dynamic-programming win probability in cricket (Brooker and Hogan, 2011, the basis of WASP); hierarchical variance priors (Gelman, <i>Bayesian Analysis</i>, 2006); mixed-model equations (Henderson, 1975).</p>
 </div></div>
+</td></tr></tbody></table>
 </body></html>"""
 
 
