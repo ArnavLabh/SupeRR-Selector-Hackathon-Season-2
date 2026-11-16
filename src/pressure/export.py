@@ -19,7 +19,9 @@ SCOPES = ["Ordinary", "Elevated", "High", "Pressure", "Live"]
 MIN_LISTED_BALLS = 150
 
 
-def _r(x, n=2):
+def _r(x, n=3):
+    # Three decimals so that every surface rounds the same underlying value
+    # (9.2472 must display as 9.2 everywhere, not 9.25 -> 9.3 in JavaScript).
     if x is None or (isinstance(x, float) and np.isnan(x)):
         return None
     return round(float(x), n)

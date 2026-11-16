@@ -39,6 +39,11 @@ def pc(x, d=0):
     return "–" if x is None or pd.isna(x) else f"{100 * x:.{d}f}%"
 
 
+def pcap(x) -> str:
+    """Probability from a finite posterior sample: never print certainty."""
+    return "–" if x is None or pd.isna(x) else (">99%" if x >= 0.995 else f"{100 * x:.0f}%")
+
+
 def img(name: str, width="100%") -> str:
     svg = (FIG / f"{name}.png").read_bytes()
     return (f'<img src="data:image/png;base64,{base64.b64encode(svg).decode()}" '
@@ -74,7 +79,10 @@ def load():
 
 
 def affil(r) -> str:
-    parts = [TEAM.get(r.ipl_team, r.ipl_team) if isinstance(r.ipl_team, str) else None,
+    team = TEAM.get(r.ipl_team, r.ipl_team) if isinstance(r.ipl_team, str) else None
+    if team and not pd.isna(r.ipl_last_year) and int(r.ipl_last_year) < 2026:
+        team = f"{team} to {int(r.ipl_last_year)}"
+    parts = [team,
              r.country if isinstance(r.country, str) else None]
     return " · ".join(p for p in parts if p)
 
@@ -104,7 +112,7 @@ def top_table(d, kind: str) -> str:
             f"<tr><td><span class='rk{' g' if r.rank <= 3 else ''}'>{int(r.rank)}</span></td>"
             f"<td><b>{short(r.player)}</b><br><span class=sub>{affil(r)}</span></td>"
             f"<td class=r><b>{sg(r.pressure)}</b></td><td class=r>{sg(r.pressure_lo)} to {sg(r.pressure_hi)}</td>"
-            f"<td class=r>{pc(r.p_top10)} / {pc(b.boot_p_top10)}</td><td class=r>{int(r.pressure_balls)}</td>"
+            f"<td class=r>{pcap(r.p_top10)} / {pcap(b.boot_p_top10)}</td><td class=r>{int(r.pressure_balls)}</td>"
             f"<td class=r>{int(r.high_balls)}</td>{ev}<td class=r>{sg(r.lift)}</td>"
             f"<td class=r>{'–' if c is None else f'{int(c.positive_matches)}/{int(c.pressure_matches)}'}</td></tr>")
     return f"<table class='data tight'><thead><tr>{head}</tr></thead><tbody>{''.join(rows)}</tbody></table>"
@@ -123,12 +131,12 @@ def sentence(d, kind: str, r) -> str:
              f"(usual {o.strike_rate:.0f}) and an average of {p.average:.0f}; "
              f"{int(h.runs)} from {int(h.balls)} in the High tier (strike rate {h.strike_rate:.0f}).")
     else:
-        s = (f"{int(p.wickets)} wickets in {int(p.balls)} pressure balls at {p.economy:.2f} an over "
+        s = (f"{int(p.wickets)} wickets in {int(p.balls)} legal pressure balls at {p.economy:.2f} an over "
              f"(usual {o.economy:.2f}); {h.economy:.2f} an over with {int(h.wickets)} wickets across "
              f"{int(h.balls)} High-tier balls.")
     if c is not None:
         s += (f" Added win probability on pressure balls in {int(c.positive_matches)} of "
-              f"{int(c.pressure_matches)} matches; net {sg(100 * c.total_wpa, 0)} points over the period.")
+              f"{int(c.pressure_matches)} matches; net {sg(c.total_wpa, 1)} wins over the period.")
     return s
 
 
@@ -365,7 +373,7 @@ def build(d) -> str:
 <p>Players were rated on one set of matches. Their pressure-weighted value was then measured in the remaining matches: 40 random half-splits and one split forward in time (rate on 2022–24, test on 2025–26).</p>
 <ul>
 <li>Lift on its own has no predictive value (r = {ho.loc[('bat', LIFT), 'mean_r']:.2f} for batters, {ho.loc[('bowl', LIFT), 'mean_r']:.2f} for bowlers).</li>
-<li>Adding lift to a player's level makes the prediction worse, in {pc(ho.loc[('bat', PUB), 'share_beating_pressure_rating'])} of splits for batters and {pc(ho.loc[('bowl', PUB), 'share_beating_pressure_rating'])} for bowlers.</li>
+<li>Adding lift to a player's level makes the prediction worse, in {pc(ho.loc[('bat', PUB), 'share_beating_pressure_rating'], 1)} of splits for batters and {pc(ho.loc[('bowl', PUB), 'share_beating_pressure_rating'], 1)} for bowlers.</li>
 <li>Anything built from pressure balls alone does worst of all. Giving pressure balls extra weight when estimating level also hurt.</li>
 </ul>
 <div class="callout pink"><b>Decision.</b> The published pressure rating is the player's adjusted level with no weight on lift. It is the best available predictor of what a player will do on a pressure ball. Lift is reported for every player as record.</div>
@@ -387,7 +395,7 @@ def build(d) -> str:
 <p class="cap">Pink dot: rating. Bar: 80% credible interval. Hollow blue dot: where the player would sit if their past lift carried forward. Right-hand column: probability of a true top-10 place.</p>
 </div></div>
 {top_table(d, 'batters')}
-<p class="cap">SR = strike rate. "Usual" = Ordinary-tier balls; "pressure" = Elevated and High; "High" = LI ≥ 2. Shown lift = demonstrated, shrunk, not used in the rating. Matches positive = matches with six or more pressure balls in which the player added win probability.</p>
+<p class="cap">SR = strike rate. "Usual" = Ordinary-tier balls; "pressure" = Elevated and High; "High" = LI ≥ 2. Shown lift = demonstrated, shrunk, not used in the rating. Pressure balls = all deliveries in the pressure tiers (the evidence lines below count legal balls only). Matches positive = matches with six or more pressure balls in which the player added win probability. Team = last IPL side in the data.</p>
 <ol class="ev">{''.join(f"<li><b>{short(r.player)}.</b> {sentence(d, 'batters', r)}</li>" for r in tb.itertuples())}</ol>
 
 <h1><span class="no">7</span>The top 10 bowlers under pressure</h1>

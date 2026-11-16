@@ -24,6 +24,7 @@ The central finding: **a player's past "lift" under pressure does not predict th
 | `reports/` | Methodology report (PDF) and executive deck (PPTX) |
 | `dashboard/` | Interactive dashboard (Vite + React), deployable to Vercel |
 | `research/` | Royals squad and auction research, gathered *after* the rankings were frozen |
+| [`submission/UNSTOP_SUBMISSION.md`](submission/UNSTOP_SUBMISSION.md) | Exact lists, remark, video script and caption for Unstop |
 
 ## Reproduce
 
@@ -36,6 +37,7 @@ python -m pressure.pipeline all     # rankings, validation, dashboard data (abou
 pytest                              # unit tests and cross-output consistency checks
 python reports/figures.py
 python reports/build_report.py
+python reports/build_deck.py      # needs `npm install` in reports/ once
 ```
 
 The cross-fitted win probability is cached in `artifacts/` after the first run. Seeds are fixed, so a rerun gives the same results.
@@ -75,6 +77,7 @@ research/           secondary research and source log
 - [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md): what is in the data, what was wrong with it, and how each issue is handled
 - [docs/METHODOLOGY.md](docs/METHODOLOGY.md): the method in formulas
 - [docs/DECISIONS.md](docs/DECISIONS.md): every analytical choice, the alternatives and the evidence
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md): deploying the dashboard to Vercel
 - [docs/ROADMAP.md](docs/ROADMAP.md): plan and status
 
 ## Data use

@@ -46,6 +46,11 @@ def _save(fig, name):
     plt.close(fig)
 
 
+def _p(v: float) -> str:
+    """Probability label that never claims certainty from a finite sample."""
+    return ">99%" if v >= 0.995 else f"{100 * v:.0f}%"
+
+
 def _short(name: str) -> str:
     return name.split(" (")[0].replace("Namboori Tilak Varma", "Tilak Varma")
 
@@ -64,7 +69,7 @@ def top10(kind: str):
     ax.axvline(0, color=INK3, lw=0.8)
     ax.grid(axis="y", visible=False)
     for yy, v in zip(y, t["p_top10"]):
-        ax.text(1.01, yy, f"{100 * v:.0f}%", transform=ax.get_yaxis_transform(), va="center",
+        ax.text(1.01, yy, _p(v), transform=ax.get_yaxis_transform(), va="center",
                 fontsize=8.5, color=INK2)
     ax.text(1.01, len(t) - 0.25, "P(top 10)", transform=ax.get_yaxis_transform(), fontsize=8,
             color=INK3, va="bottom")
@@ -171,7 +176,7 @@ def stability(kind: str):
     ax.set_xlabel("Rank across 200 resampled datasets (middle 80%)")
     ax.set_xlim(0.3, max(32, b["boot_rank_hi"].max() + 1))
     for yy, v in zip(y, b["boot_p_top10"]):
-        ax.text(1.01, yy, f"{100 * v:.0f}%", transform=ax.get_yaxis_transform(), va="center",
+        ax.text(1.01, yy, _p(v), transform=ax.get_yaxis_transform(), va="center",
                 fontsize=8.5, color=INK2)
     ax.text(1.01, len(b) - 0.3, "in top 10", transform=ax.get_yaxis_transform(), fontsize=8,
             color=INK3, va="bottom")

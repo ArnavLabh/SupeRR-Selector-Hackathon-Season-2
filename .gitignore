@@ -230,3 +230,7 @@ dashboard/dist/
 .vercel
 *.log
 .claude/
+
+# The Python template above ignores lib/; the dashboard keeps source there.
+!dashboard/src/lib/
+reports/*.html

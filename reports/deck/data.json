@@ -1,0 +1,378 @@
+{
+ "deliveries": 200961,
+ "matches": 867,
+ "eligible": {
+  "bat": 35,
+  "bowl": 64
+ },
+ "highShare": 0.043115260649835514,
+ "tiers": {
+  "Ordinary": {
+   "share": 0.6898552654206955,
+   "death": 0.2189,
+   "chase": 0.1672,
+   "sr": 139.8504,
+   "bnd": 18.6007,
+   "dot": 36.5795,
+   "wkt": 5.4361
+  },
+  "Elevated": {
+   "share": 0.26702947392946896,
+   "death": 0.0619,
+   "chase": 0.9652,
+   "sr": 135.7526,
+   "bnd": 18.7065,
+   "dot": 38.7289,
+   "wkt": 5.0441
+  },
+  "High": {
+   "share": 0.043115260649835514,
+   "death": 0.7689,
+   "chase": 1.0,
+   "sr": 155.2044,
+   "bnd": 20.436,
+   "dot": 32.5749,
+   "wkt": 8.7548
+  }
+ },
+ "holdout": {
+  "bat": [
+   {
+    "label": "Published rating (no lift)",
+    "r": 0.16,
+    "se": 0.021
+   },
+   {
+    "label": "Rating + half the lift",
+    "r": 0.152,
+    "se": 0.021
+   },
+   {
+    "label": "Rating + full lift",
+    "r": 0.142,
+    "se": 0.021
+   },
+   {
+    "label": "Pressure balls only",
+    "r": 0.073,
+    "se": 0.016
+   },
+   {
+    "label": "Lift alone",
+    "r": -0.069,
+    "se": 0.015
+   }
+  ],
+  "bowl": [
+   {
+    "label": "Published rating (no lift)",
+    "r": 0.286,
+    "se": 0.014
+   },
+   {
+    "label": "Rating + half the lift",
+    "r": 0.262,
+    "se": 0.012
+   },
+   {
+    "label": "Rating + full lift",
+    "r": 0.227,
+    "se": 0.011
+   },
+   {
+    "label": "Pressure balls only",
+    "r": 0.188,
+    "se": 0.013
+   },
+   {
+    "label": "Lift alone",
+    "r": 0.056,
+    "se": 0.012
+   }
+  ]
+ },
+ "beat": {
+  "bat": 0.825,
+  "bowl": 0.825
+ },
+ "lrP": {
+  "bat": 0.5,
+  "bowl": 0.018596658086836474
+ },
+ "boot": {
+  "batters": 7.32,
+  "bowlers": 6.945
+ },
+ "robustMinOverlap": 8,
+ "robustRuns": 14,
+ "sensRuns": 18,
+ "bench": {
+  "Dynamic programme (raw)": 0.524,
+  "Dynamic programme + calibration": 0.519,
+  "Logistic regression": 0.521,
+  "Gradient boosting (monotone)": 0.529
+ },
+ "tops": {
+  "batters": [
+   {
+    "rank": 1,
+    "name": "Suryakumar Yadav",
+    "team": "MI \u00b7 India",
+    "rating": 13.6,
+    "p10": 1.0,
+    "pb": 754,
+    "hb": 61
+   },
+   {
+    "rank": 2,
+    "name": "Heinrich Klaasen",
+    "team": "SRH \u00b7 South Africa",
+    "rating": 12.8,
+    "p10": 1.0,
+    "pb": 280,
+    "hb": 38
+   },
+   {
+    "rank": 3,
+    "name": "Tim David",
+    "team": "RCB \u00b7 Australia",
+    "rating": 12.7,
+    "p10": 0.99,
+    "pb": 337,
+    "hb": 150
+   },
+   {
+    "rank": 4,
+    "name": "Shubman Gill",
+    "team": "GT \u00b7 India",
+    "rating": 8.3,
+    "p10": 0.81,
+    "pb": 979,
+    "hb": 34
+   },
+   {
+    "rank": 5,
+    "name": "Jos Buttler",
+    "team": "GT \u00b7 England",
+    "rating": 8.2,
+    "p10": 0.82,
+    "pb": 778,
+    "hb": 47
+   },
+   {
+    "rank": 6,
+    "name": "Tilak Varma",
+    "team": "MI \u00b7 India",
+    "rating": 7.1,
+    "p10": 0.62,
+    "pb": 791,
+    "hb": 166
+   },
+   {
+    "rank": 7,
+    "name": "Mitchell Marsh",
+    "team": "LSG \u00b7 Australia",
+    "rating": 6.7,
+    "p10": 0.53,
+    "pb": 662,
+    "hb": 35
+   },
+   {
+    "rank": 8,
+    "name": "Cameron Green",
+    "team": "KKR \u00b7 Australia",
+    "rating": 6.2,
+    "p10": 0.45,
+    "pb": 328,
+    "hb": 37
+   },
+   {
+    "rank": 9,
+    "name": "Nicholas Pooran",
+    "team": "LSG \u00b7 West Indies",
+    "rating": 6.2,
+    "p10": 0.44,
+    "pb": 541,
+    "hb": 74
+   },
+   {
+    "rank": 10,
+    "name": "Lokesh Rahul",
+    "team": "DC \u00b7 India",
+    "rating": 6.1,
+    "p10": 0.42,
+    "pb": 565,
+    "hb": 52
+   }
+  ],
+  "bowlers": [
+   {
+    "rank": 1,
+    "name": "Sunil Narine",
+    "team": "KKR",
+    "rating": 9.9,
+    "p10": 0.9,
+    "pb": 485,
+    "hb": 56
+   },
+   {
+    "rank": 2,
+    "name": "Jasprit Bumrah",
+    "team": "MI \u00b7 India",
+    "rating": 9.5,
+    "p10": 0.88,
+    "pb": 486,
+    "hb": 70
+   },
+   {
+    "rank": 3,
+    "name": "Varun Chakravarthy",
+    "team": "KKR \u00b7 India",
+    "rating": 9.2,
+    "p10": 0.86,
+    "pb": 593,
+    "hb": 72
+   },
+   {
+    "rank": 4,
+    "name": "Kuldeep Yadav",
+    "team": "DC \u00b7 India",
+    "rating": 8.9,
+    "p10": 0.83,
+    "pb": 484,
+    "hb": 58
+   },
+   {
+    "rank": 5,
+    "name": "Josh Hazlewood",
+    "team": "RCB \u00b7 Australia",
+    "rating": 8.2,
+    "p10": 0.71,
+    "pb": 480,
+    "hb": 84
+   },
+   {
+    "rank": 6,
+    "name": "Rashid Khan",
+    "team": "GT \u00b7 Afghanistan",
+    "rating": 8.1,
+    "p10": 0.74,
+    "pb": 677,
+    "hb": 77
+   },
+   {
+    "rank": 7,
+    "name": "Noor Ahmad",
+    "team": "CSK \u00b7 Afghanistan",
+    "rating": 7.2,
+    "p10": 0.54,
+    "pb": 378,
+    "hb": 63
+   },
+   {
+    "rank": 8,
+    "name": "Mohsin Khan",
+    "team": "LSG",
+    "rating": 7.0,
+    "p10": 0.5,
+    "pb": 265,
+    "hb": 37
+   },
+   {
+    "rank": 9,
+    "name": "Wanindu Hasaranga",
+    "team": "RR to 2025 \u00b7 Sri Lanka",
+    "rating": 6.5,
+    "p10": 0.39,
+    "pb": 549,
+    "hb": 75
+   },
+   {
+    "rank": 10,
+    "name": "Bhuvneshwar Kumar",
+    "team": "RCB \u00b7 India",
+    "rating": 6.0,
+    "p10": 0.32,
+    "pb": 738,
+    "hb": 127
+   }
+  ],
+  "batters_sure": 5,
+  "bowlers_sure": 4
+ },
+ "targets": [
+  {
+   "name": "Wanindu Hasaranga",
+   "tier": "Priority",
+   "fit": "Leg-spin, lower-order hitting; former Royal",
+   "rank": 9,
+   "of": 64,
+   "disc": "bowler",
+   "availability": "Release tipped in media"
+  },
+  {
+   "name": "Nathan Ellis",
+   "tier": "Strong",
+   "fit": "Death-overs pace, slower balls",
+   "rank": 12,
+   "of": 64,
+   "disc": "bowler",
+   "availability": "No 2027 reporting yet"
+  },
+  {
+   "name": "Cameron Green",
+   "tier": "Strong",
+   "fit": "Top-four or floating middle order, seam bowling",
+   "rank": 8,
+   "of": 35,
+   "disc": "batter",
+   "availability": "Release tipped in media"
+  },
+  {
+   "name": "Mohsin Khan",
+   "tier": "Watch",
+   "fit": "Indian left-arm pace, the Royals' missing profile",
+   "rank": 8,
+   "of": 64,
+   "disc": "bowler",
+   "availability": "Unlikely to be released"
+  },
+  {
+   "name": "Bhuvneshwar Kumar",
+   "tier": "Watch",
+   "fit": "Indian seam, new ball and death",
+   "rank": 10,
+   "of": 64,
+   "disc": "bowler",
+   "availability": "Unlikely to be released"
+  },
+  {
+   "name": "Sikandar Raza",
+   "tier": "Watch",
+   "fit": "Spin-bowling all-rounder for the middle order",
+   "rank": 25,
+   "of": 35,
+   "disc": "batter",
+   "availability": "Likely in the auction pool"
+  }
+ ],
+ "needs": [
+  {
+   "title": "A middle-order batter proven in the crunch",
+   "detail": "All four of the Royals' rated middle-order batters sit in the bottom half of 35: Parag 22nd, Hetmyer 27th, Jurel 29th, Jadeja 34th. Hetmyer, the designated finisher, is the most likely release.",
+   "evidence": "Primary: outputs/rankings/batters_all.csv. Corroborated by post-season reviews that call the middle order the biggest issue [S7]."
+  },
+  {
+   "title": "A second pressure bowler beside Archer",
+   "detail": "Archer is the only Royals bowler in the top third. Deshpande is 56th of 64 and Sandeep Sharma falls below the floor. An Indian seamer would also free an overseas slot.",
+   "evidence": "Primary: outputs/rankings/bowlers_all.csv. Reviews: 'the bowling needs one more Indian death-overs option' [S7]."
+  },
+  {
+   "title": "Test the openers before paying for certainty",
+   "detail": "Sooryavanshi and Jaiswal have the two best usual levels in the squad but almost no High-pressure balls, because openers are out or home before the crunch. The data cannot say how they finish chases; it is not a reason to buy, but it is a reason not to assume.",
+   "evidence": "Primary: High-tier balls 0 and 3 respectively (batters_all.csv)."
+  }
+ ],
+ "asOf": "16 November 2026, one day before the IPL 2027 retention deadline",
+ "figures": "C:/Arnav/Coding/SupeRR Selector Hackathon Season 2/reports/figures"
+}
