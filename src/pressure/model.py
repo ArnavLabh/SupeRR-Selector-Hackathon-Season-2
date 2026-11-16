@@ -130,6 +130,9 @@ class _System:
         Wd = sparse.diags(wt)
         self.lhs0 = np.empty((self.p + self.q, self.p + self.q))
         self.lhs0[:self.p, :self.p] = (Xs.T @ Wd @ Xs).toarray()
+        # Guard against a fixed-effect column that is constant in a subset
+        # (for example intensity set to zero in the pressure-only comparison).
+        self.lhs0[np.arange(self.p), np.arange(self.p)] += 1e-8
         xz = (Xs.T @ Wd @ Z).toarray()
         self.lhs0[:self.p, self.p:] = xz
         self.lhs0[self.p:, :self.p] = xz.T

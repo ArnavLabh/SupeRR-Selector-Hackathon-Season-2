@@ -1,0 +1,36 @@
+{
+  "batters": {
+    "replicates": 200,
+    "mean_top10_overlap": 7.32,
+    "overlap_histogram": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      4,
+      27,
+      89,
+      61,
+      19,
+      0
+    ]
+  },
+  "bowlers": {
+    "replicates": 200,
+    "mean_top10_overlap": 6.945,
+    "overlap_histogram": [
+      0,
+      0,
+      0,
+      1,
+      1,
+      13,
+      53,
+      73,
+      43,
+      16,
+      0
+    ]
+  }
+}

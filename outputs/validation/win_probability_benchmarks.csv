@@ -1,0 +1,13 @@
+model,scope,n_balls,log_loss,brier,auc
+Dynamic programme (raw),First innings,101245,0.63697,0.22254,0.6936
+Dynamic programme (raw),Chase,93058,0.40072,0.12943,0.89961
+Dynamic programme (raw),All,194303,0.52382,0.17795,0.80972
+Dynamic programme + calibration,First innings,101245,0.63094,0.22097,0.693
+Dynamic programme + calibration,Chase,93058,0.39704,0.129,0.8996
+Dynamic programme + calibration,All,194303,0.51892,0.17692,0.80979
+Logistic regression,First innings,101245,0.62882,0.21983,0.69668
+Logistic regression,Chase,93058,0.40274,0.13019,0.89692
+Logistic regression,All,194303,0.52055,0.1769,0.81012
+Gradient boosting (monotone),First innings,101245,0.64479,0.22533,0.68134
+Gradient boosting (monotone),Chase,93058,0.40363,0.13155,0.89576
+Gradient boosting (monotone),All,194303,0.52929,0.18042,0.8029

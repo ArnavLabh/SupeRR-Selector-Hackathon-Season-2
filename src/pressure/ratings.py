@@ -55,24 +55,33 @@ def build_ratings(b: pd.DataFrame, fit: Fit, discipline: str, settings: Settings
     t = t[idx.notna()].copy()
     idx = idx.dropna().astype(int).to_numpy()
 
-    sd_u, sd_p, sd_l = fit.sd(s_ref)
+    s_eff = settings.lift_weight * s_ref
+    sd_u, sd_p, _ = fit.sd(s_eff)
+    _, sd_w, sd_l = fit.sd(s_ref)
     t["usual"] = SCALE * fit.base[idx]
-    t["lift"] = SCALE * s_ref * fit.slope[idx]
-    t["pressure"] = t["usual"] + t["lift"]
+    t["lift"] = SCALE * s_ref * fit.slope[idx]              # demonstrated, shrunk
+    t["pressure"] = t["usual"] + settings.lift_weight * t["lift"]   # published rating
+    t["with_lift"] = t["usual"] + t["lift"]                 # if past lift carried forward
     t["usual_sd"] = SCALE * sd_u[idx]
     t["pressure_sd"] = SCALE * sd_p[idx]
+    t["with_lift_sd"] = SCALE * sd_w[idx]
     t["lift_sd"] = SCALE * sd_l[idx]
     t["pressure_lo"] = t["pressure"] + norm.ppf(0.10) * t["pressure_sd"]
     t["pressure_hi"] = t["pressure"] + norm.ppf(0.90) * t["pressure_sd"]
     t["p_above_average"] = norm.cdf(t["pressure"] / t["pressure_sd"])
     t["p_lift_positive"] = norm.cdf(t["lift"] / t["lift_sd"].replace(0, np.nan))
+    # Observed pressure-versus-usual gap, with a plain standard error.
+    n_p = (t["s_sum"] ** 2 / t["pressure_balls"].replace(0, np.nan))   # rough effective n
+    n_o = (t["live_balls"] - t["pressure_balls"]).replace(0, np.nan)
+    t["obs_gap"] = SCALE * (t["raw_pressure_weighted"] - t["raw_usual"])
+    t["obs_gap_se"] = SCALE * np.sqrt(1.0 / n_p + 1.0 / n_o)
 
     t["eligible"] = eligible_mask(t, settings).to_numpy()
     el = t["eligible"].to_numpy()
     k = int(el.sum())
 
     # Posterior rank distribution among eligible players.
-    _, press_draws = fit.draws(s_ref, idx[el], settings.n_draws, SEED + (discipline == "bowl"))
+    _, press_draws = fit.draws(s_eff, idx[el], settings.n_draws, SEED + (discipline == "bowl"))
     order = np.argsort(-press_draws, axis=1)
     ranks = np.empty_like(order)
     rows = np.arange(order.shape[0])[:, None]

@@ -101,20 +101,44 @@ pressure-response components with a flat prior on each, and the posterior mean v
 other. The data cannot support that either: the likelihood is nearly flat up to a standard deviation
 of about 0.03. Using a flat prior on a hierarchical standard deviation and integrating, rather than
 taking a boundary mode, is the standard remedy (Gelman, 2006). The effect is that batters receive a
-small, heavily shrunk lift and bowlers a substantial one. The plug-in version is a sensitivity run.
+small, heavily shrunk lift estimate and bowlers a larger one. Whether that lift should enter the
+rating is a separate question, answered in D-08.
 
-## D-08 Rank on the posterior mean pressure rating
+## D-08 The published rating gives pressure-specific lift no weight
 
-**Choice.** Players are ranked by the model's estimate of their value per 100 balls at the reference
-High-tier intensity (the league-average intensity of a High ball, identical for everyone).
+**Choice.** Pressure rating = the player's estimated level per 100 balls from the joint model, with
+`lift_weight = 0`. Players are ranked on it, among those eligible under D-09. Each player's
+demonstrated lift is still estimated and published beside the rating.
 
-**Alternatives.** Rank on a lower credible bound; rank on a composite of level, lift and consistency;
-rank on pressure-ball evidence alone.
+**Alternatives.** Rating plus the full demonstrated lift (the model's literal estimate at High
+pressure); plus half of it; pressure balls only; a composite of level, lift and consistency.
 
-**Why.** The posterior mean is the best single estimate of how the player performs when it matters,
-and it already contains the lift over their usual level and the sample-size penalty. Composite
-weights would be arbitrary. Whether pressure-only evidence would rank better is an empirical
-question, answered by the hold-out test (D-10).
+**Why.** This was the plan's central open question and it was settled by evidence, against the
+result I expected. Players were rated on one set of matches and scored on their pressure-weighted
+value in unseen matches: one temporal split and 40 random half-splits.
+
+| Rated on the first half by | Batters, mean r | Bowlers, mean r |
+|---|---:|---:|
+| Level, no lift (published) | 0.160 | 0.286 |
+| Level plus half the lift | 0.152 | 0.262 |
+| Level plus full lift | 0.142 | 0.227 |
+| Pressure balls only, shrunk and adjusted | 0.073 | 0.188 |
+| Raw pressure-weighted mean | 0.054 | 0.139 |
+| Lift alone | -0.069 | 0.056 |
+
+Level without lift beat level with lift in 82.5% of the 40 random splits for batters and for
+bowlers. Lift on its own has no predictive value. Up-weighting pressure balls when estimating level
+also made prediction worse (0.169 to 0.138 for batters, 0.272 to 0.228 for bowlers at four times the
+weight). The in-sample signal for bowlers in D-07 therefore does not behave like a repeatable trait.
+
+**What this means in cricket terms.** Performing above your usual level under pressure in one set
+of matches says nothing about doing so in the next. The most reliable players under pressure are
+the best players, measured fairly, who have been tested there. The brief's comparison of pressure
+with usual level is still made for every player; it is reported as record, not used as forecast.
+
+**Cost.** The rating no longer depends on the pressure tiers except through eligibility and the
+dead-ball rule. That is stated plainly in the report. The "plus full lift" ranking is published as a
+sensitivity run so a reader who prefers the descriptive reading can see exactly what changes.
 
 ## D-09 Eligibility
 
@@ -128,9 +152,9 @@ are reported separately as "untested at high pressure", not ranked.
 
 ## D-10 Validation decides between methods
 
-Hold-out prediction (rate on one set of matches, test on another), a 200-replicate bootstrap over
-matches, and fifteen sensitivity runs. Results and the conclusions drawn from them are in
-`docs/METHODOLOGY.md` section 7 and `outputs/validation/`.
+Hold-out prediction over 41 splits (D-08), a 200-replicate bootstrap over matches, and eighteen
+sensitivity runs. Results are in `outputs/validation/` and discussed in `docs/METHODOLOGY.md`.
+The hold-out result overturned the first version of the rating (level plus lift); see D-08.
 
 ## D-11 Scope
 

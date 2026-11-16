@@ -1,0 +1,37 @@
+variant,family,discipline,players_compared,spearman,top10_overlap,top5_in_alt_top10
+Intensity capped at LI 2,pressure definition,bat,35,0.9983,10,5
+Intensity capped at LI 2,pressure definition,bowl,64,0.999,10,5
+Intensity capped at LI 4,pressure definition,bat,35,0.9983,9,5
+Intensity capped at LI 4,pressure definition,bowl,64,0.9987,10,5
+Binary pressure flag at LI 1.5,pressure definition,bat,35,0.9983,10,5
+Binary pressure flag at LI 1.5,pressure definition,bowl,64,0.9975,10,5
+Knockout matches weighted 1.5x,pressure definition,bat,35,0.9994,10,5
+Knockout matches weighted 1.5x,pressure definition,bowl,64,0.9992,10,5
+Dead-ball cut at 1%,data handling,bat,35,0.9899,9,5
+Dead-ball cut at 1%,data handling,bowl,64,0.9957,10,5
+Dead-ball cut at 5%,data handling,bat,35,0.9874,9,5
+Dead-ball cut at 5%,data handling,bowl,64,0.9927,9,5
+Value clipped at 3,data handling,bat,35,0.9964,9,5
+Value clipped at 3,data handling,bowl,64,0.9908,8,5
+Value clipped at 8,data handling,bat,35,0.995,10,5
+Value clipped at 8,data handling,bowl,64,0.9962,10,5
+Rain-affected matches removed,scope,bat,35,0.9857,9,5
+Rain-affected matches removed,scope,bowl,64,0.9923,10,5
+IPL and full-member T20Is only,scope,bat,35,0.9933,9,5
+IPL and full-member T20Is only,scope,bowl,64,0.9844,10,5
+IPL only,scope,bat,33,0.8964,8,5
+IPL only,scope,bowl,56,0.897,8,5
+Recency-weighted (20% decay per year),scope,bat,35,0.9773,8,5
+Recency-weighted (20% decay per year),scope,bowl,64,0.9761,9,5
+Rating plus full demonstrated lift,model,bat,35,0.9683,9,5
+Rating plus full demonstrated lift,model,bowl,64,0.7369,7,5
+Rating plus half the demonstrated lift,model,bat,35,0.9866,9,5
+Rating plus half the demonstrated lift,model,bowl,64,0.8991,7,5
+No opposition or match adjustment,model,bat,35,0.9868,9,5
+No opposition or match adjustment,model,bowl,64,0.9626,8,5
+REML plug-in variances (no averaging),model,bat,35,0.9966,9,5
+REML plug-in variances (no averaging),model,bowl,64,1.0,10,5
+Pressure balls only (no borrowing from usual play),model,bat,35,0.7546,6,4
+Pressure balls only (no borrowing from usual play),model,bowl,64,0.6821,4,3
+Uncalibrated win probability,win probability,bat,35,0.9728,9,5
+Uncalibrated win probability,win probability,bowl,64,0.9892,9,5

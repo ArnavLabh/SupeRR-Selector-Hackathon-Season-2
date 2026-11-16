@@ -48,6 +48,13 @@ class Settings:
     # Per-ball value is winsorised at this many leverage-standardised units.
     z_clip: float = 4.0
 
+    # --- rating ----------------------------------------------------------------
+    # Published rating = usual level + lift_weight * demonstrated pressure lift.
+    # The weight was chosen by hold-out prediction over 41 splits: 0 beat 0.5
+    # and 1 for batters and for bowlers (docs/DECISIONS.md D-10). The lift is
+    # still estimated and reported for every player.
+    lift_weight: float = 0.0
+
     # --- win probability -----------------------------------------------------
     n_folds: int = 5
 

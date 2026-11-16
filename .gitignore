@@ -229,3 +229,4 @@ node_modules/
 dashboard/dist/
 .vercel
 *.log
+.claude/

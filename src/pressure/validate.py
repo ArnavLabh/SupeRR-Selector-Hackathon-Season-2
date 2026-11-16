@@ -80,62 +80,109 @@ def definition_checks(b: pd.DataFrame) -> dict:
         "share_of_high_tier_meeting_rule": float(live.loc[live["tier"] == "High", "rule"].mean()),
         "share_of_rule_balls_high": float((live.loc[rule, "tier"] == "High").mean()),
         "share_of_rule_balls_elevated_or_high": float((live.loc[rule, "tier"] != "Ordinary").mean()),
-        "crosstab": tab.to_dict(),
+        "crosstab": {str(k): {str(i): int(n) for i, n in col.items()}
+                     for k, col in tab.to_dict().items()},
     }
     # How leverage responds to the classic cues, for chase balls.
     ch = live[live["innings"] == 2].assign(rrr=rrr)
     ch["rrr_band"] = pd.cut(ch["rrr"], [0, 6, 8, 10, 12, 15, 100], right=False)
     ch["over_band"] = pd.cut(ch["over"], [0, 6, 10, 15, 18, 20])
-    out["mean_li_by_over_and_rrr"] = (ch.groupby(["over_band", "rrr_band"], observed=True)["li"]
-                                      .mean().round(3).unstack().to_dict())
+    grid = ch.groupby(["over_band", "rrr_band"], observed=True)["li"].mean().round(3).unstack()
+    out["mean_li_by_over_and_rrr"] = {
+        str(c): {str(i): (None if pd.isna(v) else float(v)) for i, v in grid[c].items()}
+        for c in grid.columns}
     ch["wp_band"] = pd.cut(ch["wp"], [0, .1, .25, .4, .6, .75, .9, 1])
-    out["mean_li_by_wp_band"] = ch.groupby("wp_band", observed=True)["li"].mean().round(3).to_dict()
-    out["mean_li_by_wickets_in_hand"] = ch.groupby("wih")["li"].mean().round(3).to_dict()
+    out["mean_li_by_wp_band"] = {str(k): float(v) for k, v in ch.groupby(
+        "wp_band", observed=True)["li"].mean().round(3).items()}
+    out["mean_li_by_wickets_in_hand"] = {str(k): float(v) for k, v in ch.groupby(
+        "wih")["li"].mean().round(3).items()}
     return out
 
 
 # ----------------------------------------------------------------------------
 # 3. hold-out prediction
 # ----------------------------------------------------------------------------
-def holdout(b: pd.DataFrame, s_ref: float, min_exposure: float = 60.0) -> pd.DataFrame:
-    splits = {"Temporal: rate on 2022-24, test on 2025-26": b["year"] <= 2024}
+def holdout(b: pd.DataFrame, s_ref: float, variances: dict, n_random: int = 20,
+            min_exposure: float = 60.0) -> pd.DataFrame:
+    """Rate players on one set of matches, score them on another.
+
+    Splits: one temporal (2022-24 -> 2025-26) and `n_random` random halves of
+    matches, each used in both directions. Variance components are held at
+    their full-data values so that 41 splits are affordable; they are six
+    numbers and carry no player-level information.
+
+    Target: the player's pressure-weighted mean value in the unseen matches.
+    """
+    splits = [("Temporal", b["year"] <= 2024, False)]
     rng = np.random.default_rng(SEED)
     ids = np.sort(b["match_id"].unique())
-    for i in range(2):
+    for i in range(n_random):
         half = set(rng.permutation(ids)[: len(ids) // 2].tolist())
-        splits[f"Random half of matches #{i + 1}"] = b["match_id"].isin(half)
+        splits.append((f"Random {i + 1}", b["match_id"].isin(half), True))
     out = []
-    for split, mask in splits.items():
-        train, test = b[mask], b[~mask]
-        for disc in ("bat", "bowl"):
-            _log(f"hold-out: {split} / {disc}")
-            rtr, rte = _rows(train, disc), _rows(test, disc)
-            fit = model.fit_discipline(rtr, disc, want_cov=False)
-            pred = pd.DataFrame({"Model: pressure rating": fit.theta(s_ref),
-                                 "Model: usual level only": fit.base}, index=fit.players)
-            po, _ = _pressure_only_fit(rtr, disc)
-            pred["Pressure balls only, shrunk"] = po
-            tr = _player_table(rtr, disc)
-            pred["Raw pressure-weighted mean (no shrinkage)"] = tr["raw_pressure"]
-            pred["Raw overall mean (no shrinkage)"] = tr["raw_all"]
-            pred["Conventional: pressure strike rate / economy"] = tr["conventional"]
-            te = _player_table(rte, disc)
-            d = pred.join(tr[["s_sum"]].rename(columns={"s_sum": "train_s"})).join(
-                te[["s_sum", "raw_pressure"]].rename(
-                    columns={"s_sum": "test_s", "raw_pressure": "target"}), how="inner")
-            d = d[(d["train_s"] >= min_exposure) & (d["test_s"] >= min_exposure)
-                  & (d.index != model.POOL_ID)].dropna()
-            for name in pred.columns:
-                top = d.nlargest(10, name)
-                out.append({
-                    "split": split, "discipline": disc, "method": name,
-                    "players": int(len(d)),
-                    "weighted_r": _wcorr(d[name], d["target"], d["test_s"]),
-                    "spearman": float(spearmanr(d[name], d["target"]).statistic),
-                    "top10_future_value": float(np.average(top["target"], weights=top["test_s"])),
-                    "pool_future_value": float(np.average(d["target"], weights=d["test_s"])),
-                })
+    for name, mask, both in splits:
+        _log(f"hold-out: {name}")
+        for direction, (train, test) in enumerate(((b[mask], b[~mask]), (b[~mask], b[mask]))):
+            if direction == 1 and not both:
+                continue
+            for disc in ("bat", "bowl"):
+                rtr, rte = _rows(train, disc), _rows(test, disc)
+                fit = model.fit_discipline(rtr, disc, variances=variances[disc], want_cov=False)
+                lift = s_ref * fit.slope
+                pred = pd.DataFrame({
+                    "Model: usual level (no pressure-specific term)": fit.base,
+                    "Model: usual level + half the lift": fit.base + 0.5 * lift,
+                    "Model: pressure rating (usual level + lift)": fit.base + lift,
+                    "Model: lift alone": lift}, index=fit.players)
+                press = rtr[rtr["s"] > 0].assign(s=0.0)
+                sysm = model._System(press, disc)
+                sol, _ = sysm.solve({**variances[disc], "own_pressure": 1e-9,
+                                     "opp_pressure": 1e-9}, want_cov=False)
+                pred["Pressure balls only, shrunk and adjusted"] = pd.Series(
+                    sol[sysm.p:sysm.p + sysm.n_own], index=sysm.own_ids)
+                tr = _player_table(rtr, disc)
+                pred["Raw pressure-weighted mean (no shrinkage)"] = tr["raw_pressure"]
+                pred["Raw overall mean (no shrinkage)"] = tr["raw_all"]
+                pred["Conventional: pressure strike rate / economy"] = tr["conventional"]
+                te = _player_table(rte, disc)
+                d = pred.join(tr[["s_sum"]].rename(columns={"s_sum": "train_s"})).join(
+                    te[["s_sum", "raw_pressure"]].rename(
+                        columns={"s_sum": "test_s", "raw_pressure": "target"}), how="inner")
+                d = d[(d["train_s"] >= min_exposure) & (d["test_s"] >= min_exposure)
+                      & (d.index != model.POOL_ID)].dropna()
+                for m in pred.columns:
+                    top = d.nlargest(10, m)
+                    out.append({
+                        "split": name, "direction": direction, "discipline": disc, "method": m,
+                        "players": int(len(d)),
+                        "weighted_r": _wcorr(d[m], d["target"], d["test_s"]),
+                        "top10_future_value": float(np.average(top["target"], weights=top["test_s"])),
+                        "pool_future_value": float(np.average(d["target"], weights=d["test_s"])),
+                    })
     return pd.DataFrame(out)
+
+
+def holdout_summary(ho: pd.DataFrame) -> pd.DataFrame:
+    """Mean and spread over the random splits, plus the temporal split."""
+    ref = "Model: pressure rating (usual level + lift)"
+    rnd = ho[ho["split"] != "Temporal"]
+    piv = rnd.pivot_table(index=["discipline", "split", "direction"], columns="method",
+                          values="weighted_r")
+    rows = []
+    for (disc, m), g in rnd.groupby(["discipline", "method"]):
+        col = piv.loc[disc]
+        tmp = ho[(ho["split"] == "Temporal") & (ho["discipline"] == disc) & (ho["method"] == m)]
+        rows.append({
+            "discipline": disc, "method": m, "splits": int(len(g)),
+            "mean_r": g["weighted_r"].mean(),
+            "se_r": g["weighted_r"].std(ddof=1) / np.sqrt(len(g)),
+            "share_beating_pressure_rating": float((col[m] > col[ref]).mean()),
+            "temporal_r": float(tmp["weighted_r"].iloc[0]),
+            "top10_future_value": ratings.SCALE * g["top10_future_value"].mean(),
+            "pool_future_value": ratings.SCALE * g["pool_future_value"].mean(),
+            "mean_players": g["players"].mean(),
+        })
+    return pd.DataFrame(rows).sort_values(["discipline", "mean_r"], ascending=[True, False])
 
 
 # ----------------------------------------------------------------------------
@@ -154,7 +201,7 @@ def bootstrap(b, tables, variances, s_ref, n_boot: int) -> dict[str, pd.DataFram
         fits = fit_both(b, variances=variances, want_cov=False, weights=weights)
         for d in tables:
             pos = {int(p): i for i, p in enumerate(fits[d].players)}
-            th = fits[d].theta(s_ref)
+            th = fits[d].theta(DEFAULT.lift_weight * s_ref)
             draws[d][r] = [th[pos[int(p)]] if int(p) in pos else np.nan for p in elig[d]]
     out = {}
     for d in tables:
@@ -183,10 +230,11 @@ def bootstrap(b, tables, variances, s_ref, n_boot: int) -> dict[str, pd.DataFram
 # ----------------------------------------------------------------------------
 # 5. sensitivity
 # ----------------------------------------------------------------------------
-def _variant_tables(ctx, b, variances, s_ref=None, weights=None):
+def _variant_tables(ctx, b, variances, s_ref=None, weights=None, lift_weight=None):
     s_ref = s_ref if s_ref is not None else ratings.reference_intensity(b)
     fits = fit_both(b, variances=variances, want_cov=False, weights=weights)
-    return {d: pd.Series(ratings.SCALE * fits[d].theta(s_ref), index=fits[d].players)
+    w = DEFAULT.lift_weight if lift_weight is None else lift_weight
+    return {d: pd.Series(ratings.SCALE * fits[d].theta(w * s_ref), index=fits[d].players)
             for d in fits}
 
 
@@ -236,6 +284,11 @@ def sensitivity(ctx) -> pd.DataFrame:
         w = (0.8 ** (yr.max() - yr)).to_dict()
         return _variant_tables(ctx, bb, primary_v, weights=w)
     add("Recency-weighted (20% decay per year)", "scope", recent)
+
+    add("Rating plus full demonstrated lift", "model",
+        lambda: _variant_tables(ctx, ctx["balls"], primary_v, lift_weight=1.0))
+    add("Rating plus half the demonstrated lift", "model",
+        lambda: _variant_tables(ctx, ctx["balls"], primary_v, lift_weight=0.5))
 
     def no_adjust():
         v = {d: {**primary_v[d], "opp": 1e-9, "opp_pressure": 1e-9, "match": 1e-9}
@@ -307,10 +360,11 @@ def run(ctx: dict, n_boot: int = 200) -> None:
 
     write_json(OUT / "pressure_definition_checks.json", definition_checks(b))
 
-    ho = holdout(b, s_ref)
-    ho.round(4).to_csv(OUT / "holdout_prediction.csv", index=False)
-
     variances = {d: ctx["fits"][d].variances for d in ctx["fits"]}
+    ho = holdout(b, s_ref, variances)
+    ho.round(4).to_csv(OUT / "holdout_splits.csv", index=False)
+    holdout_summary(ho).round(4).to_csv(OUT / "holdout_prediction.csv", index=False)
+
     boot = bootstrap(b, ctx["tables"], variances, s_ref, n_boot)
     summary = {}
     for d, name in (("bat", "batters"), ("bowl", "bowlers")):

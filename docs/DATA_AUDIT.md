@@ -31,7 +31,7 @@ Twenty-three national sides appear; twelve full members account for the large ma
 - **Ordering.** `innings_ball_num` is strictly increasing and unique within every innings.
 - **Score reconstruction.** Summing `runs + extras1_runs + extras_2_runs` reproduces the stated winning
   margin in 397 of 400 matches won by runs. The three exceptions are two DLS results and one super over.
-- **Chases.** In 403 of 410 wins by wickets the chasing total exceeds the first-innings total. The other
+- **Chases.** In 412 of 419 wins by wickets the chasing total exceeds the first-innings total. The other
   seven are DLS chases or ties settled by super over.
 - **Player identity within the ball data.** Every player id maps to one name, with one spelling variant
   (`AHT Donald` / `Aneurin Donald`).

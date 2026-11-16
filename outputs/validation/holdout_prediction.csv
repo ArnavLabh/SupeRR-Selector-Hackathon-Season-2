@@ -1,0 +1,17 @@
+discipline,method,splits,mean_r,se_r,share_beating_pressure_rating,temporal_r,top10_future_value,pool_future_value,mean_players
+bat,Model: usual level (no pressure-specific term),40,0.1603,0.0209,0.825,-0.1109,5.2401,3.0695,46.9
+bat,Raw overall mean (no shrinkage),40,0.1591,0.0205,0.6,-0.052,5.4935,3.0695,46.9
+bat,Model: usual level + half the lift,40,0.1517,0.0208,0.85,-0.1212,4.9444,3.0695,46.9
+bat,Model: pressure rating (usual level + lift),40,0.142,0.0206,0.0,-0.1306,4.6049,3.0695,46.9
+bat,Conventional: pressure strike rate / economy,40,0.0885,0.0161,0.3,-0.0308,4.8991,3.0695,46.9
+bat,"Pressure balls only, shrunk and adjusted",40,0.0731,0.0162,0.225,-0.0196,4.0356,3.0695,46.9
+bat,Raw pressure-weighted mean (no shrinkage),40,0.0538,0.0148,0.225,-0.1001,2.7013,3.0695,46.9
+bat,Model: lift alone,40,-0.069,0.0153,0.1,-0.0919,1.7659,3.0695,46.9
+bowl,Model: usual level (no pressure-specific term),40,0.2858,0.0138,0.825,0.4281,6.6429,1.3119,63.6
+bowl,Conventional: pressure strike rate / economy,40,0.274,0.0153,0.7,0.2253,6.0494,1.3119,63.6
+bowl,Model: usual level + half the lift,40,0.2621,0.0117,0.925,0.3555,6.9947,1.3119,63.6
+bowl,Raw overall mean (no shrinkage),40,0.2617,0.014,0.75,0.416,5.6093,1.3119,63.6
+bowl,Model: pressure rating (usual level + lift),40,0.2266,0.0106,0.0,0.2784,6.4026,1.3119,63.6
+bowl,"Pressure balls only, shrunk and adjusted",40,0.1883,0.0128,0.225,0.1721,5.2816,1.3119,63.6
+bowl,Raw pressure-weighted mean (no shrinkage),40,0.1389,0.0115,0.025,0.0786,4.8664,1.3119,63.6
+bowl,Model: lift alone,40,0.0559,0.012,0.0,-0.0152,3.2491,1.3119,63.6

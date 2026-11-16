@@ -1,0 +1,170 @@
+{
+  "rows": {
+    "balls": 200999,
+    "matches": 883,
+    "competitions": 141,
+    "teams": 353,
+    "xi": 28381,
+    "mapping": 6413
+  },
+  "match_date_range": [
+    "2022-01-22",
+    "2026-11-01"
+  ],
+  "matches_with_ball_data": 867,
+  "matches_without_ball_data": 16,
+  "by_group": [
+    {
+      "group": "A",
+      "matches": 30,
+      "deliveries": 6985
+    },
+    {
+      "group": "IPL",
+      "matches": 367,
+      "deliveries": 87687
+    },
+    {
+      "group": "T20I",
+      "matches": 470,
+      "deliveries": 106327
+    }
+  ],
+  "run_environment": [
+    {
+      "group": "A",
+      "year": 2024,
+      "matches": 15,
+      "runs_per_over": 7.616
+    },
+    {
+      "group": "A",
+      "year": 2025,
+      "matches": 15,
+      "runs_per_over": 7.643
+    },
+    {
+      "group": "IPL",
+      "year": 2022,
+      "matches": 74,
+      "runs_per_over": 8.172
+    },
+    {
+      "group": "IPL",
+      "year": 2023,
+      "matches": 74,
+      "runs_per_over": 8.628
+    },
+    {
+      "group": "IPL",
+      "year": 2024,
+      "matches": 71,
+      "runs_per_over": 9.111
+    },
+    {
+      "group": "IPL",
+      "year": 2025,
+      "matches": 74,
+      "runs_per_over": 9.208
+    },
+    {
+      "group": "IPL",
+      "year": 2026,
+      "matches": 74,
+      "runs_per_over": 9.399
+    },
+    {
+      "group": "T20I",
+      "year": 2022,
+      "matches": 106,
+      "runs_per_over": 8.007
+    },
+    {
+      "group": "T20I",
+      "year": 2023,
+      "matches": 66,
+      "runs_per_over": 8.212
+    },
+    {
+      "group": "T20I",
+      "year": 2024,
+      "matches": 106,
+      "runs_per_over": 8.147
+    },
+    {
+      "group": "T20I",
+      "year": 2025,
+      "matches": 122,
+      "runs_per_over": 8.099
+    },
+    {
+      "group": "T20I",
+      "year": 2026,
+      "matches": 70,
+      "runs_per_over": 8.76
+    }
+  ],
+  "ordering": {
+    "duplicate_ball_numbers": 0,
+    "monotonic_within_innings": true
+  },
+  "score_reconstruction": {
+    "run_margin_matches": 400,
+    "run_margin_exact": 397,
+    "wicket_margin_matches": 419,
+    "wicket_margin_chase_exceeds_first": 412
+  },
+  "overs_with_six_legal_balls": {
+    "treating_other_as_legal": [
+      31518,
+      32338
+    ],
+    "treating_other_as_no_ball": [
+      31757,
+      32338
+    ]
+  },
+  "extras_type_counts": {
+    "none": 189167,
+    "wide": 7714,
+    "legbyes": 2748,
+    "Overstep": 576,
+    "byes": 529,
+    "other": 264,
+    "Penalty": 1
+  },
+  "dismissal_type_counts": {
+    "Caught": 7557,
+    "Bowled": 1775,
+    "LBW": 709,
+    "RunOut": 600,
+    "Stump": 214,
+    "Hit Wicket": 17,
+    "Retire Out": 6,
+    "Obstracting the field": 2,
+    "Obstructing the field": 1
+  },
+  "super_over_matches": 6,
+  "super_over_deliveries": 38,
+  "rain_affected_matches": 38,
+  "one_innings_only_matches": 22,
+  "player_ids": 1217,
+  "names_shared_by_two_ids": [
+    "Abdul Samad",
+    "Bashir Ahmad",
+    "Basil Hameed",
+    "Haider Ali",
+    "Mohammad Ali",
+    "Muhammad Farooq",
+    "Rashid Khan"
+  ],
+  "ids_with_two_spellings": 1,
+  "wicket_flag_anomalies": {
+    "dismissed_player_without_wicket_flag": 12,
+    "wicket_without_dismissed_player": 1
+  },
+  "bowl_speed": {
+    "share_positive": 0.613,
+    "max": 1456.1
+  }
+}

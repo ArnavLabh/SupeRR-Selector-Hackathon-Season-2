@@ -117,7 +117,7 @@ def primary(settings: Settings = DEFAULT, force: bool = False) -> dict:
     rk = OUTPUTS / "rankings"
     rk.mkdir(parents=True, exist_ok=True)
     cols = ["rank", "player", "player_id", "pressure", "pressure_lo", "pressure_hi", "usual",
-            "lift", "p_lift_positive", "p_top10", "p_top5", "rank_lo", "rank_hi",
+            "lift", "with_lift", "p_lift_positive", "obs_gap", "obs_gap_se", "p_top10", "p_top5", "rank_lo", "rank_hi",
             "wp_per_over", "pressure_balls", "high_balls", "s_sum", "pressure_matches",
             "live_balls", "raw_usual", "raw_elevated", "raw_high", "raw_pressure_weighted",
             "ipl_team", "country", "ipl_last_year", "last_match", "bat_hand", "bowl_type",
@@ -183,7 +183,7 @@ def main() -> None:
         t = ctx["tables"][disc]
         print(f"\nTOP 10 {name}")
         print(t[t["eligible"]].head(10)[
-            ["rank", "player", "pressure", "usual", "lift", "p_top10", "pressure_balls",
+            ["rank", "player", "pressure", "lift", "with_lift", "p_top10", "pressure_balls",
              "high_balls"]].round(2).to_string(index=False))
 
 
