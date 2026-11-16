@@ -218,3 +218,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- Project specific ---
+# Supplied competition data is not redistributed. Place it in "Data Pack/" locally.
+Data Pack/
+.DS_Store
+# Large intermediate artefacts (rebuilt by the pipeline)
+artifacts/
+node_modules/
+dashboard/dist/
+.vercel
+*.log
