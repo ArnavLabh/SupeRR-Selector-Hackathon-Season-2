@@ -37,7 +37,7 @@ export default function Rankings() {
 
   return (
     <>
-      <PageHead eyebrow="Leaderboards" title={<>Every rated {disc === "bat" ? "batter" : "bowler"}</>}>
+      <PageHead eyebrow="Leaderboards" title={pool === "top10" ? <>Top 10 {disc === "bat" ? "batters" : "bowlers"} <span className="accent">under pressure</span></> : pool === "rated" ? <>Every ranked {disc === "bat" ? "batter" : "bowler"}</> : <>Every {disc === "bat" ? "batter" : "bowler"} in the data</>}>
         Ranked on expected value under pressure. Tap anyone for the full scouting report.
       </PageHead>
 
