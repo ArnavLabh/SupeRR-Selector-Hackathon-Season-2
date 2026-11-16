@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Bar, PageHead, RankBadge, Scatter, Seg } from "../components/ui";
-import { affil, pct, players, signed, teamShort, useData, type Disc, type Player } from "../lib/data";
+import { affil, pctCapped, players, signed, teamShort, useData, type Disc, type Player } from "../lib/data";
 
 type Key = "rank" | "pressure" | "withLift" | "lift" | "pTop10" | "pressureBalls" | "highBalls" | "evidence";
 const COLS: { key: Key; label: string; title: string }[] = [
@@ -69,10 +69,10 @@ export default function Rankings() {
                 <tr key={p.id} className="click" tabIndex={0} onClick={() => nav(`/player/${disc}/${p.id}`)} onKeyDown={(e) => e.key === "Enter" && nav(`/player/${disc}/${p.id}`)}>
                   <td><RankBadge rank={p.rank} /></td>
                   <td><span className="pname">{p.name}</span><div className="psub">{affil(p)}</div></td>
-                  <td className="r num"><Bar value={p.pressure} max={maxP} /> <b style={{ display: "inline-block", minWidth: 44 }}>{signed(p.pressure)}</b></td>
+                  <td className="r num" style={{ whiteSpace: "nowrap" }}><Bar value={p.pressure} max={maxP} /> <b style={{ display: "inline-block", minWidth: 44 }}>{signed(p.pressure)}</b></td>
                   <td className="r num" style={{ color: p.lift >= 0 ? "var(--good)" : "var(--bad)" }}>{signed(p.lift)}</td>
                   <td className="r num">{signed(p.withLift)}</td>
-                  <td className="r num">{p.eligible ? pct(p.pTop10) : "–"}</td>
+                  <td className="r num">{p.eligible ? pctCapped(p.pTop10) : "–"}</td>
                   <td className="r num">{p.pressureBalls}</td>
                   <td className="r num">{p.highBalls}</td>
                   <td className="r num">{ev(p)?.toFixed(disc === "bat" ? 1 : 2) ?? "–"}</td>

@@ -1,6 +1,6 @@
 import { scaleLinear } from "d3-scale";
 import { PageHead, Seg, Stat, useTip } from "../components/ui";
-import { eligible, pct, signed, useData, type Disc } from "../lib/data";
+import { eligible, pct, shortName, signed, useData, type Disc } from "../lib/data";
 import { useState } from "react";
 
 function Calibration() {
@@ -78,7 +78,7 @@ function Stability({ disc }: { disc: Disc }) {
   const tip = useTip();
   const rows = eligible(data, disc).slice(0, 15);
   const n = eligible(data, disc).length;
-  const W = 560, rowH = 24, m = { l: 150, r: 46, t: 22, b: 8 }, H = m.t + rows.length * rowH + m.b;
+  const W = 560, rowH = 24, m = { l: 170, r: 46, t: 22, b: 8 }, H = m.t + rows.length * rowH + m.b;
   const x = scaleLinear().domain([1, Math.min(n, 40)]).range([m.l, W - m.r]).clamp(true);
   return (
     <>
@@ -86,7 +86,7 @@ function Stability({ disc }: { disc: Disc }) {
         {[1, 10, 20, 30, 40].filter((t) => t <= n).map((t) => <g key={t}><line className={t === 10 ? "zero" : "grid"} x1={x(t)} x2={x(t)} y1={m.t - 4} y2={H - m.b} /><text x={x(t)} y={12} textAnchor="middle">{t === 1 ? "rank 1" : t}</text></g>)}
         {rows.map((p, i) => { const y = m.t + i * rowH + rowH / 2; const b = p.boot; return <g key={p.id} onMouseMove={(e) => tip.show(e, <><b>{p.name}</b>Ranked {b?.rankLo}–{b?.rankHi} in 80% of resampled datasets<br />In the top 10 in {pct(b?.pTop10)} of them</>)} onMouseLeave={tip.hide}>
           <rect x={0} y={y - rowH / 2} width={W} height={rowH} fill="transparent" />
-          <text x={m.l - 10} y={y + 4} textAnchor="end" className="lbl" fillOpacity={i < 10 ? 1 : 0.6}>{p.rank}. {p.name.length > 18 ? p.name.split(" ").slice(-1)[0] : p.name}</text>
+          <text x={m.l - 10} y={y + 4} textAnchor="end" className="lbl" fillOpacity={i < 10 ? 1 : 0.6}>{p.rank}. {shortName(p.name)}</text>
           {b && <line x1={x(b.rankLo)} x2={x(b.rankHi)} y1={y} y2={y} stroke="var(--c-pressure)" strokeOpacity="0.35" strokeWidth="6" strokeLinecap="round" />}
           <circle cx={x(p.rank!)} cy={y} r="5" fill="var(--c-pressure)" stroke="var(--surface)" strokeWidth="2" />
           <text x={W - 4} y={y + 4} textAnchor="end">{pct(b?.pTop10)}</text>
@@ -176,7 +176,7 @@ export default function Method() {
         <div className="panel table-wrap">
           <table className="data">
             <thead><tr><th>Alternative</th><th>What it varies</th><th className="r">Rank correlation</th><th className="r">Top 10 in common</th><th>Its top five</th></tr></thead>
-            <tbody>{sens.map((r) => <tr key={r.variant}><td style={{ fontWeight: 560 }}>{r.variant}</td><td className="muted">{r.family}</td><td className="r num">{r.spearman.toFixed(2)}</td><td className="r num"><b>{r.top10_overlap}</b> of 10</td><td className="small muted">{r.alt_top10.slice(0, 5).map((n) => n.split(" (")[0].split(" ").slice(-1)[0]).join(", ")}</td></tr>)}</tbody>
+            <tbody>{sens.map((r) => <tr key={r.variant}><td style={{ fontWeight: 560 }}>{r.variant}</td><td className="muted">{r.family}</td><td className="r num">{r.spearman.toFixed(2)}</td><td className="r num"><b>{r.top10_overlap}</b> of 10</td><td className="small muted">{r.alt_top10.slice(0, 5).map(shortName).join(", ")}</td></tr>)}</tbody>
           </table>
         </div>
       </section>

@@ -249,7 +249,7 @@ def build(d) -> str:
 <div class="kpis">
   <div><b>{s['deliveries']:,}</b><span>deliveries, {s['matches']} matches, IPL and T20I, 2022 to 2026</span></div>
   <div><b>{pc(s['tierShares']['High'], 1)}</b><span>of live deliveries are High pressure; {pc(hi.death_share)} of those fall in overs 16–20</span></div>
-  <div><b>{pc(beat)}</b><span>of 40 hold-out tests in which ignoring past pressure "lift" predicted better than using it</span></div>
+  <div><b>{pc(beat, 1)}</b><span>of 40 hold-out tests in which ignoring past pressure "lift" predicted better than using it</span></div>
   <div><b>{s['eligible']['bat']} + {s['eligible']['bowl']}</b><span>batters and bowlers with enough High-pressure exposure to be ranked</span></div>
 </div>
 <div class="cols">
@@ -423,7 +423,7 @@ def build(d) -> str:
 <li><b>Team strength is not in the win probability.</b> Every match starts near even; opposition quality is handled ball by ball in the player model.</li>
 <li><b>Fielding, captaincy and match-ups are outside the data.</b> A dropped catch is credited to the batter and charged to the bowler.</li>
 <li><b>Normal approximations.</b> Intervals and rank probabilities treat player effects as Gaussian. The match bootstrap, which does not, gives a similar picture.</li>
-<li><b>No recency weighting</b> in the published ranking. A recency-weighted run is in the sensitivity table and is used in the auction section.</li>
+<li><b>No recency weighting</b> in the published ranking. A recency-weighted run (20% decay a year) is in the sensitivity table; it shares 8 or 9 of each top 10.</li>
 </ul></div></div>
 {auction_html}
 <h1><span class="no">{11 if auction_html else 10}</span>Reproducing the results</h1>

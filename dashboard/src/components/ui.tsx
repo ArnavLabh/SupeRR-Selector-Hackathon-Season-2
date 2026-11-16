@@ -1,7 +1,7 @@
 import { useCallback, useState, type ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { scaleLinear } from "d3-scale";
-import { affil, f1, pct, signed, type Disc, type Player } from "../lib/data";
+import { affil, f1, pctCapped, signed, type Disc, type Player } from "../lib/data";
 
 /* ---------------------------------------------------------------- tooltip */
 export function useTip() {
@@ -72,19 +72,19 @@ export function IntervalList({ rows, disc, domain }: { rows: Player[]; disc: Dis
         </span><span style={{ textAlign: "right" }}>Rating</span></div>
       {rows.map((p) => (
         <Link key={p.id} to={`/player/${disc}/${p.id}`} className="irow"
-          onMouseMove={(e) => tip.show(e, <><b>{p.name}</b>Pressure rating {signed(p.pressure)} <i>(80% interval {signed(p.lo)} to {signed(p.hi)})</i><br />Demonstrated lift {signed(p.lift)}; with it, {signed(p.withLift)}<br />Chance of a true top-10 place: {pct(p.pTop10)}<br /><i>{p.pressureBalls} pressure balls, {p.highBalls} in the High tier</i></>)}
+          onMouseMove={(e) => tip.show(e, <><b>{p.name}</b>Pressure rating {signed(p.pressure)} <i>(80% interval {signed(p.lo)} to {signed(p.hi)})</i><br />Demonstrated lift {signed(p.lift)}; with it, {signed(p.withLift)}<br />Chance of a true top-10 place: {pctCapped(p.pTop10)}<br /><i>{p.pressureBalls} pressure balls, {p.highBalls} in the High tier</i></>)}
           onMouseLeave={tip.hide}>
           <RankBadge rank={p.rank} />
           <span><span className="pname">{p.name}</span><br /><span className="psub">{affil(p)}</span></span>
-          <svg viewBox="0 0 100 22" preserveAspectRatio="none" width="100%" height="22" aria-hidden="true">
-            {ticks.map((t) => <line key={t} x1={x(t)} x2={x(t)} y1="0" y2="22" stroke={t === 0 ? "var(--line-strong)" : "var(--line)"} strokeWidth="1" vectorEffect="non-scaling-stroke" />)}
-            <line x1={x(p.lo)} x2={x(p.hi)} y1="11" y2="11" stroke="var(--c-pressure)" strokeOpacity="0.35" strokeWidth="5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-          </svg>
-          <span className="val">{signed(p.pressure)}</span>
-          <span style={{ gridColumn: "3", gridRow: "1", position: "relative", height: 22, pointerEvents: "none" }}>
-            <span style={{ position: "absolute", left: `${x(p.withLift)}%`, top: 6, width: 10, height: 10, marginLeft: -5, borderRadius: "50%", border: "2px solid var(--c-usual)", background: "var(--surface)" }} />
+          <span style={{ position: "relative", height: 22, display: "block" }} aria-hidden="true">
+            <svg viewBox="0 0 100 22" preserveAspectRatio="none" width="100%" height="22" style={{ position: "absolute", inset: 0 }}>
+              {ticks.map((t) => <line key={t} x1={x(t)} x2={x(t)} y1="0" y2="22" stroke={t === 0 ? "var(--line-strong)" : "var(--line)"} strokeWidth="1" vectorEffect="non-scaling-stroke" />)}
+              <line x1={x(p.lo)} x2={x(p.hi)} y1="11" y2="11" stroke="var(--c-pressure)" strokeOpacity="0.35" strokeWidth="5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+            </svg>
+            <span style={{ position: "absolute", left: `${x(p.withLift)}%`, top: 6, width: 10, height: 10, marginLeft: -5, borderRadius: "50%", border: "2px solid var(--c-usual)", background: "var(--surface)", boxSizing: "border-box" }} />
             <span style={{ position: "absolute", left: `${x(p.pressure)}%`, top: 5, width: 12, height: 12, marginLeft: -6, borderRadius: "50%", background: "var(--c-pressure)", boxShadow: "0 0 0 2px var(--surface)" }} />
           </span>
+          <span className="val">{signed(p.pressure)}</span>
         </Link>
       ))}
       {tip.el}
@@ -107,12 +107,12 @@ export function IntervalLegend() {
 export function Scatter({ rows, disc, highlight }: { rows: Player[]; disc: Disc; highlight?: number }) {
   const tip = useTip();
   const nav = useNavigate();
-  const W = 640, H = 420, m = { l: 52, r: 18, t: 14, b: 44 };
+  const W = 420, H = 360, m = { l: 46, r: 14, t: 12, b: 40 };
   const xs = rows.map((p) => p.pressure), ys = rows.map((p) => p.lift);
   const x = scaleLinear().domain([Math.floor(Math.min(...xs) - 1), Math.ceil(Math.max(...xs) + 1)]).range([m.l, W - m.r]).nice();
   const ext = Math.max(2, Math.ceil(Math.max(...ys.map(Math.abs)) + 0.5));
   const y = scaleLinear().domain([-ext, ext]).range([H - m.b, m.t]);
-  const tt = (p: Player) => <><b>{p.rank ? `#${p.rank} ` : ""}{p.name}</b>Pressure rating {signed(p.pressure)}<br />Demonstrated lift {signed(p.lift)} <i>(chance it is above zero: {pct(p.pLift)})</i></>;
+  const tt = (p: Player) => <><b>{p.rank ? `#${p.rank} ` : ""}{p.name}</b>Pressure rating {signed(p.pressure)}<br />Demonstrated lift {signed(p.lift)} <i>(chance it is above zero: {pctCapped(p.pLift)})</i></>;
   return (
     <>
       <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Pressure rating against demonstrated pressure lift for rated ${disc === "bat" ? "batters" : "bowlers"}`}>
@@ -120,9 +120,9 @@ export function Scatter({ rows, disc, highlight }: { rows: Player[]; disc: Disc;
         {y.ticks(6).map((t) => <g key={t}><line className={t === 0 ? "zero" : "grid"} x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} /><text x={m.l - 8} y={y(t) + 4} textAnchor="end">{t > 0 ? `+${t}` : t}</text></g>)}
         <line x1={m.l} x2={W - m.r} y1={y(0)} y2={y(0)} stroke="var(--ink-3)" strokeWidth="1" />
         <text className="axis-title" x={(m.l + W - m.r) / 2} y={H - 6} textAnchor="middle">Pressure rating</text>
-        <text className="axis-title" transform={`translate(14 ${(m.t + H - m.b) / 2}) rotate(-90)`} textAnchor="middle">Demonstrated lift under pressure</text>
-        <text x={m.l + 8} y={m.t + 14} className="lbl" fillOpacity="0.55">Did better under pressure than usual</text>
-        <text x={m.l + 8} y={H - m.b - 10} className="lbl" fillOpacity="0.55">Did worse under pressure than usual</text>
+        <text className="axis-title" transform={`translate(12 ${(m.t + H - m.b) / 2}) rotate(-90)`} textAnchor="middle">Demonstrated lift</text>
+        <text x={m.l + 8} y={m.t + 14} className="lbl" fillOpacity="0.55">Better under pressure than usual</text>
+        <text x={m.l + 8} y={H - m.b - 10} className="lbl" fillOpacity="0.55">Worse under pressure than usual</text>
         {rows.map((p) => {
           const top = (p.rank ?? 99) <= 10, hl = p.id === highlight;
           const right = x(p.pressure) > W - 110;
@@ -130,7 +130,7 @@ export function Scatter({ rows, disc, highlight }: { rows: Player[]; disc: Disc;
             onClick={() => nav(`/player/${disc}/${p.id}`)} onKeyDown={(e) => e.key === "Enter" && nav(`/player/${disc}/${p.id}`)} onMouseMove={(e) => tip.show(e, tt(p))} onMouseLeave={tip.hide}>
             <circle cx={x(p.pressure)} cy={y(p.lift)} r="12" fill="transparent" />
             <circle cx={x(p.pressure)} cy={y(p.lift)} r={hl ? 8 : top ? 6 : 4.5} fill={top || hl ? "var(--c-pressure)" : "var(--c-neutral)"} stroke="var(--surface)" strokeWidth="2" />
-            {((p.rank ?? 99) <= 5 || hl) && <text className="lbl" x={x(p.pressure) + (right ? -9 : 9)} y={y(p.lift) - 8} textAnchor={right ? "end" : "start"}>{p.name.split(" (")[0].split(" ").slice(-1)[0]}</text>}
+            {((p.rank ?? 99) <= 3 || hl) && <text className="lbl" x={x(p.pressure) + (right ? -9 : 9)} y={y(p.lift) - 8} textAnchor={right ? "end" : "start"}>{p.name.split(" (")[0].split(" ").slice(-1)[0]}</text>}
           </g>;
         })}
       </svg>

@@ -37,9 +37,9 @@ export default function Overview() {
           <p>A High-pressure ball can move the result at least twice as much as an average one. {pct(high.death_share)} of them fall in overs 16 to 20, and the game changes there: a wicket every {(100 / high.wicket_pct).toFixed(0)} balls against every {(100 / ord.wicket_pct).toFixed(0)} in ordinary play.</p>
         </div>
         <div className="finding">
-          <div className="n num">{pct(beat)}</div>
+          <div className="n num">{pct(beat, 1)}</div>
           <h3>Rising to the occasion does not repeat. Quality does</h3>
-          <p>Players were rated on half the matches and tested on the other half, 40 times over. Leaving out a player's past pressure "lift" predicted the next pressure performance better in {pct(beat)} of those tests. The most reliable player under pressure is the best player who has been tested there.</p>
+          <p>Players were rated on half the matches and tested on the other half, 40 times over. Leaving out a player's past pressure "lift" predicted the next pressure performance better in {pct(beat, 1)} of those tests. The most reliable player under pressure is the best player who has been tested there.</p>
         </div>
         <div className="finding">
           <div className="n num">{sure("bat")} and {sure("bowl")}</div>

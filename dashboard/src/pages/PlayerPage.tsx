@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { scaleBand, scaleLinear } from "d3-scale";
 import { RankBadge, Stat, useTip } from "../components/ui";
-import { affil, eligible, f1, pct, players, signed, useData, type Disc, type Player, type Scope } from "../lib/data";
+import { affil, eligible, f1, pct, pctCapped, players, signed, useData, type Disc, type Player, type Scope } from "../lib/data";
 
 const TIER_COLOR: Record<string, string> = { Ordinary: "var(--tier-ordinary)", Elevated: "var(--tier-elevated)", High: "var(--tier-high)" };
 
@@ -24,7 +24,6 @@ function Estimate({ p, domain }: { p: Player; domain: [number, number] }) {
           <text x={x(r.v + 1.2816 * r.sd) + 10} y={y + 4} className="lbl">{signed(r.v)}</text>
         </g>;
       })}
-      <text x={W - m.r} y={H - 12} textAnchor="end">league average = 0</text>
     </svg>
   );
 }
@@ -134,8 +133,8 @@ export default function PlayerPage() {
           <div className="stats" style={{ marginTop: 14 }}>
             <Stat k="Demonstrated lift" v={signed(p.lift)} />
             <Stat k="Observed gap, pressure v usual" v={p.obsGap == null ? "–" : `${signed(p.obsGap, 0)} ± ${p.obsGapSe?.toFixed(0)}`} />
-            <Stat k="Chance above average under pressure" v={pct(p.pAbove)} />
-            {p.eligible && <Stat k="Chance of a true top-10 place" v={pct(p.pTop10)} />}
+            <Stat k="Chance above average under pressure" v={pctCapped(p.pAbove)} />
+            {p.eligible && <Stat k="Chance of a true top-10 place" v={pctCapped(p.pTop10)} />}
             {p.eligible && <Stat k="Plausible rank" v={`${p.rankLo}–${p.rankHi}`} />}
             <Stat k="In the crunch, per over" v={signed(p.wpPerOver)} unit="pts of win probability" />
           </div>
@@ -169,7 +168,7 @@ export default function PlayerPage() {
 
       <section className="section">
         <div className="section-head"><div><h2>Match by match</h2><p>Consistency is checked, not assumed: what the player added or cost on pressure balls in every match that had any.</p></div>
-          {c && <div className="stats"><Stat k="Matches with 6+ pressure balls" v={c.matches} /><Stat k="Added win probability in" v={pct(c.rate)} unit={`rated ${disc === "bat" ? "batters" : "bowlers"} average ${pct(leagueRate)}`} /><Stat k="Net over the period" v={signed(c.totalWpa * 100, 0)} unit="pts" />{c.seasons != null && <Stat k="Positive seasons" v={`${c.seasonsPositive} of ${c.seasons}`} />}</div>}
+          {c && <div className="stats"><Stat k="Matches with 6+ pressure balls" v={c.matches} /><Stat k="Added win probability in" v={pct(c.rate)} unit={`rated ${disc === "bat" ? "batters" : "bowlers"} average ${pct(leagueRate)}`} /><Stat k="Net over the period" v={signed(c.totalWpa, 1)} unit="wins added" />{c.seasons != null && <Stat k="Positive seasons" v={`${c.seasonsPositive} of ${c.seasons}`} />}</div>}
         </div>
         <div className="panel panel-pad"><MatchLog p={p} disc={disc} /></div>
       </section>

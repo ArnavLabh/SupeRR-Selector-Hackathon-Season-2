@@ -1,0 +1,57 @@
+{
+  "asOf": "16 November 2026, one day before the IPL 2027 retention deadline",
+  "summary": "The data says the Royals' clearest gaps are a middle-order batter proven in the crunch and a second pressure bowler beside Jofra Archer. Their best batters are openers the data has barely seen at High pressure. The squad and overseas slots are full, so every target depends on releases first, theirs and other franchises'.",
+  "confidence": "Retention lists are due on 17 November 2026 and were not public when this was written, so every availability call below is a judgement from media reporting, not a fact.",
+  "squad": [
+    {"name": "Vaibhav Sooryavanshi", "role": "Opener", "status": "Retained for 2026 (₹1.1 cr). 776 runs in IPL 2026 [S1]", "note": "Usual level +18.3, the highest of anyone listed, but 0 High-tier balls: unrated at high pressure"},
+    {"name": "Yashasvi Jaiswal", "role": "Opener", "status": "Retained for 2026 (₹18 cr) [S1]; trade talk reported, a move now described as unlikely [S6]", "note": "Usual level +6.7; 3 High-tier balls: unrated at high pressure"},
+    {"name": "Dhruv Jurel", "role": "Keeper, middle order", "status": "Retained for 2026 (₹14 cr); 515 runs in 2026 [S1]", "note": "Rated 29th of 35 batters (−0.1)"},
+    {"name": "Riyan Parag", "role": "Captain, middle order", "status": "Retained for 2026 (₹14 cr) [S1]", "note": "Rated 22nd of 35 batters (+3.0)"},
+    {"name": "Shimron Hetmyer", "role": "Finisher", "status": "Widely tipped for release; 78 runs at SR 113 in 2026 [S4][S5]", "note": "Rated 27th of 35 batters (+0.9)"},
+    {"name": "Ravindra Jadeja", "role": "All-rounder", "status": "Traded in from CSK for 2026 (₹14 cr) [S1]", "note": "Rated 34th of 35 batters (−2.7); not enough High-tier balls to be rated as a bowler"},
+    {"name": "Jofra Archer", "role": "Pace, new ball and death", "status": "Retained for 2026 (₹12.5 cr); 25 wickets in 2026 [S1]", "note": "Rated 21st of 64 bowlers (+3.5)"},
+    {"name": "Ravi Bishnoi", "role": "Leg-spin", "status": "Bought for 2026 (₹7.2 cr) [S1]; lost his place mid-season [S7]", "note": "Rated 26th of 64 bowlers (+3.2); largest negative lift among Royals (−3.9)"},
+    {"name": "Tushar Deshpande", "role": "Pace", "status": "Retained for 2026 (₹6.5 cr) [S1]", "note": "Rated 56th of 64 bowlers (−0.8)"},
+    {"name": "Sandeep Sharma", "role": "Pace, death", "status": "Named as a release candidate; economy 11.38 in six 2026 games [S4]", "note": "Below the eligibility floor; usual level +1.5, lift −2.1"}
+  ],
+  "needs": [
+    {"title": "A middle-order batter proven in the crunch", "detail": "All four of the Royals' rated middle-order batters sit in the bottom half of 35: Parag 22nd, Hetmyer 27th, Jurel 29th, Jadeja 34th. Hetmyer, the designated finisher, is the most likely release.", "evidence": "Primary: outputs/rankings/batters_all.csv. Corroborated by post-season reviews that call the middle order the biggest issue [S7]."},
+    {"title": "A second pressure bowler beside Archer", "detail": "Archer is the only Royals bowler in the top third. Deshpande is 56th of 64 and Sandeep Sharma falls below the floor. An Indian seamer would also free an overseas slot.", "evidence": "Primary: outputs/rankings/bowlers_all.csv. Reviews: 'the bowling needs one more Indian death-overs option' [S7]."},
+    {"title": "Test the openers before paying for certainty", "detail": "Sooryavanshi and Jaiswal have the two best usual levels in the squad but almost no High-pressure balls, because openers are out or home before the crunch. The data cannot say how they finish chases; it is not a reason to buy, but it is a reason not to assume.", "evidence": "Primary: High-tier balls 0 and 3 respectively (batters_all.csv)."}
+  ],
+  "targets": [
+    {"id": 4900, "name": "Wanindu Hasaranga", "disc": "bowl", "fit": "Leg-spin, lower-order hitting; former Royal", "tier": "Priority", "availability": "Reported: missed all of IPL 2026 injured after joining LSG for ₹2 cr; CricTracker (16 Nov) calls his release 'a realistic option' after LSG traded for Kuldeep Yadav [S8]", "why": "9th of 64 bowlers, the highest-rated bowler with a credible route to the auction. 549 pressure balls, 75 in the High tier.", "risk": "Hamstring injury; overseas slot needed; his own pressure lift was negative (−1.2), which section 5 shows does not predict the future but a selector will see it."},
+    {"id": 7920, "name": "Nathan Ellis", "disc": "bowl", "fit": "Death-overs pace, slower balls", "tier": "Strong", "availability": "Unknown: retained by CSK for 2026 [S9]; no 2027 reporting found", "why": "12th of 64 bowlers; the death specialist the Royals have lacked. 33% chance of a true top-10 place.", "risk": "Overseas; CSK may keep him; availability for the full season."},
+    {"id": 5939, "name": "Cameron Green", "disc": "bat", "fit": "Top-four or floating middle order, seam bowling", "tier": "Strong", "availability": "Reported: several outlets name him a likely KKR release on salary and fitness grounds [S10]", "why": "8th of 35 batters (+6.2) with 37 High-tier balls; would replace Hetmyer's slot with a higher-rated batter who also bowls.", "risk": "Price could be very high; injury history; overseas slot."},
+    {"id": 6669, "name": "Mohsin Khan", "disc": "bowl", "fit": "Indian left-arm pace, the Royals' missing profile", "tier": "Watch", "availability": "Unlikely: no release reporting; LSG managed his workload through 2026 [S11]", "why": "8th of 64 bowlers and Indian, so no overseas slot. 11 wickets at 8.14 in seven 2026 games [S11].", "risk": "Missed IPL 2025 and parts of 2026 injured; would probably need a trade."},
+    {"id": 360, "name": "Bhuvneshwar Kumar", "disc": "bowl", "fit": "Indian seam, new ball and death", "tier": "Watch", "availability": "Unlikely: predicted RCB retention [S12]", "why": "10th of 64 bowlers; the most-tested Indian seamer in the data (738 pressure balls, 127 High-tier).", "risk": "Age; RCB expected to keep a title-winning core."},
+    {"id": 2984, "name": "Sikandar Raza", "disc": "bat", "fit": "Spin-bowling all-rounder for the middle order", "tier": "Watch", "availability": "Likely in the pool: no IPL appearance since 2024 in the data", "why": "25th of 35 batters but tested (55 High-tier balls), and he also bowls off-spin.", "risk": "Age; modest rating; overseas slot."}
+  ],
+  "notAvailable": [
+    {"name": "Suryakumar Yadav, Tim David, Jasprit Bumrah, Sunil Narine, Varun Chakravarthy", "reason": "Top-five names in the primary ranking and core players at their franchises. No release reporting found."},
+    {"name": "Heinrich Klaasen, Shubman Gill, Rashid Khan", "reason": "Franchise cornerstones; treated as unavailable."},
+    {"name": "Haris Rauf, Shaheen Afridi", "reason": "Rated 16th and 30th of 64 bowlers, but Pakistani players have not taken part in the IPL since its first season."},
+    {"name": "Mustafizur Rahman", "reason": "13th of 64 bowlers, but the BCCI directed KKR to release him in January 2026 amid political pressure [S13]. Whether he could be signed for 2027 is unclear."}
+  ],
+  "caveats": [
+    "Availability is the least certain part of this page. Revisit it once the retention lists are published on or after 17 November 2026.",
+    "Ratings measure how players performed in this data, 2022 to 2026. They do not account for price, age, fitness, or how a player fits the Jaipur pitch.",
+    "The Royals' squad and overseas slots were full at 25 and 8 [S5]. Every target therefore assumes releases first. Releasing Hetmyer, Milne and Shanaka was reported to free ₹15.40 crore and three overseas slots [S5].",
+    "Where sources disagreed (Hasaranga's 2026 team, Muzarabani's status), the conflict is noted rather than resolved. Data Pack facts take precedence over media reports."
+  ],
+  "sources": [
+    {"id": "S1", "title": "2026 Rajasthan Royals season (squad table, results, statistics)", "publisher": "Wikipedia", "date": "accessed 2026-11-16", "url": "https://en.wikipedia.org/wiki/2026_Rajasthan_Royals_season", "kind": "Confirmed"},
+    {"id": "S2", "title": "IPL 2027 retention deadline moved to November 17", "publisher": "ESPNcricinfo", "date": "2026-11 (page blocked to automated fetch; headline only)", "url": "https://www.cricinfo.com/story/ipl-2027-retention-deadline-moved-to-november-17-1561149", "kind": "Reported"},
+    {"id": "S3", "title": "Rajasthan Royals retained players list 2027: predicted retentions", "publisher": "CricketAddictor", "date": "2026-11 (about 6 Nov)", "url": "https://cricketaddictor.com/cricket-news/rajasthan-royals-retained-players-list-2027-predicted-retentions-ahead-of-ipl-auction-465674/", "kind": "Speculative"},
+    {"id": "S4", "title": "RR IPL 2027 retention: five players Rajasthan Royals may release", "publisher": "MyKhel", "date": "2026-10-15", "url": "https://www.mykhel.com/cricket/rr-ipl-2027-retention-five-players-rajasthan-royals-may-release-before-ipl-mini-auction-456429.html", "kind": "Speculative"},
+    {"id": "S5", "title": "3 overseas players Rajasthan Royals can release ahead of IPL 2027 auction", "publisher": "CricketTimes", "date": "2026-11-15", "url": "https://crickettimes.com/2026/11/3-overseas-players-rajasthan-royals-rr-can-release-ahead-of-ipl-2027-auction/", "kind": "Speculative"},
+    {"id": "S6", "title": "RR retention list for IPL 2027 auction", "publisher": "Yahoo Sports", "date": "2026-11", "url": "https://sports.yahoo.com/articles/rr-retention-list-ipl-2027-173000723.html", "kind": "Speculative"},
+    {"id": "S7", "title": "RR IPL 2026 report card: player ratings and what went wrong", "publisher": "SportsYaari", "date": "2026-05-31", "url": "https://www.sportsyaari.com/cricket/rr-ipl-2026-report-card-full-player-ratings-and-what-went-wrong-this-season-for-riyan-parags-side-27860/", "kind": "Reported"},
+    {"id": "S8", "title": "3 LSG players who may not be retained ahead of IPL 2027 auction", "publisher": "CricTracker", "date": "2026-11-16", "url": "https://www.crictracker.com/cricket-appeal/ipl-2027-auction-3-lsg-players-whose-places-could-be-at-risk/", "kind": "Speculative"},
+    {"id": "S9", "title": "IPL 2026 squads: full list of all 10 teams after auction", "publisher": "The Federal", "date": "2025-12", "url": "https://thefederal.com/sports/cricket/ipl-2026-final-squads-all-10-teams-after-auction-221072", "kind": "Reported"},
+    {"id": "S10", "title": "KKR IPL 2027 retention: players Kolkata Knight Riders may offload", "publisher": "MyKhel", "date": "2026-10/11", "url": "https://www.mykhel.com/cricket/kkr-ipl-2027-retention-four-players-kolkata-knight-riders-may-offload-before-mini-auction-455961.html", "kind": "Speculative"},
+    {"id": "S11", "title": "Mohsin Khan player profile (2026 season figures)", "publisher": "Lucknow Super Giants", "date": "accessed 2026-11-16", "url": "https://www.lucknowsupergiants.in/team/mohsin-khan-68182-profile", "kind": "Confirmed"},
+    {"id": "S12", "title": "IPL 2027: full list of players RCB are likely to retain and release", "publisher": "JagoNews24", "date": "2026-11", "url": "https://www.jagonews24.com/en/sports/news/98134", "kind": "Speculative"},
+    {"id": "S13", "title": "BCCI asks Kolkata Knight Riders to release Mustafizur Rahman from its squad", "publisher": "News On AIR", "date": "2026-01-03", "url": "https://www.newsonair.gov.in/bcci-asks-kolkata-knight-riders-to-release-mustafizur-rahman-from-its-squad-ahead-of-ipl-2026", "kind": "Reported"}
+  ]
+}

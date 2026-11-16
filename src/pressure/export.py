@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 from . import ratings, winprob
-from .config import DASHBOARD_DATA, MAX_BALLS, OUTPUTS
+from .config import DASHBOARD_DATA, MAX_BALLS, OUTPUTS, ROOT
 from .pipeline import _log, write_json
 
 VAL = OUTPUTS / "validation"
@@ -259,4 +259,7 @@ def run(ctx: dict) -> None:
         json.dumps(_pressure_map(ctx), separators=(",", ":")), encoding="utf-8")
     (DASHBOARD_DATA / "moments.json").write_text(
         json.dumps(_moments(ctx), separators=(",", ":")), encoding="utf-8")
+    auction = ROOT / "research" / "auction.json"
+    if auction.exists():   # secondary research, gathered after the primary results were frozen
+        (DASHBOARD_DATA / "auction.json").write_text(auction.read_text(encoding="utf-8"), encoding="utf-8")
     _log(f"dashboard bundle written to {DASHBOARD_DATA}")

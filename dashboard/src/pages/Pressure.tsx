@@ -32,7 +32,7 @@ function MapPanel({ map }: { map: PressureMap }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const nB = map.ballsLeft.length, nN = map.need.length;
   const grid = map.envs[env];
-  const W = 760, H = 420, m = { l: 54, r: 14, t: 10, b: 44 };
+  const W = 600, H = 380, m = { l: 50, r: 12, t: 10, b: 42 };
   const x = scaleLinear().domain([120, 0]).range([m.l, W - m.r]);
   const y = scaleLinear().domain([0, 240]).range([H - m.b, m.t]);
 
@@ -76,7 +76,12 @@ function MapPanel({ map }: { map: PressureMap }) {
             </foreignObject>
             {[120, 96, 72, 48, 24, 0].map((t) => <g key={t}><text x={x(t)} y={H - m.b + 16} textAnchor="middle">{t}</text></g>)}
             {[0, 60, 120, 180, 240].map((t) => <text key={t} x={m.l - 8} y={y(t) + 4} textAnchor="end">{t}</text>)}
-            {[6, 9, 12, 15].map((r) => <g key={r}><line x1={x(120)} y1={y(Math.min(240, r * 20))} x2={x(0)} y2={y(0)} stroke="rgba(14,20,51,.35)" strokeWidth="1" /><text x={x(120) + 6} y={y(Math.min(240, r * 20)) - 4} fill="var(--ink)">{r} an over</text></g>)}
+            {[6, 9, 12, 15].map((r) => {
+              // runs needed = r/6 per ball; the line starts where it meets the top of the map
+              const b0 = Math.min(120, (240 * 6) / r), n0 = (r * b0) / 6;
+              return <g key={r}><line x1={x(b0)} y1={y(n0)} x2={x(0)} y2={y(0)} stroke="rgba(14,20,51,.4)" strokeWidth="1" />
+                <text x={x(b0) + (b0 < 120 ? 4 : 6)} y={y(n0) + (b0 < 120 ? 14 : -5)} fill="var(--ink)">{r} an over</text></g>;
+            })}
             <text className="axis-title" x={(m.l + W - m.r) / 2} y={H - 8} textAnchor="middle">Balls left in the chase</text>
             <text className="axis-title" transform={`translate(14 ${(m.t + H - m.b) / 2}) rotate(-90)`} textAnchor="middle">Runs needed</text>
             <circle cx={x(bl)} cy={y(Math.min(240, need))} r="7" fill="none" stroke="var(--navy)" strokeWidth="2.5" />
@@ -127,10 +132,12 @@ function Worm({ story }: { story: Story }) {
   const tip = useTip();
   const W = 1100, H = 260, m = { l: 44, r: 12, t: 12, b: 34 };
   const n = story.balls.length;
-  const x = scaleLinear().domain([1, n]).range([m.l, W - m.r]);
+  const x = scaleLinear().domain([1, n + 1]).range([m.l, W - m.r]);
   const y = scaleLinear().domain([0, 100]).range([H - m.b, m.t]);
-  const bw = (W - m.l - m.r) / n;
-  const path = story.balls.map((b, i) => `${i ? "L" : "M"}${x(b.n).toFixed(1)},${y(b.wp).toFixed(1)}`).join("");
+  const bw = (W - m.l - m.r) / (n + 1);
+  // each point is the win probability before that ball; the last point is the result
+  const pts = [...story.balls.map((b) => [b.n, b.wp]), [n + 1, story.won ? 100 : 0]];
+  const path = pts.map(([bn, wp], i) => `${i ? "L" : "M"}${x(bn).toFixed(1)},${y(wp).toFixed(1)}`).join("");
   const overs = [...new Set(story.balls.map((b) => b.over))];
   return (
     <>
