@@ -70,13 +70,22 @@ def main() -> None:
             "- **Rashid Khan** is the Afghanistan leg-spinner (Data Pack id 4722), not the other Rashid Khan in the pack.",
             "- **Tilak Varma** appears in the Data Pack as *Namboori Tilak Varma*; **Lokesh Rahul** is KL Rahul.",
             "- If a dropdown spells a name differently, pick the same player; the id column is the reference.", ""]
-    out += ["## Files to upload", "",
-            "| What | File |", "|---|---|",
-            "| Methodology report (required) | `reports/Pressure_Index_Methodology_Report.pdf` |",
-            "| Executive deck (optional) | `reports/Pressure_Index_Executive_Deck.pptx` |", "",
-            "## Dashboard URL", "", url, "",
-            f"## Remark ({len(REMARK)} of 500 characters)", "", "```", REMARK, "```", "",
-            VIDEO, "", CAPTION]
+    link_field = f"{url}  (code, data pipeline and tests: https://github.com/ArnavLabh/SupeRR-Selector-Hackathon-Season-2)"
+    assert len(link_field) <= 500, len(link_field)
+    out += ["## Upload Your Report (one file, PDF or PPTX)", "",
+            "Upload **`reports/Pressure_Index_Methodology_Report.pdf`**.", "",
+            "Why the PDF and not the deck: the field asks for your methodology, your most reliable players under pressure,",
+            "and how each player could strengthen the Royals for the IPL 2027 auction. The PDF covers all three in full:",
+            "the pressure definition and model (sections 2 to 5), evidence for all 20 players (6 to 8), reliability and limits (8, 9),",
+            "and the Royals lens for every one of the 20 plus targets and sources (section 10). The deck is an 11-slide summary;",
+            "it is linked from the dashboard footer for anyone who wants it.", "",
+            f"## Dashboard link field ({len(link_field)} of 500 characters)", "", "Paste exactly:", "", "```", link_field, "```", "",
+            "## Share Your Journey (optional; does not affect evaluation)", "",
+            "A link to your own reel, post or short video (Google Drive, Instagram, LinkedIn or YouTube).",
+            "Tag @rajasthanroyals and @unstop.world if you post on social media. A script and caption are below.", "",
+            VIDEO, "", CAPTION, "",
+            "## Spare 500-character summary", "",
+            "Not needed by the current form; kept in case a remark box appears.", "", "```", REMARK, "```"]
     (SUB / "UNSTOP_SUBMISSION.md").write_text("\n".join(out), encoding="utf-8")
     print("written", SUB / "UNSTOP_SUBMISSION.md")
 

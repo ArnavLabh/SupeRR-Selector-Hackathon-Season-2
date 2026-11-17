@@ -1,3 +1,4 @@
+import { HeroChase } from "../components/hero";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowRight, Gavel, Activity } from "lucide-react";
@@ -109,63 +110,59 @@ export default function Overview() {
 
   return (
     <>
-      <section style={{ display: "grid", gridTemplateColumns: "minmax(0,1.25fr) minmax(0,1fr)", gap: 32, alignItems: "center" }} className="hero">
-        <div className="stack" style={{ gap: 18 }}>
+      <section className="hero">
+        <div className="stack hero-copy">
           <span className="eyebrow">SupeRR Selector · Season 2</span>
           <h1 className="display">Who delivers when the match is <span className="accent">on the line</span>?</h1>
-          <p className="lede">Every IPL and T20I ball since 2022, scored for how much it could swing the result. Every player, judged on what they did when it mattered.</p>
-          <div className="row" style={{ marginTop: 6 }}>
-            <Link to="/rankings" className="btn primary">See the leaderboards <ArrowRight /></Link>
+          <p className="lede">Every IPL and T20I ball since 2022, priced for how far it could swing the result. Every player, judged on what they did when it mattered.</p>
+          <div className="row" style={{ marginTop: 4 }}>
+            <Link to="/rankings" className="btn primary">See the top tens <ArrowRight /></Link>
             <Link to="/auction" className="btn"><Gavel /> Royals auction plan</Link>
           </div>
+          <div className="spot-row">
+            {([["bat", bat[0], "No. 1 batter"], ["bowl", bowl[0], "No. 1 bowler"]] as const).map(([d, p, lab], i) => (
+              <motion.div key={d} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + 0.1 * i, duration: 0.45, ease: EASE }}>
+                <Link to={`/player/${d}/${p.id}`} className="spot">
+                  <span className="spot-k">{lab}</span>
+                  <span className="spot-n">{shortName(p.name)}</span>
+                  <span className="spot-v num"><CountUp value={p.pressure} format={(v) => signed(v)} /></span>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
         </div>
-        <div className="stack">
-          {([["bat", bat[0], "Best batter under pressure"], ["bowl", bowl[0], "Best bowler under pressure"]] as const).map(([d, p, lab], i) => (
-            <motion.div key={d} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + 0.12 * i, duration: 0.5, ease: EASE }}>
-              <Link to={`/player/${d}/${p.id}`} className="card pad link row between" style={{ gap: 16 }}>
-                <span className="row" style={{ gap: 14 }}>
-                  <RankBadge rank={1} lg />
-                  <span><span className="muted small">{lab}</span><div className="h3">{shortName(p.name)}</div><div className="psub">{affil(p)}</div></span>
-                </span>
-                <span style={{ textAlign: "right" }}><span style={{ font: "750 34px/1 var(--head)" }}><CountUp value={p.pressure} format={(v) => signed(v)} /></span><div className="psub">rating</div></span>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+        <HeroChase />
       </section>
 
-      <Reveal className="grid-4 section" y={10}>
-        {[[s.deliveries, "deliveries scored", (v: number) => Math.round(v).toLocaleString("en-US")],
-          [s.matches, "matches", (v: number) => Math.round(v).toString()],
+      <Reveal className="ledger section" y={8}>
+        {[[s.deliveries, "deliveries priced", (v: number) => Math.round(v).toLocaleString("en-US")],
+          [s.matches, "IPL and T20I matches", (v: number) => Math.round(v).toString()],
           [100 * s.tierShares.High, "of live balls are high pressure", (v: number) => `${v.toFixed(1)}%`],
           [s.eligible.bat + s.eligible.bowl, "players tested enough to rank", (v: number) => Math.round(v).toString()],
         ].map(([v, k, f], i) => (
-          <div key={i} className="card pad stat"><div className="v"><CountUp value={v as number} format={f as (v: number) => string} /></div><div className="k">{k as string}</div></div>
+          <div key={i} className="ledger-cell"><div className="ledger-v"><CountUp value={v as number} format={f as (v: number) => string} /></div><div className="ledger-k">{k as string}</div></div>
         ))}
       </Reveal>
 
       <section className="section">
-        <div className="section-head"><div><span className="eyebrow">The answer</span><h2 className="h2" style={{ marginTop: 8 }}>The two top tens</h2></div></div>
+        <div className="section-head"><div><h2 className="h2">The two top tens</h2></div></div>
         <div className="grid-2"><TopList disc="bat" /><TopList disc="bowl" /></div>
       </section>
 
       <section className="section">
-        <div className="section-head"><div><span className="eyebrow">What the data says</span><h2 className="h2" style={{ marginTop: 8 }}>Three findings</h2></div></div>
+        <div className="section-head"><div><h2 className="h2">Three findings</h2></div></div>
         <div className="grid-3">
           <Reveal className="card pad stack" delay={0}>
-            <span className="tag pink">01</span>
             <h3 className="h3">High pressure lives at the death of a live chase</h3>
             <p className="muted small">Where the high-pressure balls fall</p>
             <PhaseShare />
           </Reveal>
           <Reveal className="card pad stack" delay={0.08}>
-            <span className="tag pink">02</span>
             <h3 className="h3">Rising to the occasion does not repeat. Quality does</h3>
             <p className="muted small">How well each method predicts unseen matches. Quality won {pct(beat, 1)} of 40 tests.</p>
             <FindingBars />
           </Reveal>
           <Reveal className="card pad stack" delay={0.16}>
-            <span className="tag pink">03</span>
             <h3 className="h3">A few names are certain. The rest are close calls</h3>
             <p className="muted small">Players with an 80% or better chance of a true top-10 place</p>
             <div className="row" style={{ gap: 28, marginTop: 6 }}>

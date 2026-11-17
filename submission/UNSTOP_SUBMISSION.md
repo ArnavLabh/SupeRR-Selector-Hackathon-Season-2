@@ -39,22 +39,28 @@ Notes for the dropdowns:
 - **Tilak Varma** appears in the Data Pack as *Namboori Tilak Varma*; **Lokesh Rahul** is KL Rahul.
 - If a dropdown spells a name differently, pick the same player; the id column is the reference.
 
-## Files to upload
+## Upload Your Report (one file, PDF or PPTX)
 
-| What | File |
-|---|---|
-| Methodology report (required) | `reports/Pressure_Index_Methodology_Report.pdf` |
-| Executive deck (optional) | `reports/Pressure_Index_Executive_Deck.pptx` |
+Upload **`reports/Pressure_Index_Methodology_Report.pdf`**.
 
-## Dashboard URL
+Why the PDF and not the deck: the field asks for your methodology, your most reliable players under pressure,
+and how each player could strengthen the Royals for the IPL 2027 auction. The PDF covers all three in full:
+the pressure definition and model (sections 2 to 5), evidence for all 20 players (6 to 8), reliability and limits (8, 9),
+and the Royals lens for every one of the 20 plus targets and sources (section 10). The deck is an 11-slide summary;
+it is linked from the dashboard footer for anyone who wants it.
 
-https://superr-selector-2.vercel.app/
+## Dashboard link field (135 of 500 characters)
 
-## Remark (454 of 500 characters)
+Paste exactly:
 
 ```
-Pressure = leverage: how far each ball can swing win probability (cross-fitted model, 200,961 deliveries). Players valued by win probability added per unit of leverage, adjusted for opposition, conditions and sample size. Key finding: past pressure 'lift' did not repeat in 40 hold-out tests, so rankings use fairly adjusted quality among players tested at High pressure. Validated by bootstrap and 18 sensitivity runs. Report, dashboard and code linked.
+https://superr-selector-2.vercel.app/  (code, data pipeline and tests: https://github.com/ArnavLabh/SupeRR-Selector-Hackathon-Season-2)
 ```
+
+## Share Your Journey (optional; does not affect evaluation)
+
+A link to your own reel, post or short video (Google Drive, Instagram, LinkedIn or YouTube).
+Tag @rajasthanroyals and @unstop.world if you post on social media. A script and caption are below.
 
 **Share Your Journey: video script (about 50 seconds)**
 
@@ -79,3 +85,12 @@ Thanks to @rajasthanroyals and @unstop.world for a brilliant problem.
 Who really delivers when the match is on the line? I priced 200,961 IPL and T20I deliveries for how much each could swing the result, then tested whether rising to the occasion repeats. It didn't, but quality under real pressure did. My SupeRR Selector Season 2 entry: a pressure index, a methodology report and an interactive dashboard.
 
 @rajasthanroyals @unstop.world #SupeRRSelector #RajasthanRoyals #CricketAnalytics #IPL
+
+
+## Spare 500-character summary
+
+Not needed by the current form; kept in case a remark box appears.
+
+```
+Pressure = leverage: how far each ball can swing win probability (cross-fitted model, 200,961 deliveries). Players valued by win probability added per unit of leverage, adjusted for opposition, conditions and sample size. Key finding: past pressure 'lift' did not repeat in 40 hold-out tests, so rankings use fairly adjusted quality among players tested at High pressure. Validated by bootstrap and 18 sensitivity runs. Report, dashboard and code linked.
+```

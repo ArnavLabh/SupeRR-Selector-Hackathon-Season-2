@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowUpRight, ExternalLink, ShieldAlert, Target, Users } from "lucide-react";
 import { scaleLinear } from "d3-scale";
+import { LensBoard } from "../components/lens";
 import { EASE, GrowBar, PageHead, RankBadge, Reveal, Ring, Seg, useTip, useSeen } from "../components/ui";
 import { eligible, players, shortName, signed, useData, useLazy, type Auction as A, type Disc, type Player } from "../lib/data";
 
@@ -103,7 +104,7 @@ export default function Auction() {
       </Reveal>
 
       <section className="section">
-        <div className="section-head"><div><span className="eyebrow">From the data</span><h2 className="h2" style={{ marginTop: 8 }}>Where the squad stands</h2><p className="sub">Every ranked player on one line. The Royals' middle order sits left of the pack, and only Archer reaches the right half of the bowlers.</p></div></div>
+        <div className="section-head"><div><h2 className="h2">Where the squad stands</h2><p className="sub">Every ranked player on one line. The Royals' middle order sits left of the pack, and only Archer reaches the right half of the bowlers.</p></div></div>
         <div className="grid-2"><SquadStrip disc="bat" /><SquadStrip disc="bowl" /></div>
         {openers.length > 0 && (
           <div className="card pad row" style={{ marginTop: 16, gap: 18 }}>
@@ -116,7 +117,7 @@ export default function Auction() {
       </section>
 
       <section className="section">
-        <div className="section-head"><div><span className="eyebrow">The gaps</span><h2 className="h2" style={{ marginTop: 8 }}>What to shop for</h2></div></div>
+        <div className="section-head"><div><h2 className="h2">What to shop for</h2></div></div>
         <div className="grid-2">
           {a.needs.slice(0, 2).map((n, i) => (
             <Reveal key={i} delay={0.08 * i} className="card pad stack">
@@ -132,7 +133,7 @@ export default function Auction() {
 
       <section className="section">
         <div className="section-head">
-          <div><span className="eyebrow">The targets</span><h2 className="h2" style={{ marginTop: 8 }}>Who could fill them</h2><p className="sub">Ranked by the model, filtered for players with a realistic route to Jaipur.</p></div>
+          <div><h2 className="h2">Who could fill them</h2><p className="sub">Ranked by the model, filtered for players with a realistic route to Jaipur.</p></div>
           <Seg label="Filter targets" value={fd} onChange={setFd} options={[["all", "All"], ["bat", "Batting"], ["bowl", "Bowling"]] as const} />
         </div>
         <motion.div layout className="grid-3">
@@ -140,6 +141,11 @@ export default function Auction() {
             {targets.map((t, i) => <TargetCard key={t.name} t={t} p={find(t.id, t.disc)} i={i} />)}
           </AnimatePresence>
         </motion.div>
+      </section>
+
+      <section className="section">
+        <div className="section-head"><div><h2 className="h2">The top 20 through the Royals lens</h2><p className="sub">What every ranked player would add to this squad, and how realistic a bid is.</p></div></div>
+        <LensBoard />
       </section>
 
       <section className="section grid-2">
@@ -168,7 +174,7 @@ export default function Auction() {
       </section>
 
       <section className="section">
-        <div className="section-head"><div><span className="eyebrow">Sources</span><h2 className="h2" style={{ marginTop: 8 }}>Where the squad facts come from</h2><p className="sub">{a.confidence}</p></div></div>
+        <div className="section-head"><div><h2 className="h2">Where the squad facts come from</h2><p className="sub">{a.confidence}</p></div></div>
         <div className="card table-wrap">
           <table className="data">
             <thead><tr><th>#</th><th>Source</th><th>Publisher</th><th>Date</th><th>Type</th></tr></thead>

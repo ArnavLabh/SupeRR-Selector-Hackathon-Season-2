@@ -10,6 +10,7 @@ in reports/ once.
 from __future__ import annotations
 
 import json
+import shutil
 import os
 import subprocess
 import sys
@@ -105,6 +106,9 @@ def main():
     # NODE_PATH lets an optional external theme helper (PPTX_APPLY_THEME) find pptxgenjs.
     env = {**os.environ, "NODE_PATH": str(REP / "node_modules")}
     subprocess.run(["node", str(deck / "deck.js")], check=True, cwd=REP, env=env)
+    dl = ROOT / "dashboard" / "public" / "downloads"
+    dl.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(REP / "Pressure_Index_Executive_Deck.pptx", dl / "Pressure_Index_Executive_Deck.pptx")
 
 
 if __name__ == "__main__":

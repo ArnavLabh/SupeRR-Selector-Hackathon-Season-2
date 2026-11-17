@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { scaleLinear } from "d3-scale";
 import { AnimatePresence, motion } from "motion/react";
-import { Calculator, ChevronDown, Database, Gauge, Users } from "lucide-react";
+import { Calculator, ChevronDown, Database, FileDown, Gauge, Users } from "lucide-react";
 import { EASE, GrowBar, PageHead, Reveal, Seg, useTip, useSeen } from "../components/ui";
 import { eligible, pct, pctCapped, shortName, useData, type Disc } from "../lib/data";
 
@@ -119,7 +119,8 @@ export default function Method() {
   ];
   return (
     <>
-      <PageHead eyebrow="Methodology" title={<>How the ratings work, and how far to <span className="accent">trust</span> them</>}>
+      <PageHead eyebrow="Methodology" title={<>How the ratings work, and how far to <span className="accent">trust</span> them</>}
+        right={<a className="btn primary" href="/downloads/Pressure_Index_Methodology_Report.pdf" download><FileDown /> Full report (PDF)</a>}>
         Four steps, each tested against an alternative.
       </PageHead>
 
@@ -137,7 +138,7 @@ export default function Method() {
 
       <section className="section">
         <div className="section-head">
-          <div><span className="eyebrow">Validation</span><h2 className="h2" style={{ marginTop: 8 }}>Tested four ways</h2></div>
+          <div><h2 className="h2">Tested four ways</h2></div>
           <div className="row" style={{ gap: 10 }}>
             {test !== "cal" && <Seg label="Discipline" value={disc} onChange={setDisc} options={[["bat", "Batters"], ["bowl", "Bowlers"]] as const} />}
           </div>
@@ -170,7 +171,7 @@ export default function Method() {
       </section>
 
       <section className="section">
-        <div className="section-head"><div><span className="eyebrow">Limits</span><h2 className="h2" style={{ marginTop: 8 }}>Where to be careful</h2></div></div>
+        <div className="section-head"><div><h2 className="h2">Where to be careful</h2></div></div>
         <div className="grid-3">
           {LIMITS.map(([t, b], i) => <Reveal key={t} delay={0.04 * i} className="card pad stack" ><h3 className="h3" style={{ fontSize: 16 }}>{t}</h3><p className="muted small">{b}</p></Reveal>)}
         </div>

@@ -3,21 +3,11 @@ import { scaleLinear } from "d3-scale";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Pause, Play, RotateCcw, Zap } from "lucide-react";
 import { CountUp, GrowBar, PageHead, Reveal, Seg, useTip } from "../components/ui";
+import { LI_STOPS, WP_STOPS, lerp } from "../lib/color";
 import { f1, pct, useData, useLazy, type Moment, type PressureMap, type Story } from "../lib/data";
 
 const tierOf = (li: number) => (li >= 2 ? "High" : li >= 1 ? "Elevated" : "Ordinary");
 const TIER: Record<string, string> = { Ordinary: "var(--tier-ord)", Elevated: "var(--tier-el)", High: "var(--tier-high)" };
-type RGB = [number, number, number];
-const lerp = (stops: [number, RGB][], v: number): RGB => {
-  for (let i = 1; i < stops.length; i++) if (v <= stops[i][0]) {
-    const [a, ca] = stops[i - 1], [b, cb] = stops[i], t = (v - a) / (b - a);
-    return [0, 1, 2].map((k) => Math.round(ca[k] + t * (cb[k] - ca[k]))) as RGB;
-  }
-  return stops[stops.length - 1][1];
-};
-const LI_STOPS: [number, RGB][] = [[0, [22, 30, 82]], [1, [96, 52, 118]], [2, [194, 64, 138]], [3, [255, 107, 181]], [5, [255, 220, 238]]];
-const WP_STOPS: [number, RGB][] = [[0, [91, 140, 255]], [50, [36, 44, 98]], [100, [240, 56, 143]]];
-
 const SCENARIOS = [
   { label: "Last-over thriller", need: 12, bl: 6, wk: 3 },
   { label: "Death-overs squeeze", need: 40, bl: 24, wk: 5 },
@@ -64,7 +54,7 @@ function MapPanel({ map }: { map: PressureMap }) {
   };
 
   return (
-    <div className="split" style={{ gridTemplateColumns: "minmax(0,1.6fr) minmax(0,1fr)" }}>
+    <div className="split map-split">
       <div className="card pad stack" style={{ gap: 14 }}>
         <div className="row between">
           <Seg label="Colour by" value={metric} onChange={setMetric} options={[["li", "Pressure"], ["wp", "Win chance"]] as const} />

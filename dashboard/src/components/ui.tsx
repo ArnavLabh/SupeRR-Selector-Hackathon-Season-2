@@ -251,7 +251,12 @@ export function Shell({ children }: { children: ReactNode }) {
       </main>
       <footer className="footer">
         <span className="row"><img src="/brand/rr-logo.svg" alt="" width="22" height="34" /><span><b>Arnav Labhasetwar</b><br />SupeRR Selector Season 2</span></span>
-        <span>IPL and T20I data, January 2022 to November 2026</span>
+        <nav className="footer-links" aria-label="Downloads and source">
+          <a href="/downloads/Pressure_Index_Methodology_Report.pdf" download>Report (PDF)</a>
+          <a href="/downloads/Pressure_Index_Executive_Deck.pptx" download>Deck (PPTX)</a>
+          <a href="https://github.com/ArnavLabh/SupeRR-Selector-Hackathon-Season-2" target="_blank" rel="noreferrer">Code on GitHub</a>
+        </nav>
+        <span className="small">IPL and T20I data, Jan 2022 to Nov 2026</span>
       </footer>
     </>
   );

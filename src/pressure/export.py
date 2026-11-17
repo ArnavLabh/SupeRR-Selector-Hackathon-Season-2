@@ -201,7 +201,8 @@ def _moments(ctx) -> dict:
             "target": int(ch["target"].iloc[0]),
             "won": bool(ch["batting_won"].iloc[0] == 1),
             "balls": [{"n": int(i), "wp": _r(100 * r.wp, 1), "li": _r(r.li, 2),
-                       "over": int(r.over), "w": bool(r.is_wicket), "runs": int(r.total_runs)}
+                       "over": int(r.over), "w": bool(r.is_wicket), "runs": int(r.total_runs),
+                       "need": int(r.need), "bl": int(r.bl), "wih": int(r.wih)}
                       for i, r in enumerate(ch.itertuples(), 1)]})
     return {"moments": picked, "stories": stories}
 

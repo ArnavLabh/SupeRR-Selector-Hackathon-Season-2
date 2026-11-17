@@ -488,6 +488,29 @@ def auction_section(d) -> str:
     src = "".join(f"<tr><td>{s_['id']}</td><td>{s_['title']}</td><td>{s_['publisher']}</td><td>{s_['date']}</td><td>{s_['kind']}</td></tr>" for s_ in a["sources"])
     na = "".join(f"<li><b>{n['name']}.</b> {n['reason']}</li>" for n in a["notAvailable"])
     cav = "".join(f"<li>{c}</li>" for c in a["caveats"])
+    lens_path = ROOT / "research" / "royals_lens.json"
+    lens = json.loads(lens_path.read_text(encoding="utf-8")) if lens_path.exists() else None
+    lens_html = ""
+    if lens:
+        def lens_rows(disc):
+            out = ""
+            for r in sorted((x for x in lens["rows"] if x["disc"] == disc), key=lambda x: x["rank"]):
+                slot = "n/a" if r["overseas"] is None else ("Overseas" if r["overseas"] else "Indian")
+                cls = {"Priority": "p", "Strong": "n"}.get(r["call"], "")
+                out += (f"<tr><td><span class='rk{' g' if r['rank'] <= 3 else ''}'>{r['rank']}</span></td><td><b>{short(r['name'])}</b></td>"
+                        f"<td>{r['role']}</td><td class=r>{sg(r['upgrade'])}</td><td>{slot}</td><td>{r['fit']}</td>"
+                        f"<td><span class='tag {cls}'>{r['call']}</span></td></tr>")
+            return out
+        b0 = next(x for x in lens["rows"] if x["disc"] == "bat")
+        w0 = next(x for x in lens["rows"] if x["disc"] == "bowl")
+        head = "<thead><tr><th>#</th><th>Player</th><th>Role in the data</th><th class=r>Upgrade</th><th>Slot</th><th>How they would strengthen the Royals</th><th>Call</th></tr></thead>"
+        lens_html = f"""
+<h2>10.3 Each of the top 20 through the Royals lens</h2>
+<p>Every one of the 20 ranked players would be the Royals' best pressure performer in their discipline. "Upgrade" is their rating minus the Royals' best ranked player: {b0['rrBest']} ({sg(b0['rrBestRating'])}) for batting, {w0['rrBest']} ({sg(w0['rrBestRating'])}) for bowling. Role comes from where each player actually batted or bowled in the data. The call combines that fit with availability reporting.</p>
+<h3>Batters</h3><table class="data tight">{head}<tbody>{lens_rows("bat")}</tbody></table>
+<h3>Bowlers</h3><table class="data tight">{head}<tbody>{lens_rows("bowl")}</tbody></table>
+<p class="cap">Priority, Strong and Watch: realistic targets, in that order. Monitor: no release news either way. Out of reach: franchise cores or ineligible. Overseas players need one of the eight overseas places, all filled in 2026.</p>
+"""
     return f"""
 <h1><span class="no">10</span>What it means for Rajasthan Royals</h1>
 <div class="callout">Sections 1 to 9 use only the supplied data; those results were fixed (git tag <code>primary-results-v1</code>) before this squad research began, on {a['asOf'].split(",")[0]}. {a['confidence']}</div>
@@ -495,8 +518,9 @@ def auction_section(d) -> str:
 <h2>10.1 Where the squad needs pressure performers</h2><ul>{needs}</ul>
 <h2>10.2 Targets</h2>
 <table class="data tight"><thead><tr><th>Player</th><th>Call</th><th class=r>Pressure rank</th><th class=r>Rating</th><th>Why they fit</th><th>Availability</th><th>Risk</th></tr></thead><tbody>{rows}</tbody></table>
-<div class="cols"><div><h2>10.3 Highly rated, not realistic targets</h2><ul>{na}</ul></div><div><h2>10.4 Caveats</h2><ul>{cav}</ul></div></div>
-<h2>10.5 Sources</h2>
+{lens_html}
+<div class="cols"><div><h2>10.4 Highly rated, not realistic targets</h2><ul>{na}</ul></div><div><h2>10.5 Caveats</h2><ul>{cav}</ul></div></div>
+<h2>10.6 Sources</h2>
 <table class="data tight"><thead><tr><th>#</th><th>Source</th><th>Publisher</th><th>Date</th><th>Kind</th></tr></thead><tbody>{src}</tbody></table>
 <p class="cap">Full URLs are in <code>research/SOURCES.md</code> in the repository. "Confirmed" marks official or directly reported facts, "Reported" media reports, "Speculative" previews and predictions.</p>
 """
@@ -521,6 +545,9 @@ def main():
     hp.write_text(html, encoding="utf-8")
     pp = REP / "Pressure_Index_Methodology_Report.pdf"
     to_pdf(hp, pp)
+    dl = ROOT / "dashboard" / "public" / "downloads"
+    dl.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(pp, dl / pp.name)
     print("written", pp, f"{pp.stat().st_size / 1e6:.1f} MB")
 
 

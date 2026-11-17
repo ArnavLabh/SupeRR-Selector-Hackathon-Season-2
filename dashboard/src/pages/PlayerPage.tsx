@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowLeft, Flame, Gauge, ShieldCheck, Sparkles, Swords, Target, TrendingUp } from "lucide-react";
 import { scaleBand, scaleLinear } from "d3-scale";
+import { LensCard } from "../components/lens";
 import { CountUp, EASE, GrowBar, RankBadge, Reveal, Ring, Seg, searchPlayers, usePlayerIndex, useTip, useSeen } from "../components/ui";
 import { affil, econ, eligible, f1, pct, pctCapped, percentile, players, role, shortName, signed, sr, useData, type Disc, type Player, type Scope, type SplitLite } from "../lib/data";
 
@@ -344,6 +345,10 @@ export default function PlayerPage() {
         <div className="section-head"><div><h2 className="h2">Match by match</h2><p className="sub">What they added or cost on pressure balls in every game.</p></div>
           {p.consistency && <span className="tag pink">Won {p.consistency.positive} of {p.consistency.matches} · net {signed(p.consistency.totalWpa, 1)} wins</span>}</div>
         <div className="card pad"><Timeline p={p} d={d} /></div>
+      </section>
+
+      <section className="section" style={{ marginTop: 48 }}>
+        <LensCard p={p} d={d} />
       </section>
 
       <section className="section grid-2" style={{ marginTop: 48 }}>

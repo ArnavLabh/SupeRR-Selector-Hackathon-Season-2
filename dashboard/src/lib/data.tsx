@@ -59,7 +59,13 @@ export interface Summary {
 }
 export interface PressureMap { ballsLeft: number[]; need: number[]; wickets: number[]; envs: Record<string, { wp: number[][][]; li: number[][][] }> }
 export interface Moment { date: string; comp: string; batting: string; bowling: string; striker: string; bowler: string; need: number; ballsLeft: number; wkts: number; li: number; wp: number; wpAfter: number; outcome: string }
-export interface Story { comp: string; date: string; batting: string; bowling: string; target: number; won: boolean; balls: { n: number; wp: number; li: number; over: number; w: boolean; runs: number }[] }
+export interface Story { comp: string; date: string; batting: string; bowling: string; target: number; won: boolean; balls: { n: number; wp: number; li: number; over: number; w: boolean; runs: number; need: number; bl: number; wih: number }[] }
+export interface LensRow {
+  id: number; disc: Disc; rank: number; name: string; team: string | null; nationality: string | null; overseas: boolean | null;
+  role: string; rating: number; pTop10: number; rrBest: string; rrBestRating: number; upgrade: number; rrRank: number; rrSize: number;
+  fit: string; availability: string; availabilityNote: string; call: string;
+}
+export interface Lens { asOf: string; note: string; rows: LensRow[] }
 export interface Auction {
   asOf: string; summary: string; confidence: string;
   facts?: { k: string; v: string; note: string }[];
@@ -87,7 +93,7 @@ export function get<T>(name: string): Promise<T> {
   return cache.get(name) as Promise<T>;
 }
 /** Warm the cache for data used on other pages. */
-export const prefetchData = () => ["pressure_map", "moments", "auction"].forEach((n) => { get(n).catch(() => undefined); });
+export const prefetchData = () => ["pressure_map", "moments", "auction", "royals_lens"].forEach((n) => { get(n).catch(() => undefined); });
 
 const Ctx = createContext<Bundle | null>(null);
 
