@@ -235,3 +235,6 @@ dashboard/dist/
 !dashboard/src/lib/
 reports/*.html
 !dashboard/public/downloads/
+
+# Personal submission notes (kept local, not published)
+submission/

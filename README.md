@@ -24,7 +24,6 @@ The central finding: **a player's past "lift" under pressure does not predict th
 | `reports/` | Methodology report (PDF) and executive deck (PPTX) |
 | `dashboard/` | Interactive dashboard (Vite + React), deployable to Vercel |
 | `research/` | Royals squad and auction research, gathered *after* the rankings were frozen |
-| [`submission/UNSTOP_SUBMISSION.md`](submission/UNSTOP_SUBMISSION.md) | Exact lists, remark, video script and caption for Unstop |
 
 ## Reproduce
 

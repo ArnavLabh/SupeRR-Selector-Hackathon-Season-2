@@ -32,10 +32,6 @@ Save the production URL into `reports/dashboard_url.txt`, then regenerate the fi
 python reports/build_report.py
 ```
 
-```bash
-python submission/build_submission.py
-```
-
 Check these pages load on the live URL: `/`, `/pressure`, `/rankings?d=bowl`,
 `/player/bowl/781`, `/method`, `/auction`. A direct load of a deep link should not return 404;
 the rewrite in `vercel.json` handles that.
