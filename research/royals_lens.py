@@ -93,7 +93,7 @@ def main() -> None:
     out = {"asOf": auction["asOf"], "rows": rows,
            "note": "Ratings and ranks are the frozen primary results. Roles come from where each player bats or bowls in the data; availability comes from the research sources."}
     txt = json.dumps(out, ensure_ascii=False, indent=1)
-    assert "–" not in txt and "—" not in txt
+    assert chr(0x2013) not in txt and chr(0x2014) not in txt   # no en or em dashes
     (ROOT / "research" / "royals_lens.json").write_text(txt, encoding="utf-8")
     (DATA / "royals_lens.json").write_text(txt, encoding="utf-8")
     print(pd.DataFrame(rows)[["disc", "rank", "name", "role", "overseas", "upgrade", "rrRank", "call"]].to_string(index=False))
