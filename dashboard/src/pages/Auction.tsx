@@ -5,7 +5,7 @@ import { ArrowDown, ArrowUpRight, ExternalLink, ShieldAlert, Target, Users } fro
 import { scaleLinear } from "d3-scale";
 import { LensBoard } from "../components/lens";
 import { EASE, GrowBar, PageHead, RankBadge, Reveal, Ring, Seg, useTip, useSeen } from "../components/ui";
-import { eligible, players, shortName, signed, useData, useLazy, type Auction as A, type Disc, type Player } from "../lib/data";
+import { eligible, isRoyal, players, shortName, signed, useData, useLazy, type Auction as A, type Disc, type Player } from "../lib/data";
 
 const CALL: Record<string, string> = { Priority: "pink", Strong: "blue", Watch: "" };
 const AVAIL = (s: string) => {
@@ -22,7 +22,7 @@ function SquadStrip({ disc }: { disc: Disc }) {
   const tip = useTip();
   const nav = useNavigate();
   const rows = eligible(data, disc);
-  const rr = rows.filter((p) => p.team === "Rajasthan Royals" && (p.iplLastYear ?? 0) >= 2026);
+  const rr = rows.filter(isRoyal);
   const W = 640, H = 136, m = { l: 36, r: 36 };
   const x = scaleLinear().domain([Math.floor(Math.min(...rows.map((p) => p.pressure)) - 1), Math.ceil(Math.max(...rows.map((p) => p.pressure)) + 1)]).range([m.l, W - m.r]);
   const cut = rows[9].pressure;
@@ -48,7 +48,7 @@ function SquadStrip({ disc }: { disc: Disc }) {
             <text className="lbl" x={x(p.pressure)} y={ly} textAnchor="middle">{shortName(p.name).split(" ").slice(-1)[0]}</text></g>;
         })}
       </svg>
-      <div className="legend small"><span><i className="dot" style={{ background: "var(--pink)" }} />Royals (2026 squad)</span><span><i className="dot" style={{ background: "var(--blue-data)", opacity: 0.5 }} />Rest of the league</span><span className="muted">Further right is better under pressure</span></div>
+      <div className="legend small"><span><i className="dot" style={{ background: "var(--pink)" }} />Royals (2027 squad, after retentions)</span><span><i className="dot" style={{ background: "var(--blue-data)", opacity: 0.5 }} />Rest of the league</span><span className="muted">Further right is better under pressure</span></div>
       {tip.el}
     </div>
   );
@@ -106,10 +106,10 @@ export default function Auction() {
           <div key={f.k} className="card pad stat"><div className="v">{f.v}</div><div className="k">{f.k} · {f.note.replace(/\s*\[S\d+\]/g, "")}</div></div>
         ))}
       </Reveal>
-      <p className="muted small" style={{ marginTop: 12 }}>An IPL squad holds at most 25 players, of whom at most 8 can be overseas. With both full, the Royals have to release players before they can buy anyone at the auction.</p>
+      <p className="muted small" style={{ marginTop: 12 }}>An IPL squad holds at most 25 players, of whom at most 8 can be overseas. After the releases and the Shami trade, the Royals have a reported 6 places to fill, 3 of them overseas.</p>
 
       <section className="section">
-        <div className="section-head"><div><h2 className="h2">Where the squad stands</h2><p className="sub">Every ranked player on one line. The Royals' middle order sits left of the pack, and only Archer reaches the right half of the bowlers.</p></div></div>
+        <div className="section-head"><div><h2 className="h2">Where the squad stands</h2><p className="sub">Every ranked player on one line, the Royals in pink. After retentions, no Royal sits in either top-10 zone.</p></div></div>
         <div className="grid-2"><SquadStrip disc="bat" /><SquadStrip disc="bowl" /></div>
         {openers.length > 0 && (
           <div className="card pad row" style={{ marginTop: 16, gap: 18 }}>
@@ -138,7 +138,7 @@ export default function Auction() {
 
       <section className="section anchor" id="targets">
         <div className="section-head">
-          <div><h2 className="h2">Who could fill them</h2><p className="sub">Ranked by the model, filtered for players with a realistic route to Jaipur.</p></div>
+          <div><h2 className="h2">Who could fill them</h2><p className="sub">Players in the auction pool after retentions, ordered by the model's call.</p></div>
           <Seg label="Filter targets" value={fd} onChange={setFd} options={[["all", "All"], ["bat", "Batting"], ["bowl", "Bowling"]] as const} />
         </div>
         <motion.div layout className="grid-3">
@@ -165,7 +165,7 @@ export default function Auction() {
           {a.caveats.map((c, i) => <div key={i} className="row" style={{ alignItems: "start", gap: 10, flexWrap: "nowrap" }}><span className="dot" style={{ background: "var(--gold)", marginTop: 8 }} /><p className="small" style={{ color: "var(--text-2)" }}>{c.replace(/\s*\[S\d+\]/g, "")}</p></div>)}
           <div style={{ marginTop: 6 }}><span className="field-label">Royals in the ratings</span>
             <div className="stack" style={{ gap: 8 }}>
-              {[...eligible(data, "bat"), ...eligible(data, "bowl")].filter((p) => p.team === "Rajasthan Royals" && (p.iplLastYear ?? 0) >= 2026).map((p) => {
+              {[...eligible(data, "bat"), ...eligible(data, "bowl")].filter(isRoyal).map((p) => {
                 const d: Disc = data.batters.includes(p) ? "bat" : "bowl";
                 const pool = eligible(data, d);
                 return <Link key={`${d}${p.id}`} to={`/player/${d}/${p.id}`} className="meter-row" style={{ gridTemplateColumns: "140px 1fr 70px" }}>
@@ -179,7 +179,7 @@ export default function Auction() {
       </section>
 
       <section className="section">
-        <div className="section-head"><div><h2 className="h2">Where the squad facts come from</h2><p className="sub">{a.confidence}</p></div></div>
+        <div className="section-head"><div><h2 className="h2">Where the squad facts come from</h2><p className="sub">{a.confidence.replace(/\s*\[S\d+\]/g, "")}</p></div></div>
         <div className="card table-wrap">
           <table className="data">
             <thead><tr><th>#</th><th>Source</th><th>Publisher</th><th>Date</th><th>Type</th></tr></thead>
@@ -192,7 +192,7 @@ export default function Auction() {
               </tr>))}</tbody>
           </table>
         </div>
-        <p className="muted small" style={{ marginTop: 14 }}>Rankings use only the competition data. Squad details were gathered afterwards from the sources above, as of {a.asOf.split(",")[0]}. <Link to="/rankings" className="accent row" style={{ display: "inline-flex", gap: 4 }}>Open the leaderboards <ArrowUpRight size={14} /></Link></p>
+        <p className="muted small" style={{ marginTop: 14 }}>Rankings use only the competition data. Squad details were gathered afterwards from the sources above, as of {a.asOf.split(",").slice(0, 2).join(",")}. <Link to="/rankings" className="accent row" style={{ display: "inline-flex", gap: 4 }}>Open the leaderboards <ArrowUpRight size={14} /></Link></p>
       </section>
     </>
   );

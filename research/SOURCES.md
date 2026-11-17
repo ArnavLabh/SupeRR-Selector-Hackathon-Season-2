@@ -1,6 +1,7 @@
 # Source log
 
-Secondary sources consulted on 16 November 2026, after the primary results were frozen.
+Secondary sources consulted on 16 and 17 November 2026, after the primary results were frozen.
+S3, S4, S6 and S8 to S12 were pre-retention predictions; S14 supersedes them and they are no longer cited on the dashboard.
 Dates are as shown by the publisher; where a page showed none, the access date is given.
 
 | # | Title | Publisher | Date | Kind | URL |
@@ -18,6 +19,7 @@ Dates are as shown by the publisher; where a page showed none, the access date i
 | S11 | Mohsin Khan player profile (2026 season figures) | Lucknow Super Giants | accessed 2026-11-16 | Confirmed | <https://www.lucknowsupergiants.in/team/mohsin-khan-68182-profile> |
 | S12 | IPL 2027: full list of players RCB are likely to retain and release | JagoNews24 | 2026-11 | Speculative | <https://www.jagonews24.com/en/sports/news/98134> |
 | S13 | BCCI asks Kolkata Knight Riders to release Mustafizur Rahman from its squad | News On AIR | 2026-01-03 | Reported | <https://www.newsonair.gov.in/bcci-asks-kolkata-knight-riders-to-release-mustafizur-rahman-from-its-squad-ahead-of-ipl-2026> |
+| S14 | IPL 2027 retention: Starc unavailable for IPL 2027 (live blog with all ten release lists and trades) | ESPNcricinfo | 2026-11-17, updated 6:59 pm IST; read at 7 pm IST | Confirmed | <https://www.espncricinfo.com/live-blog/ipl-2027-retention-starc-unavailable-for-ipl-2027-1562922> |
 
 Also consulted but not relied on: iplretention.in, leaguesschedule.com and ipl2027in.com present 2027
 retained lists as final, contradict each other, and predate the deadline; Sportskeeda report of

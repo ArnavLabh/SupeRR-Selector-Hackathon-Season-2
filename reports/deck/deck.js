@@ -254,14 +254,14 @@ pres.addSection({ title: "Evidence" });
 // ------------------------------------------------------------------ 10 royals
 pres.addSection({ title: "Royals" });
 {
-  const s = content("Royals", "Rajasthan Royals: auction lens", "Two gaps the data can see, and who could fill them");
+  const s = content("Royals", "Rajasthan Royals: auction lens", "After retentions: two gaps, and who is in the pool");
   D.needs.slice(0, 2).forEach((n, i) => {
     const y = 1.7 + i * 1.75;
     card(s, M, y, 5.0, 1.55, i === 0 ? HEX.goldSoft : HEX.paper);
     tb(s, n.title, { x: M + 0.2, y: y + 0.12, w: 4.6, h: 0.4, fontSize: 15, bold: true, color: HEX.ink });
     tb(s, n.detail, { x: M + 0.2, y: y + 0.52, w: 4.6, h: 1.0, fontSize: 11.5 });
   });
-  tb(s, `Rankings were fixed before this research (${D.asOf}). Retention lists were not yet public, so availability is a judgement from reporting.`,
+  tb(s, `Rankings were fixed before any squad research. Availability is from the IPL 2027 retention lists as of ${D.asOf.split(', after')[0]} (ESPNcricinfo).`,
     { x: M, y: 5.3, w: 5.0, h: 1.0, fontSize: 11, color: HEX.muted });
   const head = ["Target", "Role", "Rank", "Call", "Availability"].map((t) => ({ text: t, options: { bold: true, color: HEX.muted, fontSize: 11 } }));
   const tierFill = { Priority: HEX.pinkSoft, Strong: "16224F", Watch: HEX.paper };
@@ -274,7 +274,7 @@ pres.addSection({ title: "Royals" });
   ]);
   s.addTable([head, ...rows], { x: 5.95, y: 1.7, w: 6.8, colW: [1.55, 2.0, 1.15, 0.85, 1.25], rowH: 0.62, fontSize: 12, fontFace: "Calibri", valign: "middle",
     border: { type: "solid", pt: 0.5, color: HEX.line }, margin: [0.03, 0.06, 0.03, 0.06] });
-  s.addNotes("The Royals' rated middle order sits in the bottom half and Archer is their only bowler in the top third; post-season reviews say the same thing. The squad and overseas slots are full, so every target depends on releases. Hasaranga is the highest-rated bowler with a credible route to the auction.");
+  s.addNotes("After retentions the Royals released Hetmyer and five seamers and traded in Shami. Archer is still their only seamer in the top third. Hasaranga is the only top-20 player released, and Muzarabani and Pathirana are the best seamers in the pool. No top-10 batter was released, so the middle-order gap cannot be fully bought.");
 }
 
 // ------------------------------------------------------------------ 10b Royals lens
@@ -300,8 +300,8 @@ pres.addSection({ title: "Royals" });
   };
   table(bat, M, "Batters");
   table(bowl, M + 6.2, "Bowlers");
-  tb(s, "Priority, Strong, Watch: realistic targets. Monitor: no release news either way. Out of reach: franchise cores. Overseas players need one of eight overseas places, all filled in 2026.",
-    { x: M, y: 6.75, w: 12.1, h: 0.3, fontSize: 10, color: HEX.muted });
+  tb(s, `Priority, Strong, Watch: released and in the auction pool. Out of reach: retained or traded (lists as of ${D.asOf.split(", after")[0]}). The Royals have 3 open overseas places (reported).`,
+    { x: M, y: 6.84, w: 12.1, h: 0.3, fontSize: 10, color: HEX.muted });
   s.addNotes("This is the brief's last question: how each player could strengthen the Royals. Every one of the 20 improves on the Royals' current best in that discipline. The realistic shortlist is the Priority, Strong and Watch rows; the biggest names are franchise cores and out of reach.");
 }
 
@@ -313,8 +313,8 @@ pres.addSection({ title: "Royals" });
   tb(s, [
     { text: "Pressure is measurable, and it is concentrated at the death of live chases.", options: { bullet: true, breakLine: true } },
     { text: "Doing better than usual under pressure did not repeat in unseen matches; overall quality, fairly adjusted, did.", options: { bullet: true, breakLine: true } },
-    { text: "For the Royals: a crunch-tested middle-order batter and a second pressure bowler beside Archer.", options: { bullet: true, breakLine: true } },
-    { text: "Revisit availability once retentions are published on 17 November 2026.", options: { bullet: true } },
+    { text: "For the Royals: buy pressure bowling. Hasaranga, Muzarabani and Pathirana were all released; no top-10 batter was.", options: { bullet: true, breakLine: true } },
+    { text: `Availability from the IPL 2027 retention lists as of ${D.asOf.split(", after")[0]}.`, options: { bullet: true } },
   ], { x: M, y: 3.4, w: 10.5, h: 2.6, fontSize: 18, color: "DCDFF0", paraSpaceAfter: 10 });
   tb(s, `${DASH ? `Live dashboard: ${DASH}   ·   ` : ""}Code and report: github.com/ArnavLabh/SupeRR-Selector-Hackathon-Season-2`, { x: M, y: 6.75, w: 12, h: 0.35, fontSize: 12, color: "AAB1D9" });
   s.addNotes("Close on the decision rule for the auction table: rank by fairly adjusted quality, require real exposure to high pressure, and treat a player's past lift under pressure as record rather than forecast.");

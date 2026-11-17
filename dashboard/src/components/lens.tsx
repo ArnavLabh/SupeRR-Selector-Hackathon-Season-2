@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { Globe2, Plane } from "lucide-react";
 import { EASE, GrowBar, RankBadge, Seg } from "./ui";
-import { eligible, shortName, signed, teamShort, useData, useLazy, type Disc, type Lens, type LensRow, type Player } from "../lib/data";
+import { eligible, isRoyal, RR_OUT, shortName, signed, teamShort, useData, useLazy, type Disc, type Lens, type LensRow, type Player } from "../lib/data";
 
 export const CALL_TONE: Record<string, string> = { Priority: "pink", Strong: "blue", Watch: "gold", Monitor: "", "Out of reach": "" };
 const ORDER = ["Priority", "Strong", "Watch", "Monitor", "Out of reach"];
@@ -56,7 +56,7 @@ export function LensBoard() {
           </AnimatePresence>
         </motion.div>
       </div>
-      <p className="muted small">Upgrade is the pressure rating minus the Royals' best ranked player in the same discipline. Calls reflect availability reporting as of {lens.asOf.split(",")[0]}; Monitor means no release news either way.</p>
+      <p className="muted small">Upgrade is the pressure rating minus the Royals' best ranked player in the same discipline. Calls use the IPL 2027 retention lists as of {lens.asOf}. Out of reach means retained or traded.</p>
     </div>
   );
 }
@@ -66,7 +66,7 @@ export function LensCard({ p, d }: { p: Player; d: Disc }) {
   const data = useData();
   const lens = useLazy<Lens>("royals_lens");
   const row: LensRow | undefined = lens?.rows.find((r) => r.id === p.id && r.disc === d);
-  const rr = eligible(data, d).filter((x) => x.team === "Rajasthan Royals" && (x.iplLastYear ?? 0) >= 2026);
+  const rr = eligible(data, d).filter(isRoyal);
   const isRR = rr.some((x) => x.id === p.id);
   const best = rr[0];
   const rrRank = rr.filter((x) => x.pressure > p.pressure && x.id !== p.id).length + 1;
@@ -78,7 +78,9 @@ export function LensCard({ p, d }: { p: Player; d: Disc }) {
         <h2 className="h3 row" style={{ gap: 10 }}><img src="/brand/rr-logo.svg" alt="" width="16" height="24" /> Royals lens</h2>
         {row && <span className={`tag ${CALL_TONE[row.call] ?? ""}`}>{row.call}</span>}
       </div>
-      {isRR ? (
+      {RR_OUT.has(p.id) ? (
+        <p style={{ color: "var(--text-2)" }}>Released by the Royals at the IPL 2027 retention deadline (17 November 2026). Against the retained squad: <b>{ordinal(rrRank)}</b> of {rr.length + 1} {d === "bat" ? "batters" : "bowlers"}, {signed(up)} against {shortName(best.name)}.</p>
+      ) : isRR ? (
         <p style={{ color: "var(--text-2)" }}>Already a Royal. Ranks <b>{ordinal(rrRank)}</b> of {rr.length} Royals {d === "bat" ? "batters" : "bowlers"} under pressure{best.id !== p.id ? `, behind ${shortName(best.name)}` : ""}.</p>
       ) : (<>
         <div className="row" style={{ gap: 28 }}>

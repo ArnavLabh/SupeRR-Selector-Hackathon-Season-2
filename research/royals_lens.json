@@ -1,5 +1,5 @@
 {
- "asOf": "16 November 2026, one day before the IPL 2027 retention deadline",
+ "asOf": "17 November 2026, 7 pm IST, after the retention deadline",
  "rows": [
   {
    "id": 1699,
@@ -16,10 +16,10 @@
    "rrBestRating": 3.014,
    "upgrade": 10.57,
    "rrRank": 1,
-   "rrSize": 6,
+   "rrSize": 5,
    "fit": "Fills the gap: a middle-order batter proven in the crunch",
-   "availability": "Out of reach",
-   "availabilityNote": "Top-five names in the primary ranking and core players at their franchises. No release reporting found.",
+   "availability": "Retained",
+   "availabilityNote": "Retained by Mumbai Indians for IPL 2027 (17 November 2026, 7 pm IST).",
    "call": "Out of reach"
   },
   {
@@ -37,10 +37,10 @@
    "rrBestRating": 3.014,
    "upgrade": 9.806,
    "rrRank": 1,
-   "rrSize": 6,
+   "rrSize": 5,
    "fit": "Fills the gap: a middle-order batter proven in the crunch",
-   "availability": "Out of reach",
-   "availabilityNote": "Franchise cornerstones; treated as unavailable.",
+   "availability": "Retained",
+   "availabilityNote": "Retained by Sunrisers Hyderabad for IPL 2027 (17 November 2026, 7 pm IST).",
    "call": "Out of reach"
   },
   {
@@ -58,10 +58,10 @@
    "rrBestRating": 3.014,
    "upgrade": 9.678,
    "rrRank": 1,
-   "rrSize": 6,
+   "rrSize": 5,
    "fit": "Fills the gap: a middle-order batter proven in the crunch",
-   "availability": "Out of reach",
-   "availabilityNote": "Top-five names in the primary ranking and core players at their franchises. No release reporting found.",
+   "availability": "Retained",
+   "availabilityNote": "Retained by Royal Challengers Bengaluru for IPL 2027 (17 November 2026, 7 pm IST).",
    "call": "Out of reach"
   },
   {
@@ -79,10 +79,10 @@
    "rrBestRating": 3.014,
    "upgrade": 5.244,
    "rrRank": 1,
-   "rrSize": 6,
+   "rrSize": 5,
    "fit": "Overlaps with Sooryavanshi and Jaiswal at the top; would need to bat lower",
-   "availability": "Out of reach",
-   "availabilityNote": "Franchise cornerstones; treated as unavailable.",
+   "availability": "Retained",
+   "availabilityNote": "Retained by Gujarat Titans for IPL 2027 (17 November 2026, 7 pm IST).",
    "call": "Out of reach"
   },
   {
@@ -100,11 +100,11 @@
    "rrBestRating": 3.014,
    "upgrade": 5.15,
    "rrRank": 1,
-   "rrSize": 6,
+   "rrSize": 5,
    "fit": "Overlaps with Sooryavanshi and Jaiswal at the top; would need to bat lower",
-   "availability": "Unknown",
-   "availabilityNote": "Played for Gujarat Titans in 2026; no release reporting found as of 16 Nov 2026.",
-   "call": "Monitor"
+   "availability": "Retained",
+   "availabilityNote": "Retained by Gujarat Titans for IPL 2027 (17 November 2026, 7 pm IST).",
+   "call": "Out of reach"
   },
   {
    "id": 7897,
@@ -121,11 +121,11 @@
    "rrBestRating": 3.014,
    "upgrade": 4.115,
    "rrRank": 1,
-   "rrSize": 6,
+   "rrSize": 5,
    "fit": "Fills the gap: a middle-order batter proven in the crunch",
-   "availability": "Unknown",
-   "availabilityNote": "Played for Mumbai Indians in 2026; no release reporting found as of 16 Nov 2026.",
-   "call": "Monitor"
+   "availability": "Retained",
+   "availabilityNote": "Retained by Mumbai Indians for IPL 2027 (17 November 2026, 7 pm IST).",
+   "call": "Out of reach"
   },
   {
    "id": 818,
@@ -142,11 +142,11 @@
    "rrBestRating": 3.014,
    "upgrade": 3.687,
    "rrRank": 1,
-   "rrSize": 6,
+   "rrSize": 5,
    "fit": "Overlaps with Sooryavanshi and Jaiswal at the top; would need to bat lower",
-   "availability": "Unknown",
-   "availabilityNote": "Played for Lucknow Super Giants in 2026; no release reporting found as of 16 Nov 2026.",
-   "call": "Monitor"
+   "availability": "Retained",
+   "availabilityNote": "Retained by Lucknow Super Giants for IPL 2027 (17 November 2026, 7 pm IST).",
+   "call": "Out of reach"
   },
   {
    "id": 5939,
@@ -163,11 +163,11 @@
    "rrBestRating": 3.014,
    "upgrade": 3.143,
    "rrRank": 1,
-   "rrSize": 6,
+   "rrSize": 5,
    "fit": "Fills the gap: a middle-order batter proven in the crunch",
-   "availability": "Reported",
-   "availabilityNote": "several outlets name him a likely KKR release on salary and fitness grounds [S10]",
-   "call": "Strong"
+   "availability": "Retained",
+   "availabilityNote": "Retained by Kolkata Knight Riders for IPL 2027 (17 November 2026, 7 pm IST).",
+   "call": "Out of reach"
   },
   {
    "id": 3125,
@@ -184,11 +184,11 @@
    "rrBestRating": 3.014,
    "upgrade": 3.136,
    "rrRank": 1,
-   "rrSize": 6,
+   "rrSize": 5,
    "fit": "Fills the gap: a middle-order batter proven in the crunch",
-   "availability": "Unknown",
-   "availabilityNote": "Played for Lucknow Super Giants in 2026; no release reporting found as of 16 Nov 2026.",
-   "call": "Monitor"
+   "availability": "Retained",
+   "availabilityNote": "Retained by Lucknow Super Giants for IPL 2027 (17 November 2026, 7 pm IST).",
+   "call": "Out of reach"
   },
   {
    "id": 953,
@@ -205,11 +205,11 @@
    "rrBestRating": 3.014,
    "upgrade": 3.13,
    "rrRank": 1,
-   "rrSize": 6,
+   "rrSize": 5,
    "fit": "Overlaps with Sooryavanshi and Jaiswal at the top; would need to bat lower",
-   "availability": "Unknown",
-   "availabilityNote": "Played for Delhi Capitals in 2026; no release reporting found as of 16 Nov 2026.",
-   "call": "Monitor"
+   "availability": "Retained",
+   "availabilityNote": "Retained by Delhi Capitals for IPL 2027 (17 November 2026, 7 pm IST).",
+   "call": "Out of reach"
   },
   {
    "id": 781,
@@ -228,8 +228,8 @@
    "rrRank": 1,
    "rrSize": 4,
    "fit": "Adds a high-pressure spin option alongside Bishnoi and Jadeja",
-   "availability": "Out of reach",
-   "availabilityNote": "Top-five names in the primary ranking and core players at their franchises. No release reporting found.",
+   "availability": "Retained",
+   "availabilityNote": "Retained by Kolkata Knight Riders for IPL 2027 (17 November 2026, 7 pm IST).",
    "call": "Out of reach"
   },
   {
@@ -249,8 +249,8 @@
    "rrRank": 1,
    "rrSize": 4,
    "fit": "Fills the gap: an Indian seamer to partner Archer",
-   "availability": "Out of reach",
-   "availabilityNote": "Top-five names in the primary ranking and core players at their franchises. No release reporting found.",
+   "availability": "Retained",
+   "availabilityNote": "Retained by Mumbai Indians for IPL 2027 (17 November 2026, 7 pm IST).",
    "call": "Out of reach"
   },
   {
@@ -270,8 +270,8 @@
    "rrRank": 1,
    "rrSize": 4,
    "fit": "Adds a high-pressure spin option alongside Bishnoi and Jadeja",
-   "availability": "Out of reach",
-   "availabilityNote": "Top-five names in the primary ranking and core players at their franchises. No release reporting found.",
+   "availability": "Retained",
+   "availabilityNote": "Retained by Kolkata Knight Riders for IPL 2027 (17 November 2026, 7 pm IST).",
    "call": "Out of reach"
   },
   {
@@ -279,7 +279,7 @@
    "disc": "bowl",
    "rank": 4,
    "name": "Kuldeep Yadav",
-   "team": "Delhi Capitals",
+   "team": "Lucknow Super Giants",
    "nationality": "India",
    "overseas": false,
    "role": "Spin",
@@ -291,9 +291,9 @@
    "rrRank": 1,
    "rrSize": 4,
    "fit": "Adds a high-pressure spin option alongside Bishnoi and Jadeja",
-   "availability": "Unknown",
-   "availabilityNote": "Played for Delhi Capitals in 2026; no release reporting found as of 16 Nov 2026.",
-   "call": "Monitor"
+   "availability": "Traded",
+   "availabilityNote": "Traded from Delhi Capitals to Lucknow Super Giants, in exchange for Rishabh Pant (17 November 2026, 7 pm IST).",
+   "call": "Out of reach"
   },
   {
    "id": 830,
@@ -312,9 +312,9 @@
    "rrRank": 1,
    "rrSize": 4,
    "fit": "Fills the gap: a pressure seamer beside Archer, but takes an overseas slot",
-   "availability": "Unknown",
-   "availabilityNote": "Played for Royal Challengers Bengaluru in 2026; no release reporting found as of 16 Nov 2026.",
-   "call": "Monitor"
+   "availability": "Retained",
+   "availabilityNote": "Retained by Royal Challengers Bengaluru for IPL 2027 (17 November 2026, 7 pm IST).",
+   "call": "Out of reach"
   },
   {
    "id": 4722,
@@ -333,8 +333,8 @@
    "rrRank": 1,
    "rrSize": 4,
    "fit": "Adds a high-pressure spin option alongside Bishnoi and Jadeja",
-   "availability": "Out of reach",
-   "availabilityNote": "Franchise cornerstones; treated as unavailable.",
+   "availability": "Retained",
+   "availabilityNote": "Retained by Gujarat Titans for IPL 2027 (17 November 2026, 7 pm IST).",
    "call": "Out of reach"
   },
   {
@@ -354,9 +354,9 @@
    "rrRank": 1,
    "rrSize": 4,
    "fit": "Adds a high-pressure spin option alongside Bishnoi and Jadeja",
-   "availability": "Unknown",
-   "availabilityNote": "Played for Chennai Super Kings in 2026; no release reporting found as of 16 Nov 2026.",
-   "call": "Monitor"
+   "availability": "Retained",
+   "availabilityNote": "Retained by Chennai Super Kings for IPL 2027 (17 November 2026, 7 pm IST).",
+   "call": "Out of reach"
   },
   {
    "id": 6669,
@@ -375,16 +375,16 @@
    "rrRank": 1,
    "rrSize": 4,
    "fit": "Fills the gap: an Indian seamer to partner Archer",
-   "availability": "Unlikely",
-   "availabilityNote": "no release reporting; LSG managed his workload through 2026 [S11]",
-   "call": "Watch"
+   "availability": "Retained",
+   "availabilityNote": "Retained by Lucknow Super Giants for IPL 2027 (17 November 2026, 7 pm IST).",
+   "call": "Out of reach"
   },
   {
    "id": 4900,
    "disc": "bowl",
    "rank": 9,
    "name": "Wanindu Hasaranga",
-   "team": "Rajasthan Royals",
+   "team": "Lucknow Super Giants",
    "nationality": "Sri Lanka",
    "overseas": true,
    "role": "Spin",
@@ -396,8 +396,8 @@
    "rrRank": 1,
    "rrSize": 4,
    "fit": "Adds a high-pressure spin option alongside Bishnoi and Jadeja",
-   "availability": "Reported",
-   "availabilityNote": "missed all of IPL 2026 injured after joining LSG for ₹2 cr; CricTracker (16 Nov) calls his release 'a realistic option' after LSG traded for Kuldeep Yadav [S8]",
+   "availability": "Released",
+   "availabilityNote": "Released by Lucknow Super Giants (17 November 2026, 7 pm IST). In the auction pool.",
    "call": "Priority"
   },
   {
@@ -417,10 +417,10 @@
    "rrRank": 1,
    "rrSize": 4,
    "fit": "Fills the gap: an Indian seamer to partner Archer",
-   "availability": "Unlikely",
-   "availabilityNote": "predicted RCB retention [S12]",
-   "call": "Watch"
+   "availability": "Retained",
+   "availabilityNote": "Retained by Royal Challengers Bengaluru for IPL 2027 (17 November 2026, 7 pm IST).",
+   "call": "Out of reach"
   }
  ],
- "note": "Ratings and ranks are the frozen primary results. Roles come from where each player bats or bowls in the data; availability comes from the research sources."
+ "note": "Ratings and ranks are the frozen primary results. Roles come from where each player bats or bowls in the data; availability comes from the IPL 2027 retention lists as of 17 November 2026, 7 pm IST (ESPNcricinfo)."
 }

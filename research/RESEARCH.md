@@ -1,8 +1,10 @@
 # Secondary research: Rajasthan Royals and the IPL 2027 auction
 
-Gathered on 16 November 2026, after the primary rankings were frozen (git tag `primary-results-v1`).
+Gathered on 16 November 2026, after the primary rankings were frozen (git tag `primary-results-v1`),
+and updated with the IPL 2027 retention lists **as of 17 November 2026, 7 pm IST** (S14).
 Nothing here feeds the pipeline or changed a rank. Structured findings for the dashboard and report
-are in [auction.json](auction.json); every source is in [SOURCES.md](SOURCES.md).
+are in [auction.json](auction.json); the release and trade lists are in
+[retentions_2027.json](retentions_2027.json); every source is in [SOURCES.md](SOURCES.md).
 
 Labels: **Confirmed** = official or a reference source with a squad table; **Reported** = media
 report of a fact; **Speculative** = preview, prediction or opinion.
@@ -13,9 +15,30 @@ report of a fact; **Speculative** = preview, prediction or opinion.
 |------|--------|--------|
 | Retention deadline 17 November 2026 (moved from 15 November) | Reported, several outlets agree | S2, S5, S8 |
 | Mini-auction 16 December 2026 in Goa | Reported; one outlet says Kochi | S5, S8 |
-| Royals' 2027 retained and released lists | **Not public** at the time of writing | S3, S6 |
+| All ten 2027 release lists and trades | **Published 17 November 2026**; checked against the ESPNcricinfo live blog at 7 pm IST | S14 |
 
-Every availability judgement is therefore provisional.
+## Retentions, 17 November 2026, 7 pm IST (S14)
+
+The release lists were taken from a team-wise summary and each was checked against the ESPNcricinfo live blog.
+Differences found and corrected in `retentions_2027.json`:
+
+- **Shimron Hetmyer** was also released by the Royals (confirmed in the blog at 6:36 pm, freeing a reported ₹11 crore).
+- **Avesh Khan** was also released by LSG.
+- GT released **Luke Wood**, not Mark Wood.
+
+Other facts from the blog that matter for the lens: Mitchell Starc is unavailable for IPL 2027 and Travis Head
+has opted out (both released); Cameron Green was retained by KKR; Kuldeep Yadav moved from DC to LSG for
+Rishabh Pant; Mohammed Shami moved from LSG to the Royals (an ₹8 crore fee was reported); Harshal Patel to GT,
+Hardik Pandya to PBKS, Arshdeep Singh to MI; MS Dhoni becomes CSK mentor.
+
+The Royals' purse (₹27.05 crore), 6 open places and 3 overseas places come from the team-wise summary
+and are not stated in the blog text, which gives ₹12.75 crore freed before Hetmyer's ₹11 crore. They are
+labelled "reported". Note that 25 places, minus 8 releases, plus Shami, would leave 7 open places, not 6;
+the difference is unexplained and is left as reported.
+
+**What it means.** Of the 20 ranked players, only Wanindu Hasaranga (9th of 64 bowlers) was released.
+Every top-10 batter was retained. The released pool is deep in pace (Muzarabani 11th, Mustafizur 13th,
+Pathirana 20th, Boult 28th) and thin in crunch-tested batting (Nissanka 17th, an opener; Raza 25th).
 
 ## Royals' 2026 season (confirmed, S1)
 
@@ -24,7 +47,7 @@ Every availability judgement is therefore provisional.
 - Key moves before 2026: Sanju Samson to CSK for Ravindra Jadeja and Sam Curran (Curran then withdrew injured, replaced by Dasun Shanaka); Nitish Rana to DC for Donovan Ferreira.
 - Top run-scorers: Sooryavanshi 776, Jurel 515, Jaiswal 427. Top wicket-taker: Archer 25.
 
-## Squad constraints (reported, S5)
+## Squad constraints before retentions (reported, S5; superseded by S14)
 
 - 25 of 25 squad places and 8 of 8 overseas places filled; about ₹2.65 crore left.
 - Releasing Hetmyer (₹11 cr), Milne (₹2.4 cr) and Shanaka (₹2 cr) would free ₹15.40 crore and three overseas places.
@@ -55,8 +78,8 @@ The full table with tiers, availability and risks is in `auction.json` and on th
 "Royals auction lens" page. The logic, in order:
 
 1. Start from the frozen ranking, not from reputation.
-2. Remove players with no realistic route to the Royals: franchise cores with no release reporting, and Pakistani players.
+2. Keep only players in the auction pool: released on 17 November 2026, and not unavailable (Starc, Head) or Pakistani.
 3. Weigh the rest against the two data-identified needs and the overseas-slot constraint (an Indian seamer is worth more than an overseas one of equal rating).
-4. Label availability by the strength of its evidence.
+4. Flag anything that could still block a signing (fitness, eligibility).
 
-Result: **Hasaranga** is the priority target, the highest-rated bowler with a credible route to the auction. **Ellis** and **Green** are strong targets if released. **Mohsin Khan**, **Bhuvneshwar Kumar** and **Sikandar Raza** go on the watch list.
+Result after retentions: **Hasaranga** and **Muzarabani** are the priority targets, the two highest-rated bowlers in the pool. **Pathirana** (death overs, 111 High-tier balls) and **Nissanka** (the best released batter) are strong targets. **Raza**, **Chahar** (Indian, so no overseas place) and **Mustafizur** (eligibility unclear) go on the watch list. The pre-retention picks Ellis, Green, Mohsin Khan and Bhuvneshwar Kumar were all retained.

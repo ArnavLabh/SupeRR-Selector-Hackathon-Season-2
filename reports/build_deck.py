@@ -27,8 +27,18 @@ TEAM = {"Rajasthan Royals": "RR", "Mumbai Indians": "MI", "Chennai Super Kings":
         "Gujarat Titans": "GT", "Lucknow Super Giants": "LSG"}
 
 
-AVAIL = {"Reported": "Release tipped in media", "Unknown": "No 2027 reporting yet",
-         "Unlikely": "Unlikely to be released", "Likely in the pool": "Likely in the auction pool"}
+AVAIL = {"In the pool": "In the auction pool", "Unknown": "No 2027 reporting yet"}
+
+
+def avail(a: str) -> str:
+    """Short availability label for the deck table, e.g. 'Released by LSG'."""
+    head, _, rest = a.partition(": ")
+    if head == "Released":
+        who = rest.split(" on ")[0].split(" [")[0]
+        for full, ab in TEAM.items():
+            who = who.replace(full, ab)
+        return f"Released {who}" + ("; eligibility unclear" if "unclear" in rest else "")
+    return AVAIL.get(head, head)
 
 
 def short(n: str) -> str:
@@ -75,7 +85,7 @@ def collect() -> dict:
         targets.append({"name": t["name"], "tier": t["tier"], "fit": t["fit"],
                         "rank": int(r["rank"]), "of": int(tab["eligible"].sum()),
                         "disc": "batter" if t["disc"] == "bat" else "bowler",
-                        "availability": AVAIL.get(t["availability"].split(":")[0], t["availability"].split(":")[0])})
+                        "availability": avail(t["availability"])})
     return {
         "deliveries": s["deliveries"], "matches": s["matches"],
         "eligible": s["eligible"], "highShare": s["tierShares"]["High"],

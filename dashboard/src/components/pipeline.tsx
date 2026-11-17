@@ -15,12 +15,14 @@ export function Pipeline() {
   const { summary: s } = useData();
   const mo = useLazy<{ moments: Moment[] }>("moments");
   const [i, setI] = useState(0);
-  const [auto, setAuto] = useState(true);
+  const [auto, setAuto] = useState(true);      // user's play or pause choice
+  const [hover, setHover] = useState(false);   // pause only while the pointer is over the card
+  const running = auto && !hover;
   useEffect(() => {
-    if (!auto) return;
+    if (!running) return;
     const t = setInterval(() => setI((x) => (x + 1) % 4), 5200);
     return () => clearInterval(t);
-  }, [auto]);
+  }, [running]);
 
   const ball = useMemo(() => {
     const ms = mo?.moments ?? [];
@@ -57,7 +59,7 @@ export function Pipeline() {
   const St = steps[i];
 
   return (
-    <div className="pipe card" onMouseEnter={() => setAuto(false)}>
+    <div className="pipe card" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
       <div className="pipe-ball">
         <span className="tag pink">A real delivery</span>{ball.freeHit && <span className="tag gold">Free hit, after a no-ball</span>}
         <b>{ball.batting} v {ball.bowling}</b>
@@ -87,7 +89,7 @@ export function Pipeline() {
             <div className="row" style={{ gap: 8, marginTop: 4 }}>{St.model.map((m) => <span key={m} className="tag blue">{m}</span>)}</div>
           </div>
         </div>
-      {auto && <motion.div key={`p${i}`} className="pipe-timer" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 5.2, ease: "linear" }} />}
+      {running && <motion.div key={`p${i}`} className="pipe-timer" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 5.2, ease: "linear" }} />}
     </div>
   );
 }

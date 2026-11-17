@@ -176,6 +176,7 @@ figure { margin: 0; }
 .callout { background: #0c1440; border: 0.6pt solid #1e2a66; border-radius: 8pt; padding: 9pt 11pt; margin: 8pt 0; break-inside: avoid; color: #bac1e6; }
 .callout.pink { background: rgba(234,26,133,.14); border-color: rgba(234,26,133,.4); }
 table.data { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin: 4pt 0 6pt; font-variant-numeric: tabular-nums; break-inside: avoid; }
+table.data.split { break-inside: auto; } table.data.split tr { break-inside: avoid; } h2, h3 { break-after: avoid; }
 table.data th { text-align: left; font-weight: 600; font-size: 7.4pt; color: #8c94c2; padding: 4pt 5pt; border-bottom: 0.8pt solid #2a3778; vertical-align: bottom; line-height: 1.25; text-transform: uppercase; letter-spacing: 0.03em; }
 table.data td { padding: 4pt 5pt; border-bottom: 0.6pt solid #1a2560; vertical-align: middle; color: #d3d8f0; }
 table.data .r { text-align: right; }
@@ -524,18 +525,18 @@ def auction_section(d) -> str:
         head = "<thead><tr><th>#</th><th>Player</th><th>Role in the data</th><th class=r>Upgrade</th><th>Slot</th><th>How they would strengthen the Royals</th><th>Call</th></tr></thead>"
         lens_html = f"""
 <h2>10.3 Each of the top 20 through the Royals lens</h2>
-<p>Every one of the 20 ranked players would be the Royals' best pressure performer in their discipline. "Upgrade" is their rating minus the Royals' best ranked player: {b0['rrBest']} ({sg(b0['rrBestRating'])}) for batting, {w0['rrBest']} ({sg(w0['rrBestRating'])}) for bowling. Role comes from where each player actually batted or bowled in the data. The call combines that fit with availability reporting.</p>
+<p>Every one of the 20 ranked players would be the Royals' best pressure performer in their discipline. "Upgrade" is their rating minus the Royals' best ranked player: {b0['rrBest']} ({sg(b0['rrBestRating'])}) for batting, {w0['rrBest']} ({sg(w0['rrBestRating'])}) for bowling. Role comes from where each player actually batted or bowled in the data. The call combines that fit with the IPL 2027 retention lists.</p>
 <h3>Batters</h3><table class="data tight">{head}<tbody>{lens_rows("bat")}</tbody></table>
 <h3>Bowlers</h3><table class="data tight">{head}<tbody>{lens_rows("bowl")}</tbody></table>
-<p class="cap">Priority, Strong and Watch: realistic targets, in that order. Monitor: no release news either way. Out of reach: franchise cores or ineligible. Overseas players need one of the eight overseas places, all filled in 2026.</p>
+<p class="cap">Priority, Strong and Watch: released and in the auction pool, in that order. Out of reach: retained or traded at the deadline ({lens['asOf'].split(', after')[0]}). Overseas players need one of the Royals' 3 open overseas places (reported).</p>
 """
     return f"""
 <h1><span class="no">10</span>What it means for Rajasthan Royals</h1>
-<div class="callout">Sections 1 to 9 use only the supplied data; those results were fixed (git tag <code>primary-results-v1</code>) before this squad research began, on {a['asOf'].split(",")[0]}. {a['confidence']}</div>
+<div class="callout">Sections 1 to 9 use only the supplied data; those results were fixed (git tag <code>primary-results-v1</code>) before any squad research. {a['confidence']}</div>
 <p class="lede">{a['summary']}</p>
 <h2>10.1 Where the squad needs pressure performers</h2><ul>{needs}</ul>
 <h2>10.2 Targets</h2>
-<table class="data tight"><thead><tr><th>Player</th><th>Call</th><th class=r>Pressure rank</th><th class=r>Rating</th><th>Why they fit</th><th>Availability</th><th>Risk</th></tr></thead><tbody>{rows}</tbody></table>
+<table class="data tight split"><thead><tr><th>Player</th><th>Call</th><th class=r>Pressure rank</th><th class=r>Rating</th><th>Why they fit</th><th>Availability</th><th>Risk</th></tr></thead><tbody>{rows}</tbody></table>
 {lens_html}
 <div class="cols"><div><h2>10.4 Highly rated, not realistic targets</h2><ul>{na}</ul></div><div><h2>10.5 Caveats</h2><ul>{cav}</ul></div></div>
 <h2>10.6 Sources</h2>

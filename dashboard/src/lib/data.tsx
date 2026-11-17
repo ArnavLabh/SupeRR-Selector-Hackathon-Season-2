@@ -139,6 +139,10 @@ export const pctCapped = (x: number | null | undefined) => (x == null ? NA : x >
 /** Display name without the disambiguating bracket, and with common short forms. */
 export const shortName = (n: string) => n.split(" (")[0].replace("Namboori Tilak Varma", "Tilak Varma").replace("Lokesh Rahul", "KL Rahul");
 export const int = (x: number | null | undefined) => (x == null ? NA : Math.round(x).toLocaleString("en-US"));
+/** The Royals' IPL 2027 squad after retentions (17 Nov 2026, 7 pm IST): released players drop out, Shami (traded in from LSG) joins. */
+export const RR_OUT = new Set([3297, 6806, 1487, 26663, 7545, 8580]); // Hetmyer, Deshpande, Milne, Maphaka, Sen, Yudhvir
+const RR_IN = new Set([1566]); // Mohammed Shami
+export const isRoyal = (p: Player) => !RR_OUT.has(p.id) && (RR_IN.has(p.id) || (p.team === "Rajasthan Royals" && (p.iplLastYear ?? 0) >= 2026));
 export const teamShort: Record<string, string> = {
   "Rajasthan Royals": "RR", "Mumbai Indians": "MI", "Chennai Super Kings": "CSK", "Royal Challengers Bengaluru": "RCB",
   "Kolkata Knight Riders": "KKR", "Sunrisers Hyderabad": "SRH", "Delhi Capitals": "DC", "Punjab Kings": "PBKS",

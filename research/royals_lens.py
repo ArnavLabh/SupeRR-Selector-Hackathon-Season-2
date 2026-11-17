@@ -2,8 +2,8 @@
 
     python research/royals_lens.py
 
-Combines the frozen primary ratings (outputs/rankings) with the secondary
-research in research/auction.json. It changes no rating or rank. Output:
+Combines the frozen primary ratings (outputs/rankings) with the retention lists
+(research/retentions_2027.json) and research/auction.json. It changes no rating or rank. Output:
 research/royals_lens.json, copied to the dashboard data folder.
 """
 from __future__ import annotations
@@ -45,17 +45,19 @@ def role_bowl(p: dict) -> str:
 
 def main() -> None:
     auction = json.loads((ROOT / "research" / "auction.json").read_text(encoding="utf-8"))
+    ret = json.loads((ROOT / "research" / "retentions_2027.json").read_text(encoding="utf-8"))
     targets = {t["name"]: t for t in auction["targets"]}
-    out_of_reach = {}
-    for n in auction["notAvailable"]:
-        for name in n["name"].split(", "):
-            out_of_reach[name.strip()] = n["reason"].split(" [")[0]
+    released = {n: team for team, names in ret["released"].items() for n in names}
+    traded = {t["player"]: t for t in ret["trades"]}
+    when = ret["asOf"]
     rows = []
     for disc, name in (("bat", "batters"), ("bowl", "bowlers")):
         bundle = {p["id"]: p for p in json.loads((DATA / f"{name}.json").read_text(encoding="utf-8"))}
         full = pd.read_csv(RANK / f"{name}_all.csv")
         el = full[full["eligible"]]
-        rr = el[(el["ipl_team"] == RR) & (el["ipl_last_year"] >= 2026)].sort_values("pressure", ascending=False)
+        nm_all = full["player"].str.split(" (", regex=False).str[0]
+        in_rr = ((full["ipl_team"] == RR) & (full["ipl_last_year"] >= 2026) & ~nm_all.isin(ret["released"][RR]))             | nm_all.isin([t["player"] for t in ret["trades"] if t["to"] == RR])
+        rr = el[in_rr[full["eligible"]]].sort_values("pressure", ascending=False)   # 2027 squad after retentions
         best = rr.iloc[0]
         for r in el.head(10).itertuples():
             p = bundle[int(r.player_id)]
@@ -64,15 +66,19 @@ def main() -> None:
             overseas = None if nat is None else nat != "India"
             rr_rank = int((rr["pressure"] > r.pressure).sum()) + 1
             role = role_bat(p) if disc == "bat" else role_bowl(p)
-            team = r.ipl_team if isinstance(r.ipl_team, str) else None
+            team = released.get(nm) or (traded[nm]["to"] if nm in traded else None) or (r.ipl_team if isinstance(r.ipl_team, str) else None)
             active = team is not None and not pd.isna(r.ipl_last_year) and int(r.ipl_last_year) >= 2026
-            if nm in targets:
-                avail, call = targets[nm]["availability"].split(":")[0], targets[nm]["tier"]
-                avail_note = targets[nm]["availability"].split(": ", 1)[-1]
-            elif nm in out_of_reach or (r.player in out_of_reach):
-                avail, call, avail_note = "Out of reach", "Out of reach", out_of_reach.get(nm, out_of_reach.get(r.player, ""))
+            if nm in ret["unavailable"]:
+                avail, call, avail_note = "Unavailable", "Out of reach", ret["unavailable"][nm] + "."
+            elif nm in traded:
+                t = traded[nm]
+                avail, call = "Traded", "Out of reach"
+                avail_note = f"Traded from {t['from']} to {t['to']}" + (f", {t['note']}" if t["note"] else "") + f" ({when})."
+            elif nm in released:
+                tier = targets[nm]["tier"] if nm in targets else "Watch"
+                avail, call, avail_note = "Released", tier, f"Released by {released[nm]} ({when}). In the auction pool."
             elif active:
-                avail, call, avail_note = "Unknown", "Monitor", f"Played for {team} in 2026; no release reporting found as of 16 Nov 2026."
+                avail, call, avail_note = "Retained", "Out of reach", f"Retained by {team} for IPL 2027 ({when})."
             else:
                 avail, call, avail_note = "Unknown", "Monitor", "No 2027 squad reporting found."
             if disc == "bat":
@@ -91,7 +97,7 @@ def main() -> None:
                 "fit": fit, "availability": avail, "availabilityNote": avail_note, "call": call,
             })
     out = {"asOf": auction["asOf"], "rows": rows,
-           "note": "Ratings and ranks are the frozen primary results. Roles come from where each player bats or bowls in the data; availability comes from the research sources."}
+           "note": f"Ratings and ranks are the frozen primary results. Roles come from where each player bats or bowls in the data; availability comes from the IPL 2027 retention lists as of {when} (ESPNcricinfo)."}
     txt = json.dumps(out, ensure_ascii=False, indent=1)
     assert chr(0x2013) not in txt and chr(0x2014) not in txt   # no en or em dashes
     (ROOT / "research" / "royals_lens.json").write_text(txt, encoding="utf-8")

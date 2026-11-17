@@ -1,0 +1,51 @@
+{
+  "asOf": "17 November 2026, 7 pm IST",
+  "source": {
+    "title": "IPL 2027 retention - Starc unavailable for IPL 2027 (live blog)",
+    "publisher": "ESPNcricinfo",
+    "url": "https://www.espncricinfo.com/live-blog/ipl-2027-retention-starc-unavailable-for-ipl-2027-1562922",
+    "updated": "2026-11-17 18:59 IST"
+  },
+  "notes": [
+    "Release lists were taken from a team-wise summary and checked against the live blog text on 17 Nov 2026.",
+    "Corrections from the blog: RR also released Shimron Hetmyer (confirmed 6:36 pm); LSG also released Avesh Khan; GT released Luke Wood (not Mark Wood).",
+    "Purse and slot figures are as given in the team-wise summary; the blog text gives RR 12.75 crore freed before Hetmyer's 11 crore and does not state slot counts."
+  ],
+  "released": {
+    "Chennai Super Kings": ["Matthew Short", "Matt Henry", "Zakary Foulkes", "Prashant Veer", "Aman Khan", "Kuldip Yadav", "Akash Madhwal", "Dian Forrester", "Macneil Noronha", "Mahendra Singh Dhoni"],
+    "Delhi Capitals": ["Nitish Rana", "Abishek Porel", "Pathum Nissanka", "Ben Duckett", "Karun Nair", "Sahil Parakh", "Dushmantha Chameera", "Rehan Ahmed", "Mitchell Starc", "Ajay Mandal"],
+    "Gujarat Titans": ["Ishant Sharma", "Luke Wood", "Kulwant Khejroliya", "Shahrukh Khan", "Connor Esterhuizen"],
+    "Kolkata Knight Riders": ["Ajinkya Rahane", "Akash Deep", "Blessing Muzarabani", "Daksh Kamra", "Luvnith Sisodia", "Matheesha Pathirana", "Mustafizur Rahman", "Navdeep Saini", "Rachin Ravindra", "Rahul Tripathi", "Tejasvi Singh", "Umran Malik"],
+    "Lucknow Super Giants": ["Matthew Breetzke", "Avesh Khan", "Anrich Nortje", "George Linde", "Wanindu Hasaranga", "Naman Tiwari", "Arshin Kulkarni"],
+    "Mumbai Indians": ["Trent Boult", "Deepak Chahar", "Allah Ghazanfar", "Atharva Ankolekar", "Keshav Maharaj", "Mohammed Izhar", "Danish Malewar", "Mayank Markande", "Mayank Rawat"],
+    "Punjab Kings": ["Lockie Ferguson", "Mitchell Owen", "Nehal Wadhera", "Pyla Avinash", "Praveen Dubey", "Vishal Nishad"],
+    "Rajasthan Royals": ["Adam Milne", "Kwena Maphaka", "Tushar Deshpande", "Kuldeep Sen", "Yudhvir Singh", "Vignesh Puthur", "Ravi Singh", "Shimron Hetmyer"],
+    "Royal Challengers Bengaluru": ["Jacob Bethell", "Richard Gleeson", "Mangesh Yadav", "Satwik Deswal", "Vihaan Malhotra"],
+    "Sunrisers Hyderabad": ["Travis Head", "Kamindu Mendis", "Jaydev Unadkat", "Dilshan Madushanka", "Onkar Tarmale", "Amit Kumar", "Shivam Mavi", "Gerald Coetzee", "David Payne"]
+  },
+  "trades": [
+    {"player": "Mohammed Shami", "from": "Lucknow Super Giants", "to": "Rajasthan Royals", "note": "8 crore fee"},
+    {"player": "Kuldeep Yadav", "from": "Delhi Capitals", "to": "Lucknow Super Giants", "note": "in exchange for Rishabh Pant"},
+    {"player": "Rishabh Pant", "from": "Lucknow Super Giants", "to": "Delhi Capitals", "note": "in exchange for Kuldeep Yadav"},
+    {"player": "Harshal Patel", "from": "Sunrisers Hyderabad", "to": "Gujarat Titans", "note": ""},
+    {"player": "Hardik Pandya", "from": "Mumbai Indians", "to": "Punjab Kings", "note": ""},
+    {"player": "Arshdeep Singh", "from": "Punjab Kings", "to": "Mumbai Indians", "note": ""}
+  ],
+  "unavailable": {
+    "Mitchell Starc": "Will not play IPL 2027 (released by DC)",
+    "Travis Head": "Opted out of IPL 2027 (released by SRH)",
+    "Mahendra Singh Dhoni": "Moved to a mentor role with CSK"
+  },
+  "purse": {
+    "Chennai Super Kings": {"purse": 28.05, "slots": 6, "overseas": 2},
+    "Delhi Capitals": {"purse": 39.50, "slots": 9, "overseas": 4},
+    "Gujarat Titans": {"purse": 8.75, "slots": 3, "overseas": 2},
+    "Kolkata Knight Riders": {"purse": 41.65, "slots": 8, "overseas": 3},
+    "Lucknow Super Giants": {"purse": 47.45, "slots": 7, "overseas": 3},
+    "Mumbai Indians": {"purse": 32.60, "slots": 9, "overseas": 2},
+    "Punjab Kings": {"purse": 18.60, "slots": 6, "overseas": 2},
+    "Rajasthan Royals": {"purse": 27.05, "slots": 6, "overseas": 3},
+    "Royal Challengers Bengaluru": {"purse": 14.15, "slots": 5, "overseas": 1},
+    "Sunrisers Hyderabad": {"purse": 40.15, "slots": 7, "overseas": 3}
+  }
+}

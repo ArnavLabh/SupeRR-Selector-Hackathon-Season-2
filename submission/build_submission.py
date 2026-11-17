@@ -36,7 +36,7 @@ Use the live site, https://superr-selector-2.vercel.app. Add burned-in captions:
 | 14 to 21 s | **Pressure Lab**. Click the **Last-over thriller** chip, then **Cruising**; the marker jumps and the pressure tag changes colour. | "Pressure = how far one ball can swing it" | "That's pressure. A last-over finish can matter many times more than a quiet over, and the model knows the difference ball by ball." |
 | 21 to 31 s | **Methodology**, scroll to **Tested four ways**, tab **Does it predict?**. Bars grow; the pink bar is the published rating. | "Lift under pressure did not repeat" | "Then the twist. Players who rose above their usual level under pressure in one half of the matches didn't do it again in the other half. Forty tests. What repeated was quality." |
 | 31 to 40 s | **Leaderboards**, Top 10 view, **Batters**. Switch to **Bowlers** so the rows animate. | "Top 10 under pressure" | "So my lists are the best players, fairly measured, who have actually faced the crunch. Suryakumar, Klaasen and Tim David. Narine, Bumrah and Varun." |
-| 40 to 50 s | **Auction Room**, scroll to **The top 20 through the Royals lens**. Click **Most gettable**; Hasaranga rises to the top. | "All 20 would be the Royals' best" | "And for the Royals: every one of the twenty would be their best performer under pressure. The first realistic call: Wanindu Hasaranga, a former Royal." |
+| 40 to 50 s | **Auction Room**, scroll to **The top 20 through the Royals lens**. Click **Most gettable**; Hasaranga rises to the top. | "1 of the top 20 is in the auction pool" | "And for the Royals: every one of the twenty would be their best performer under pressure. After retentions, only one reached the auction. Wanindu Hasaranga, a former Royal." |
 | 50 to 56 s | **Overview**, hero animation, or you on camera. | "superr-selector-2.vercel.app" | "Built for SupeRR Selector Season 2. Thank you @rajasthanroyals and @unstop.world." |
 
 If you appear on camera, record the first and last lines facing the camera and place the screen clips between them.
@@ -83,7 +83,7 @@ def main() -> None:
             "Why the PDF and not the deck: the field asks for your methodology, your most reliable players under pressure,",
             "and how each player could strengthen the Royals for the IPL 2027 auction. The PDF covers all three in full:",
             "the pressure definition and model (sections 2 to 5), evidence for all 20 players (6 to 8), reliability and limits (8, 9),",
-            "and the Royals lens for every one of the 20 plus targets and sources (section 10). The deck is an 11-slide summary;",
+            "and the Royals lens for every one of the 20 plus targets from the post-retention auction pool, as of 17 November 2026, 7 pm IST (section 10). The deck is a 12-slide summary;",
             "it is linked from the dashboard footer for anyone who wants it.", "",
             f"## Dashboard link field ({len(link_field)} of 500 characters)", "", "Paste exactly:", "", "```", link_field, "```", "",
             "## Share Your Journey (optional; does not affect evaluation)", "",
