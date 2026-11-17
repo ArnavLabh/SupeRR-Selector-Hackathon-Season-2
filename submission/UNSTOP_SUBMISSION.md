@@ -62,35 +62,34 @@ https://superr-selector-2.vercel.app/  (code, data pipeline and tests: https://g
 A link to your own reel, post or short video (Google Drive, Instagram, LinkedIn or YouTube).
 Tag @rajasthanroyals and @unstop.world if you post on social media. A script and caption are below.
 
-**Share Your Journey: video shot list (about 56 seconds)**
+**Share Your Journey: video shot list (about 55 seconds)**
 
 Record each shot as its own clip at 1920 x 1080, browser at 90% zoom, Chrome full screen (F11), then cut them together.
-Use the live site, https://superr-selector-2.vercel.app. Add burned-in captions: most people watch reels muted.
+Use the live site, https://superr-selector-2.vercel.app. Add captions, since most people watch muted. Speak plainly, at a normal pace.
 
 | Time | Screen (page and action) | On-screen text | Voiceover |
 |---|---|---|---|
-| 0 to 8 s | **Methodology** page, top. The walkthrough shows "4 off 1" with the **Free hit, after a no-ball** tag. Click **Step 3**: the number changes to +1.66. | "Jaipur · 7 May 2023 · 5 off the last ball" | "Jaipur, May 2023. Five needed off the last ball. Abdul Samad is caught at long-off... but Sandeep Sharma has overstepped. Free hit. Four needed. Six." |
-| 8 to 14 s | **Overview** page, top. Let the hero chase animation run; the white dot moves down the pink ridge. | "200,961 balls priced" | "I wanted to know who wins moments like that. So I priced every IPL and T20I ball since 2022 for how far it could swing the match." |
-| 14 to 21 s | **Pressure Lab**. Click the **Last-over thriller** chip, then **Cruising**; the marker jumps and the pressure tag changes colour. | "Pressure = how far one ball can swing it" | "That's pressure. A last-over finish can matter many times more than a quiet over, and the model knows the difference ball by ball." |
-| 21 to 31 s | **Methodology**, scroll to **Tested four ways**, tab **Does it predict?**. Bars grow; the pink bar is the published rating. | "Lift under pressure did not repeat" | "Then the twist. Players who rose above their usual level under pressure in one half of the matches didn't do it again in the other half. Forty tests. What repeated was quality." |
-| 31 to 40 s | **Leaderboards**, Top 10 view, **Batters**. Switch to **Bowlers** so the rows animate. | "Top 10 under pressure" | "So my lists are the best players, fairly measured, who have actually faced the crunch. Suryakumar, Klaasen and Tim David. Narine, Bumrah and Varun." |
-| 40 to 50 s | **Auction Room**, scroll to **The top 20 through the Royals lens**. Click **Most gettable**; Hasaranga rises to the top. | "1 of the top 20 is in the auction pool" | "And for the Royals: every one of the twenty would be their best performer under pressure. After retentions, only one reached the auction. Wanindu Hasaranga, a former Royal." |
-| 50 to 56 s | **Overview**, hero animation, or you on camera. | "superr-selector-2.vercel.app" | "Built for SupeRR Selector Season 2. Thank you @rajasthanroyals and @unstop.world." |
+| 0 to 8 s | **Methodology** page, top. The walkthrough shows the last ball of SRH v RR, Jaipur 2023, with the **Free hit, after a no-ball** tag. Click **Step 3**. | "Last ball · 4 needed · free hit" | "Last ball, four needed off a free hit. A six, and the win chance goes from 27% to 100%. Some balls matter far more than others." |
+| 8 to 19 s | **Pressure Lab**. Click the **Last-over thriller** chip, then **Cruising**; the marker moves and the pressure tag changes. | "Pressure = how far one ball can swing the result" | "I measured that as leverage: how far one ball can swing the win probability. A model trained on 200,961 IPL and T20I balls prices every delivery. Only about 4 in 100 are high pressure." |
+| 19 to 29 s | **Leaderboards**, click **Suryakumar Yadav**. Scroll from the pressure rating down to the match-by-match chart. | "Value added, adjusted for opposition and sample size" | "Players get credit for the win probability they add on those balls, adjusted for the opposition, the match and the sample size, so a short hot streak can't top the list." |
+| 29 to 39 s | **Methodology**, scroll to **Tested four ways**, tab **Does it predict?**. Let the bars grow. | "Tested on unseen matches, 40 times" | "The finding I didn't expect: doing better than usual under pressure didn't repeat in unseen matches, across 40 tests. Overall quality did, so that is what the rankings use." |
+| 39 to 49 s | **Leaderboards**, **Top 10** view, **Batters**, then switch to **Bowlers**. | "Top 10 batters · Top 10 bowlers" | "The top tens. Suryakumar Yadav, Heinrich Klaasen and Tim David lead the batters. Sunil Narine, Jasprit Bumrah and Varun Chakravarthy lead the bowlers." |
+| 49 to 55 s | **Overview** page, top, with the chase animation running. | "superr-selector-2.vercel.app" | "The method, the full rankings and the code are on the dashboard. Thanks to Rajasthan Royals and Unstop." |
 
-If you appear on camera, record the first and last lines facing the camera and place the screen clips between them.
+Tag @rajasthanroyals and @unstop.world in the post itself, not in the voiceover.
 
 
 **Social caption**
 
-Five needed off the last ball. Caught, but a no-ball. Then a six off the free hit took the win chance from 27% to 100%.
+Last ball, four needed off a free hit. A six moved the win chance from 27% to 100%.
 
-I priced 200,961 IPL and T20I deliveries for how far each could swing the match, then asked who really delivers when it matters. The surprise: rising above your usual level under pressure didn't repeat. Quality did.
+My SupeRR Selector Season 2 entry measures moments like that. I scored 200,961 IPL and T20I deliveries for how far each could swing the result, then rated batters and bowlers on the value they add on those balls, adjusted for opposition and sample size.
 
-My SupeRR Selector Season 2 entry: the two top tens, a scouting report for every player, and what it all means for the Royals at the IPL 2027 auction.
+The finding I didn't expect: doing better than usual under pressure didn't repeat in unseen matches. Overall quality did.
 
-Dashboard: superr-selector-2.vercel.app
+Top 10 batters and bowlers, the method and the code: superr-selector-2.vercel.app
 
-@rajasthanroyals @unstop.world #SupeRRSelector #RajasthanRoyals #HallaBol #IPL #CricketAnalytics
+@rajasthanroyals @unstop.world #SupeRRSelector #RajasthanRoyals #IPL #CricketAnalytics
 
 
 ## Spare 500-character summary
