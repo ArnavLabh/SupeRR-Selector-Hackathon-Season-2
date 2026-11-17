@@ -94,6 +94,7 @@ def collect() -> dict:
         "sensRuns": int(sens["variant"].nunique()),
         "bench": {r.model: round(float(r.log_loss), 3) for r in bench[bench["scope"] == "All"].itertuples()},
         "tops": tops, "targets": targets, "needs": auction["needs"], "asOf": auction["asOf"],
+        "lens": json.loads((ROOT / "research" / "royals_lens.json").read_text(encoding="utf-8"))["rows"],
         "figures": str((REP / "figures").resolve()).replace("\\", "/"),
     }
 

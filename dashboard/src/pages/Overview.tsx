@@ -53,7 +53,7 @@ function TopList({ disc }: { disc: Disc }) {
           </div>
         ))}
       </div>
-      <div className="legend small"><span>Bar: pressure rating</span><span>Ring: chance of a true top-10 place</span></div>
+      <div className="legend small"><span>Bar: pressure rating, against the No. 1</span><span>Ring: chance of a true top-10 place</span></div>
     </div>
   );
 }

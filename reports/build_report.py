@@ -210,6 +210,19 @@ a { color: #ff8ec4; }
 """
 
 
+MODEL_STACK = [
+    ("Match state", "Deterministic reconstruction (pandas)", "Balls left, wickets in hand, runs needed, revised DLS targets, and a scoring environment per IPL season and T20I year."),
+    ("Ball-outcome model", "Multinomial logistic regression (scikit-learn, L2 penalty, C = 0.5)", "Ten outcome classes; separate first-innings and chase models; spline terms in balls left, wickets, required-rate hinges, end-game flags and environment interactions."),
+    ("Win probability", "Dynamic programming: backward induction on a Markov chain", "V(b, w, r) over 120 balls x 10 wickets x 400 runs; 5-fold cross-fitting by match so every match is priced out of sample."),
+    ("Calibration", "Logistic recalibration, out of fold", "logit p = c + (a + b u) logit p_raw, with u the share of the match remaining."),
+    ("Machine-learning benchmarks", "Logistic regression; monotone gradient boosting (HistGradientBoosting)", "Fitted to match results with the same folds; out-of-fold log loss 0.521 and 0.529 against 0.519 for the structural model. Not adopted. No deep learning: about 840 match results cannot support it."),
+    ("Pressure", "Leverage index", "Standard deviation of the win-probability change over the outcome distribution, divided by the league average; graded intensity s = clip(LI - 1, 0, 2)."),
+    ("Player model", "Linear mixed-effects model, REML (Henderson's mixed-model equations)", "Random effects for player level and pressure lift, opponent level and lift, and match; empirical Bayes shrinkage; exact posterior covariance."),
+    ("Rating choice", "Hold-out prediction, 41 splits", "One temporal and 40 random half-splits; past lift made forecasts worse in 82.5% of splits, so it carries no weight."),
+    ("Uncertainty", "Posterior simulation; match-level cluster bootstrap", "4,000 posterior draws for top-10 odds; 200 bootstrap resamples; 18 sensitivity specifications."),
+]
+
+
 def build(d) -> str:
     s, lg = d["sum"], d["league"]
     tb, tw = d["top_batters"], d["top_bowlers"]
@@ -452,7 +465,12 @@ def build(d) -> str:
 <li><b>No recency weighting</b> in the published ranking. A recency-weighted run (20% decay a year) is in the sensitivity table; it shares 8 or 9 of each top 10.</li>
 </ul></div></div>
 {auction_html}
-<h1><span class="no">{11 if auction_html else 10}</span>Reproducing the results</h1>
+<h1><span class="no">{11 if auction_html else 10}</span>Model stack and reproduction</h1>
+<p class="lede">Every component of the method, the technique behind it, and how it was checked.</p>
+<table class="data tight"><thead><tr><th>Component</th><th>Technique</th><th>Detail</th></tr></thead><tbody>
+{''.join(f"<tr><td><b>{k}</b></td><td>{t}</td><td>{x}</td></tr>" for k, t, x in MODEL_STACK)}
+</tbody></table>
+<h2>Reproducing the results</h2>
 <div class="cols"><div>
 <p>Code, tests and all output files are in the repository ({REPO_URL}). With the Data Pack placed in <code>Data Pack/</code>:</p>
 <div class="formula" style="font-family:Consolas,monospace;font-size:8.6pt">pip install -e .[dev,report]<br>python -m pressure.audit<br>python -m pressure.pipeline all<br>pytest<br>python reports/figures.py<br>python reports/build_report.py</div>

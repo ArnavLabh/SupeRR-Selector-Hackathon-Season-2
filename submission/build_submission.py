@@ -24,30 +24,36 @@ REMARK = (
 )
 
 VIDEO = """\
-**Share Your Journey: video script (about 50 seconds)**
+**Share Your Journey: video shot list (about 55 seconds)**
 
-*[0 to 8 s, face to camera]*
-Every T20 fan has a name they trust when the game is on the line. I wanted to find out whether the data agrees.
+Record each shot as its own clip at 1920 x 1080, browser at 90% zoom, Chrome full screen (F11), then cut them together.
+Use the live site, https://superr-selector-2.vercel.app. Add burned-in captions: most people watch reels muted.
 
-*[8 to 20 s, screen recording: the pressure map on the dashboard]*
-So I priced every one of two hundred thousand deliveries for how much it could swing the result. That's pressure. Here, needing 24 off 12 is more than three times an average ball.
+| Time | Screen (page and action) | On-screen text | Voiceover |
+|---|---|---|---|
+| 0 to 6 s | **Methodology** page, top. The walkthrough is on Step 1 showing "4 off 1". Click **Step 3**: the number changes to +1.66. | "4 off the last ball" | "Jaipur, May 2023. Four needed off the last ball. Abdul Samad hits Sandeep Sharma for six." |
+| 6 to 12 s | **Overview** page, top. Let the hero chase animation run; the white dot moves down the pink ridge. | "200,961 balls priced" | "I wanted to know who wins moments like that. So I priced every IPL and T20I ball since 2022 for how far it could swing the match." |
+| 12 to 20 s | **Pressure Lab**. Click the **Last-over thriller** chip, then **Cruising**; the marker jumps and the pressure tag changes colour. | "Pressure = how far one ball can swing it" | "That's pressure. A last-over finish can matter many times more than a quiet over, and the model knows the difference ball by ball." |
+| 20 to 31 s | **Methodology**, scroll to **Tested four ways**, tab **Does it predict?**. Bars grow; the pink bar is the published rating. | "Lift under pressure did not repeat" | "Then the twist. Players who rose above their usual level under pressure in one half of the matches didn't do it again in the other half. Forty tests. What repeated was quality." |
+| 31 to 41 s | **Leaderboards**, Top 10 view, **Batters**. Switch to **Bowlers** so the rows animate. | "Top 10 under pressure" | "So my lists are the best players, fairly measured, who have actually faced the crunch. Suryakumar, Klaasen and Tim David. Narine, Bumrah and Varun." |
+| 41 to 51 s | **Auction Room**, scroll to **The top 20 through the Royals lens**. Click **Most gettable**; Hasaranga rises to the top. | "All 20 would be the Royals' best" | "And for the Royals: every one of the twenty would be their best performer under pressure. The first realistic call: Wanindu Hasaranga, a former Royal." |
+| 51 to 55 s | **Overview**, hero animation, or you on camera. | "superr-selector-2.vercel.app" | "Built for SupeRR Selector Season 2. Thank you @rajasthanroyals and @unstop.world." |
 
-*[20 to 35 s, screen: the hold-out chart on the Method page]*
-The surprise came when I tested it. Players who'd lifted under pressure in one half of the matches didn't do it again in the other half. Forty times over. What repeated was quality.
-
-*[35 to 48 s, screen: the two top-10 lists]*
-So my lists are the best players, measured fairly, who've actually been tested in the crunch. Suryakumar, Klaasen and Tim David with the bat; Narine, Bumrah and Varun with the ball.
-
-*[48 to 55 s, face to camera]*
-Thanks to @rajasthanroyals and @unstop.world for a brilliant problem.
+If you appear on camera, record the first and last lines facing the camera and place the screen clips between them.
 """
 
 CAPTION = """\
 **Social caption**
 
-Who really delivers when the match is on the line? I priced 200,961 IPL and T20I deliveries for how much each could swing the result, then tested whether rising to the occasion repeats. It didn't, but quality under real pressure did. My SupeRR Selector Season 2 entry: a pressure index, a methodology report and an interactive dashboard.
+Four needed off the last ball. One six took the win chance from 27% to 100%.
 
-@rajasthanroyals @unstop.world #SupeRRSelector #RajasthanRoyals #CricketAnalytics #IPL
+I priced 200,961 IPL and T20I deliveries for how far each could swing the match, then asked who really delivers when it matters. The surprise: rising above your usual level under pressure didn't repeat. Quality did.
+
+My SupeRR Selector Season 2 entry: the two top tens, a scouting report for every player, and what it all means for the Royals at the IPL 2027 auction.
+
+Dashboard: superr-selector-2.vercel.app
+
+@rajasthanroyals @unstop.world #SupeRRSelector #RajasthanRoyals #HallaBol #IPL #CricketAnalytics
 """
 
 

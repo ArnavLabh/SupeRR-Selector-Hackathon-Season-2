@@ -1,16 +1,11 @@
 import { useState } from "react";
 import { scaleLinear } from "d3-scale";
-import { AnimatePresence, motion } from "motion/react";
-import { Calculator, ChevronDown, Database, FileDown, Gauge, Users } from "lucide-react";
+import { motion } from "motion/react";
+import { FileDown } from "lucide-react";
+import { Pipeline, ModelStack } from "../components/pipeline";
 import { EASE, GrowBar, PageHead, Reveal, Seg, useTip, useSeen } from "../components/ui";
 import { eligible, pct, pctCapped, shortName, useData, type Disc } from "../lib/data";
 
-const STEPS = [
-  { icon: Database, title: "Price every situation", short: "A win model for every ball", detail: "A model of what happens on a ball (dot, single, boundary, wicket) is fitted on all 200,961 deliveries, then win probability is worked backwards from the end of the match. Every match is priced by a model that never saw it, and a light recalibration keeps it honest early in the game." },
-  { icon: Gauge, title: "Measure the pressure", short: "How far the next ball can swing it", detail: "Leverage is the spread of win-probability outcomes a ball can produce. Divided by the average ball's, that gives three levels: ordinary, elevated and high. Balls bowled after the result is settled are ignored." },
-  { icon: Calculator, title: "Value what happened", short: "Win probability added, per unit of pressure", detail: "A boundary in a quiet over and a boundary in the last over are put on the same scale by dividing the win probability added by the ball's leverage. That lets a player be compared with themselves in ordinary play." },
-  { icon: Users, title: "Rate players fairly", short: "Adjusted for opponent, venue and sample size", detail: "One model estimates each player's level while accounting for the opponent on every ball and the conditions in every match. Small samples are pulled toward average. Hold-out tests then decided what the rating contains: past pressure lift did not repeat, so it is shown but not scored." },
-];
 
 function Calibration() {
   const [seenRef, seen] = useSeen<SVGSVGElement>();
@@ -105,7 +100,6 @@ function Robustness({ disc }: { disc: Disc }) {
 export default function Method() {
   const data = useData();
   const s = data.summary;
-  const [open, setOpen] = useState<number | null>(null);
   const [test, setTest] = useState<"cal" | "pred" | "stab" | "rob">("pred");
   const [disc, setDisc] = useState<Disc>("bat");
   const boot = s.validation?.bootstrap[disc === "bat" ? "batters" : "bowlers"];
@@ -121,20 +115,15 @@ export default function Method() {
     <>
       <PageHead eyebrow="Methodology" title={<>How the ratings work, and how far to <span className="accent">trust</span> them</>}
         right={<a className="btn primary" href="/downloads/Pressure_Index_Methodology_Report.pdf" download><FileDown /> Full report (PDF)</a>}>
-        Four steps, each tested against an alternative.
+        Follow one real delivery through the method, then see the full model stack.
       </PageHead>
 
-      <div className="grid-4">
-        {STEPS.map((st, i) => (
-          <Reveal key={st.title} delay={0.06 * i} className={`card pad stack${open === i ? " raise" : ""}`}>
-            <div className="row between"><span style={{ display: "grid", placeItems: "center", width: 46, height: 46, borderRadius: 14, background: "rgba(234,26,133,.14)", color: "var(--pink-hi)" }}><st.icon size={22} /></span><span className="muted num" style={{ font: "700 26px/1 var(--head)" }}>0{i + 1}</span></div>
-            <h3 className="h3">{st.title}</h3>
-            <p className="muted small">{st.short}</p>
-            <button type="button" className="chip" style={{ justifySelf: "start" }} aria-expanded={open === i} onClick={() => setOpen(open === i ? null : i)}>{open === i ? "Hide detail" : "Show detail"} <ChevronDown size={14} style={{ transform: open === i ? "rotate(180deg)" : "none", transition: "transform .2s" }} /></button>
-            <AnimatePresence>{open === i && <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.25 }} className="small" style={{ color: "var(--text-2)", overflow: "hidden" }}>{st.detail}</motion.p>}</AnimatePresence>
-          </Reveal>
-        ))}
-      </div>
+      <Pipeline />
+
+      <section className="section">
+        <div className="section-head"><div><h2 className="h2">The model stack</h2><p className="sub">Every component, the technique behind it, and how it was checked.</p></div></div>
+        <ModelStack />
+      </section>
 
       <section className="section">
         <div className="section-head">
@@ -149,11 +138,9 @@ export default function Method() {
         </div>
         <div className="split">
           <div className="card pad">
-            <AnimatePresence mode="wait">
-              <motion.div key={test + disc} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.22 }}>
+            <div key={test + disc} className="swap-in">
                 {test === "cal" ? <Calibration /> : test === "pred" ? <Prediction disc={disc} /> : test === "stab" ? <Stability disc={disc} /> : <Robustness disc={disc} />}
-              </motion.div>
-            </AnimatePresence>
+              </div>
           </div>
           <div className="card pad stack" style={{ gap: 14 }}>
             {test === "pred" && (<><span className="tag pink" style={{ justifySelf: "start" }}>The deciding test</span><h3 className="h3">Past lift under pressure does not predict the next match</h3>

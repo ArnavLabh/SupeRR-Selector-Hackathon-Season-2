@@ -63,8 +63,8 @@ export function GrowBar({ value, max, color = "var(--pink)", height = 8, delay =
   const [ref, seen] = useSeen<HTMLDivElement>();
   return (
     <div ref={ref} className="bar" style={{ height, background: track }}>
-      <motion.span style={{ background: color }} initial={{ scaleX: 0 }} animate={{ scaleX: seen ? f : 0 }}
-        transition={{ duration: 0.8, delay, ease: EASE }} />
+      {/* CSS transition, not a JS animation: it completes even when animation frames are throttled. */}
+      <span style={{ background: color, transform: `scaleX(${seen ? f : 0})`, transitionDelay: `${delay}s` }} />
     </div>
   );
 }
@@ -77,8 +77,8 @@ export function Ring({ p, size = 44, label }: { p: number | null | undefined; si
     <span ref={ref} style={{ position: "relative", display: "inline-grid", placeItems: "center", width: size, height: size }} aria-label={label ?? `${pctCapped(p)} chance`}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(-90deg)" }} aria-hidden="true">
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--s3)" strokeWidth="4" />
-        <motion.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={v >= 0.8 ? "var(--pink)" : v >= 0.5 ? "var(--tier-el)" : "var(--tier-ord)"} strokeWidth="4" strokeLinecap="round"
-          strokeDasharray={c} initial={{ strokeDashoffset: c }} animate={{ strokeDashoffset: seen ? c * (1 - v) : c }} transition={{ duration: 0.9, ease: EASE }} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={v >= 0.8 ? "var(--pink)" : v >= 0.5 ? "var(--tier-el)" : "var(--tier-ord)"} strokeWidth="4" strokeLinecap="round"
+          strokeDasharray={c} strokeDashoffset={seen ? c * (1 - v) : c} style={{ transition: "stroke-dashoffset 900ms cubic-bezier(0.22, 1, 0.36, 1)" }} />
       </svg>
       <span style={{ position: "absolute", font: `700 ${size > 50 ? 15 : 11.5}px/1 var(--head)` }} className="num">{pctCapped(p).replace(">99%", "99+")}</span>
     </span>

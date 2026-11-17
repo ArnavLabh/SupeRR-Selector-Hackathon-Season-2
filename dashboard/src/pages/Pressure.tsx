@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { scaleLinear } from "d3-scale";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { Pause, Play, RotateCcw, Zap } from "lucide-react";
 import { CountUp, GrowBar, PageHead, Reveal, Seg, useTip } from "../components/ui";
 import { LI_STOPS, WP_STOPS, lerp } from "../lib/color";
+import { ChaseField } from "../components/hero";
 import { f1, pct, useData, useLazy, type Moment, type PressureMap, type Story } from "../lib/data";
 
 const tierOf = (li: number) => (li >= 2 ? "High" : li >= 1 ? "Elevated" : "Ordinary");
@@ -105,19 +106,17 @@ function MapPanel({ map }: { map: PressureMap }) {
             <div className="stat"><div className="v">{cur.wp}%</div><div className="k">Chasing side wins</div></div>
             <div className="stat"><div className="v">{dead ? "0" : f1(cur.li)}<small>x</small></div><div className="k">An average ball's swing</div></div>
           </div>
-          <AnimatePresence mode="wait">
-            <motion.div key={tier} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="row" style={{ gap: 10 }}>
+          <div key={tier} className="row swap-in" style={{ gap: 10 }}>
               <span className="tag" style={{ background: dead ? "var(--s3)" : TIER[tier], color: tier === "High" ? "#2a0718" : "#fff", height: 30, fontSize: 13.5 }}><Zap size={14} />{dead ? "Settled" : `${tier} pressure`}</span>
               <span className="small muted">{dead ? "The result is decided. Ignored in ratings." : tier === "High" ? "Counts fully toward ratings." : tier === "Elevated" ? "Counts partly toward ratings." : "Counts as ordinary play."}</span>
-            </motion.div>
-          </AnimatePresence>
+            </div>
         </div>
       </div>
     </div>
   );
 }
 
-function Replay({ stories }: { stories: Story[] }) {
+function Replay({ stories, map }: { stories: Story[]; map: PressureMap | null }) {
   const [si, setSi] = useState(0);
   const st = stories[si];
   const n = st.balls.length;
@@ -159,7 +158,8 @@ function Replay({ stories }: { stories: Story[] }) {
         <div className="stat sm"><div className="v num">{done ? (st.won ? 100 : 0) : curBall.wp.toFixed(0)}%</div><div className="k">win chance</div></div>
         <div className="stat sm"><div className="v" style={{ color: done ? (st.won ? "var(--good)" : "var(--bad)") : TIER[tierOf(curBall.li)] }}>{done ? (st.won ? "Chased" : "Defended") : tierOf(curBall.li)}</div><div className="k">{done ? st.comp : "pressure on this ball"}</div></div>
       </div>
-      <div className="table-wrap"><svg className="chart" style={{ minWidth: 620 }} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Win probability of ${st.batting} ball by ball`}>
+      <div className="replay-grid">
+      <div className="table-wrap replay-worm"><svg className="chart" style={{ minWidth: 520 }} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Win probability of ${st.batting} ball by ball`}>
         {st.balls.slice(0, idx).map((b) => { const t = tierOf(b.li); return t === "Ordinary" ? null : <rect key={b.n} x={x(b.n) - bw / 2} y={m.t} width={bw + 0.6} height={H - m.t - m.b} fill={TIER[t]} opacity={t === "High" ? 0.32 : 0.16} />; })}
         {[0, 25, 50, 75, 100].map((t) => <g key={t}><line className={t === 50 ? "zero" : "grid"} x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} /><text x={m.l - 6} y={y(t) + 4} textAnchor="end">{t}%</text></g>)}
         {[...new Set(st.balls.map((b) => b.over))].filter((o) => o % 2 === 0).map((o) => { const f = st.balls.find((b) => b.over === o)!; return <text key={o} x={x(f.n)} y={H - m.b + 16} textAnchor="middle">{o}</text>; })}
@@ -170,6 +170,11 @@ function Replay({ stories }: { stories: Story[] }) {
         {done && st.balls.map((b) => <rect key={b.n} x={x(b.n) - bw / 2} y={m.t} width={bw} height={H - m.t - m.b} fill="transparent"
           onMouseMove={(e) => tip.show(e, <><b>Over {b.over}: {b.w ? "wicket" : `${b.runs} run${b.runs === 1 ? "" : "s"}`}</b>{b.wp.toFixed(0)}% before the ball<br /><i>{tierOf(b.li)} pressure, {b.li.toFixed(1)}x average</i></>)} onMouseLeave={tip.hide} />)}
       </svg></div>
+      {map && <figure className="replay-field" aria-label="The same chase traced across the pressure map">
+        <ChaseField map={map} story={st} idx={done ? n : Math.max(1, idx)} />
+        <figcaption className="muted small">The same chase on the pressure map: runs needed against balls left. The field shifts as wickets fall.</figcaption>
+      </figure>}
+      </div>
       <div className="legend small"><span><i className="dot" style={{ background: "#fff" }} />Win chance</span><span><i className="dot" style={{ background: "var(--tier-el)" }} />Elevated</span><span><i className="dot" style={{ background: "var(--tier-high)" }} />High</span><span><i className="dot" style={{ border: "2px solid var(--pink-hi)" }} />Wicket</span></div>
       {tip.el}
     </div>
@@ -229,7 +234,7 @@ export default function Pressure() {
 
       <section className="section">
         <div className="section-head"><div><h2 className="h2">Replay a finish</h2><p className="sub">Three of the tightest IPL chases in the data, ball by ball. Shaded balls are pressure moments.</p></div></div>
-        {mo ? <Replay stories={mo.stories} /> : <div className="skeleton" style={{ height: 380 }} />}
+        {mo ? <Replay stories={mo.stories} map={map} /> : <div className="skeleton" style={{ height: 380 }} />}
       </section>
 
       <section className="section">
