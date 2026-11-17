@@ -247,7 +247,7 @@ export default function Pressure() {
         <div className="grid-3">
           {mo?.moments.slice(0, 9).map((r, i) => (
             <Reveal key={i} delay={0.04 * (i % 3)} className="card pad stack" >
-              <div className="row between"><span className="tag pink"><Zap size={13} />{r.li.toFixed(1)}x</span><span className="muted small num">{r.date}</span></div>
+              <div className="row between"><span className="tag pink"><Zap size={13} />{r.li.toFixed(1)}x</span>{r.freeHit && <span className="tag gold">Free hit</span>}<span className="muted small num">{r.date}</span></div>
               <div><b>{r.batting} v {r.bowling}</b><div className="psub">{r.comp}</div></div>
               <div style={{ font: "700 20px/1.2 var(--head)" }}>{r.need} off {r.ballsLeft}, {r.wkts} wicket{r.wkts === 1 ? "" : "s"} left</div>
               <div className="small muted">{r.striker} facing {r.bowler}: <b style={{ color: "var(--text)" }}>{r.outcome}</b></div>

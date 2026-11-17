@@ -167,6 +167,9 @@ def _moments(ctx) -> dict:
     """The highest-leverage deliveries in the data, and three match stories."""
     b = ctx["balls"]
     team_of = ctx["state"]["matches"].attrs["team_names"]
+    # A delivery straight after a no-ball in the same innings is a free hit.
+    prev_nb = b.groupby(["match_id", "innings"])["is_noball"].shift(1).fillna(False).astype(bool)
+    b = b.assign(free_hit=prev_nb)
     live = b[~b["dead"]].sort_values("li", ascending=False)
     picked, per_match = [], {}
     for r in live.itertuples():
@@ -182,7 +185,7 @@ def _moments(ctx) -> dict:
             "striker": r.striker_name, "bowler": r.bowler_name,
             "need": int(r.need), "ballsLeft": int(r.bl), "wkts": int(r.wih),
             "li": _r(r.li, 1), "wp": _r(100 * r.wp, 0), "wpAfter": _r(100 * r.wp_after, 0),
-            "outcome": what})
+            "outcome": what, "freeHit": bool(r.free_hit)})
         if len(picked) >= 25:
             break
 

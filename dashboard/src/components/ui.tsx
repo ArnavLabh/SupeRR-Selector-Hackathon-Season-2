@@ -266,7 +266,7 @@ export function Shell({ children }: { children: ReactNode }) {
 export function PageHead({ eyebrow, title, children, right }: { eyebrow: string; title: ReactNode; children?: ReactNode; right?: ReactNode }) {
   return (
     <div className="row between" style={{ alignItems: "end", marginBottom: 36, gap: 24 }}>
-      <div className="stack" style={{ gap: 12, maxWidth: 760 }}>
+      <div className="stack" style={{ gap: 12, maxWidth: 1040 }}>
         <span className="eyebrow">{eyebrow}</span>
         <h1 className="display">{title}</h1>
         {children && <p className="lede">{children}</p>}

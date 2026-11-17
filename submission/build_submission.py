@@ -24,20 +24,20 @@ REMARK = (
 )
 
 VIDEO = """\
-**Share Your Journey: video shot list (about 55 seconds)**
+**Share Your Journey: video shot list (about 56 seconds)**
 
 Record each shot as its own clip at 1920 x 1080, browser at 90% zoom, Chrome full screen (F11), then cut them together.
 Use the live site, https://superr-selector-2.vercel.app. Add burned-in captions: most people watch reels muted.
 
 | Time | Screen (page and action) | On-screen text | Voiceover |
 |---|---|---|---|
-| 0 to 6 s | **Methodology** page, top. The walkthrough is on Step 1 showing "4 off 1". Click **Step 3**: the number changes to +1.66. | "4 off the last ball" | "Jaipur, May 2023. Four needed off the last ball. Abdul Samad hits Sandeep Sharma for six." |
-| 6 to 12 s | **Overview** page, top. Let the hero chase animation run; the white dot moves down the pink ridge. | "200,961 balls priced" | "I wanted to know who wins moments like that. So I priced every IPL and T20I ball since 2022 for how far it could swing the match." |
-| 12 to 20 s | **Pressure Lab**. Click the **Last-over thriller** chip, then **Cruising**; the marker jumps and the pressure tag changes colour. | "Pressure = how far one ball can swing it" | "That's pressure. A last-over finish can matter many times more than a quiet over, and the model knows the difference ball by ball." |
-| 20 to 31 s | **Methodology**, scroll to **Tested four ways**, tab **Does it predict?**. Bars grow; the pink bar is the published rating. | "Lift under pressure did not repeat" | "Then the twist. Players who rose above their usual level under pressure in one half of the matches didn't do it again in the other half. Forty tests. What repeated was quality." |
-| 31 to 41 s | **Leaderboards**, Top 10 view, **Batters**. Switch to **Bowlers** so the rows animate. | "Top 10 under pressure" | "So my lists are the best players, fairly measured, who have actually faced the crunch. Suryakumar, Klaasen and Tim David. Narine, Bumrah and Varun." |
-| 41 to 51 s | **Auction Room**, scroll to **The top 20 through the Royals lens**. Click **Most gettable**; Hasaranga rises to the top. | "All 20 would be the Royals' best" | "And for the Royals: every one of the twenty would be their best performer under pressure. The first realistic call: Wanindu Hasaranga, a former Royal." |
-| 51 to 55 s | **Overview**, hero animation, or you on camera. | "superr-selector-2.vercel.app" | "Built for SupeRR Selector Season 2. Thank you @rajasthanroyals and @unstop.world." |
+| 0 to 8 s | **Methodology** page, top. The walkthrough shows "4 off 1" with the **Free hit, after a no-ball** tag. Click **Step 3**: the number changes to +1.66. | "Jaipur · 7 May 2023 · 5 off the last ball" | "Jaipur, May 2023. Five needed off the last ball. Abdul Samad is caught at long-off... but Sandeep Sharma has overstepped. Free hit. Four needed. Six." |
+| 8 to 14 s | **Overview** page, top. Let the hero chase animation run; the white dot moves down the pink ridge. | "200,961 balls priced" | "I wanted to know who wins moments like that. So I priced every IPL and T20I ball since 2022 for how far it could swing the match." |
+| 14 to 21 s | **Pressure Lab**. Click the **Last-over thriller** chip, then **Cruising**; the marker jumps and the pressure tag changes colour. | "Pressure = how far one ball can swing it" | "That's pressure. A last-over finish can matter many times more than a quiet over, and the model knows the difference ball by ball." |
+| 21 to 31 s | **Methodology**, scroll to **Tested four ways**, tab **Does it predict?**. Bars grow; the pink bar is the published rating. | "Lift under pressure did not repeat" | "Then the twist. Players who rose above their usual level under pressure in one half of the matches didn't do it again in the other half. Forty tests. What repeated was quality." |
+| 31 to 40 s | **Leaderboards**, Top 10 view, **Batters**. Switch to **Bowlers** so the rows animate. | "Top 10 under pressure" | "So my lists are the best players, fairly measured, who have actually faced the crunch. Suryakumar, Klaasen and Tim David. Narine, Bumrah and Varun." |
+| 40 to 50 s | **Auction Room**, scroll to **The top 20 through the Royals lens**. Click **Most gettable**; Hasaranga rises to the top. | "All 20 would be the Royals' best" | "And for the Royals: every one of the twenty would be their best performer under pressure. The first realistic call: Wanindu Hasaranga, a former Royal." |
+| 50 to 56 s | **Overview**, hero animation, or you on camera. | "superr-selector-2.vercel.app" | "Built for SupeRR Selector Season 2. Thank you @rajasthanroyals and @unstop.world." |
 
 If you appear on camera, record the first and last lines facing the camera and place the screen clips between them.
 """
@@ -45,7 +45,7 @@ If you appear on camera, record the first and last lines facing the camera and p
 CAPTION = """\
 **Social caption**
 
-Four needed off the last ball. One six took the win chance from 27% to 100%.
+Five needed off the last ball. Caught, but a no-ball. Then a six off the free hit took the win chance from 27% to 100%.
 
 I priced 200,961 IPL and T20I deliveries for how far each could swing the match, then asked who really delivers when it matters. The surprise: rising above your usual level under pressure didn't repeat. Quality did.
 

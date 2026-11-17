@@ -58,7 +58,7 @@ export interface Summary {
   };
 }
 export interface PressureMap { ballsLeft: number[]; need: number[]; wickets: number[]; envs: Record<string, { wp: number[][][]; li: number[][][] }> }
-export interface Moment { date: string; comp: string; batting: string; bowling: string; striker: string; bowler: string; need: number; ballsLeft: number; wkts: number; li: number; wp: number; wpAfter: number; outcome: string }
+export interface Moment { date: string; comp: string; batting: string; bowling: string; striker: string; bowler: string; need: number; ballsLeft: number; wkts: number; li: number; wp: number; wpAfter: number; outcome: string; freeHit?: boolean }
 export interface Story { comp: string; date: string; batting: string; bowling: string; target: number; won: boolean; balls: { n: number; wp: number; li: number; over: number; w: boolean; runs: number; need: number; bl: number; wih: number }[] }
 export interface LensRow {
   id: number; disc: Disc; rank: number; name: string; team: string | null; nationality: string | null; overseas: boolean | null;

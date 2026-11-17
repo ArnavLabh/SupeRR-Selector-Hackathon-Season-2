@@ -275,19 +275,19 @@
   ],
   "facts": [
     {
-      "k": "Squad",
+      "k": "Squad places",
       "v": "25 / 25",
-      "note": "full [S5]"
+      "note": "filled, the IPL maximum [S5]"
     },
     {
-      "k": "Overseas",
+      "k": "Overseas places",
       "v": "8 / 8",
-      "note": "full [S5]"
+      "note": "filled, the IPL maximum [S5]"
     },
     {
       "k": "Purse left",
       "v": "₹2.65 cr",
-      "note": "before releases [S5]"
+      "note": "before any releases [S5]"
     },
     {
       "k": "Retentions due",

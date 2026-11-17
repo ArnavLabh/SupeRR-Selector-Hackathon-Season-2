@@ -59,7 +59,7 @@ export function Pipeline() {
   return (
     <div className="pipe card" onMouseEnter={() => setAuto(false)}>
       <div className="pipe-ball">
-        <span className="tag pink">A real delivery</span>
+        <span className="tag pink">A real delivery</span>{ball.freeHit && <span className="tag gold">Free hit, after a no-ball</span>}
         <b>{ball.batting} v {ball.bowling}</b>
         <span className="muted small">{ball.comp} · {ball.date} · {ball.striker} facing {ball.bowler}</span>
         <button type="button" className="hero-pause" style={{ marginLeft: "auto" }} onClick={() => setAuto((a) => !a)} aria-label={auto ? "Pause the walkthrough" : "Play the walkthrough"}>{auto ? <Pause size={14} /> : <Play size={14} />}</button>

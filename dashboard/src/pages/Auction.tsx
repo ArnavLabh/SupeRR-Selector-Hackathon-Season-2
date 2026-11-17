@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowUpRight, ExternalLink, ShieldAlert, Target, Users } from "lucide-react";
+import { ArrowDown, ArrowUpRight, ExternalLink, ShieldAlert, Target, Users } from "lucide-react";
 import { scaleLinear } from "d3-scale";
 import { LensBoard } from "../components/lens";
 import { EASE, GrowBar, PageHead, RankBadge, Reveal, Ring, Seg, useTip, useSeen } from "../components/ui";
@@ -95,13 +95,18 @@ export default function Auction() {
 
   return (
     <>
-      <PageHead eyebrow="Auction Room · IPL 2027" title={<>The Royals' <span className="accent">shopping list</span></>}>{a.summary}</PageHead>
+      <PageHead eyebrow="Auction Room · IPL 2027" title={<>The Royals' <span className="accent">shopping list</span></>}
+        right={<div className="row" style={{ gap: 10 }}>
+          <button type="button" className="btn primary" onClick={() => document.getElementById("targets")?.scrollIntoView({ behavior: "smooth", block: "start" })}><ArrowDown /> Jump to the targets</button>
+          <button type="button" className="btn" onClick={() => document.getElementById("lens")?.scrollIntoView({ behavior: "smooth", block: "start" })}>All 20 through the Royals lens</button>
+        </div>}>{a.summary}</PageHead>
 
       <Reveal className="grid-4" y={8}>
         {(a.facts ?? []).slice(0, 4).map((f) => (
           <div key={f.k} className="card pad stat"><div className="v">{f.v}</div><div className="k">{f.k} · {f.note.replace(/\s*\[S\d+\]/g, "")}</div></div>
         ))}
       </Reveal>
+      <p className="muted small" style={{ marginTop: 12 }}>An IPL squad holds at most 25 players, of whom at most 8 can be overseas. With both full, the Royals have to release players before they can buy anyone at the auction.</p>
 
       <section className="section">
         <div className="section-head"><div><h2 className="h2">Where the squad stands</h2><p className="sub">Every ranked player on one line. The Royals' middle order sits left of the pack, and only Archer reaches the right half of the bowlers.</p></div></div>
@@ -131,7 +136,7 @@ export default function Auction() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section anchor" id="targets">
         <div className="section-head">
           <div><h2 className="h2">Who could fill them</h2><p className="sub">Ranked by the model, filtered for players with a realistic route to Jaipur.</p></div>
           <Seg label="Filter targets" value={fd} onChange={setFd} options={[["all", "All"], ["bat", "Batting"], ["bowl", "Bowling"]] as const} />
@@ -143,7 +148,7 @@ export default function Auction() {
         </motion.div>
       </section>
 
-      <section className="section">
+      <section className="section anchor" id="lens">
         <div className="section-head"><div><h2 className="h2">The top 20 through the Royals lens</h2><p className="sub">What every ranked player would add to this squad, and how realistic a bid is.</p></div></div>
         <LensBoard />
       </section>
