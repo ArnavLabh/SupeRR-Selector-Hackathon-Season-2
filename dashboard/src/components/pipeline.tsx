@@ -4,7 +4,9 @@ import { Calculator, Database, Gauge, Pause, Play, Users } from "lucide-react";
 
 import { useData, useLazy, type Moment } from "../lib/data";
 
-type Step = { icon: typeof Database; title: string; model: string[]; body: string };
+const fmtDate = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+type Step ={ icon: typeof Database; title: string; model: string[]; body: string };
 
 /**
  * One real delivery, followed through the four stages of the method.
@@ -15,9 +17,7 @@ export function Pipeline() {
   const { summary: s } = useData();
   const mo = useLazy<{ moments: Moment[] }>("moments");
   const [i, setI] = useState(0);
-  const [auto, setAuto] = useState(true);      // user's play or pause choice
-  const [hover, setHover] = useState(false);   // pause only while the pointer is over the card
-  const running = auto && !hover;
+  const [running, setRunning] = useState(true);   // only the button or a step click changes this
   useEffect(() => {
     if (!running) return;
     const t = setInterval(() => setI((x) => (x + 1) % 4), 5200);
@@ -59,19 +59,23 @@ export function Pipeline() {
   const St = steps[i];
 
   return (
-    <div className="pipe card" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+    <div className="pipe card">
       <div className="pipe-ball">
-        <span className="tag pink">A real delivery</span>{ball.freeHit && <span className="tag gold">Free hit, after a no-ball</span>}
-        <b>{ball.batting} v {ball.bowling}</b>
-        <span className="muted small">{ball.comp} · {ball.date} · {ball.striker} facing {ball.bowler}</span>
-        <button type="button" className="hero-pause" style={{ marginLeft: "auto" }} onClick={() => setAuto((a) => !a)} aria-label={auto ? "Pause the walkthrough" : "Play the walkthrough"}>{auto ? <Pause size={14} /> : <Play size={14} />}</button>
+        <div className="pipe-match">
+          <span className="eyebrow-sm">The ball we follow</span>
+          <b className="pipe-teams">{ball.batting} <span className="muted">v</span> {ball.bowling}</b>
+          <span className="muted small">{ball.comp} · {fmtDate(ball.date)} · {ball.striker} facing {ball.bowler}{ball.freeHit && <> · <span className="gold-text">free hit, after a no-ball</span></>}</span>
+        </div>
+        <button type="button" className="pipe-play" onClick={() => setRunning((r) => !r)} aria-pressed={!running}>
+          {running ? <><Pause size={14} /> Pause</> : <><Play size={14} /> Play</>}
+        </button>
       </div>
 
       <div className="pipe-rail" role="tablist" aria-label="Method steps">
         <div className="pipe-track"><span style={{ transform: `scaleX(${i / 3})` }} /></div>
         {steps.map((st, k) => (
           <button key={st.title} type="button" role="tab" aria-selected={k === i} className={`pipe-node${k <= i ? " done" : ""}${k === i ? " on" : ""}`}
-            onClick={() => { setI(k); setAuto(false); }}>
+            onClick={() => { setI(k); setRunning(false); }}>
             <span className="pipe-dot"><st.icon size={18} /></span>
             <span className="pipe-label"><small>Step {k + 1}</small>{st.title}</span>
           </button>

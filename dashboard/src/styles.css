@@ -380,7 +380,15 @@ a.lens-row:hover, a.lens-row:focus-visible { background: var(--s2); }
 
 /* ---------------------------------------------------------------- method walkthrough */
 .pipe { position: relative; padding: 22px 24px 26px; overflow: hidden; background: radial-gradient(80% 120% at 100% 0%, rgba(234, 26, 133, 0.14), transparent 60%), var(--s1); }
-.pipe-ball { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.pipe-ball { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.pipe-match { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.pipe-match .eyebrow-sm { font: 650 11px/1 var(--head); letter-spacing: 0.14em; text-transform: uppercase; color: var(--pink-hi); }
+.pipe-teams { font: 650 19px/1.25 var(--head); letter-spacing: -0.01em; }
+.gold-text { color: var(--gold); }
+.pipe-play { display: inline-flex; align-items: center; gap: 7px; flex: none; height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--s2); color: var(--text); font: 600 13px/1 var(--body, inherit); cursor: pointer; transition: border-color 160ms, background 160ms; }
+.pipe-play:hover { border-color: var(--pink); }
+.pipe-play[aria-pressed="true"] { background: rgba(234, 26, 133, 0.16); border-color: var(--pink); }
+@media (max-width: 560px) { .pipe-ball { align-items: flex-start; } .pipe-teams { font-size: 16px; } }
 .pipe-rail { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 26px 0 8px; }
 .pipe-track { position: absolute; left: 12.5%; right: 12.5%; top: 21px; height: 2px; background: var(--line-2); }
 .pipe-track span { position: absolute; inset: 0; background: var(--pink); transform-origin: left; transition: transform 500ms var(--ease); }
