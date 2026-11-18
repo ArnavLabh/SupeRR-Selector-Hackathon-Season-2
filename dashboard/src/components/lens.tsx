@@ -6,7 +6,6 @@ import { EASE, GrowBar, RankBadge, Seg } from "./ui";
 import { eligible, isRoyal, RR_OUT, shortName, signed, teamShort, useData, useLazy, type Disc, type Lens, type LensRow, type Player } from "../lib/data";
 
 export const CALL_TONE: Record<string, string> = { Priority: "pink", Strong: "blue", Watch: "gold", Monitor: "", "Out of reach": "" };
-const ORDER = ["Priority", "Strong", "Watch", "Monitor", "Out of reach"];
 const ordinal = (n: number) => `${n}${n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th"}`;
 const clean = (s: string) => s.replace(/\s*\[S\d+\]/g, "");
 
@@ -15,24 +14,35 @@ export function LensBoard() {
   const lens = useLazy<Lens>("royals_lens");
   const [d, setD] = useState<"all" | Disc>("all");
   const [sort, setSort] = useState<"upgrade" | "gettable">("upgrade");
-  const rows = useMemo(() => (lens?.rows ?? []).filter((r) => d === "all" || r.disc === d)
-    .sort((a, b) => (sort === "upgrade" ? b.upgrade - a.upgrade : ORDER.indexOf(a.call) - ORDER.indexOf(b.call) || b.upgrade - a.upgrade)), [lens, d, sort]);
+  const rows = useMemo(() => (lens?.rows ?? []).filter((r) => (d === "all" || r.disc === d) && (sort === "upgrade" || r.availability === "Released"))
+    .sort((a, b) => b.upgrade - a.upgrade), [lens, d, sort]);
+  const released = (lens?.rows ?? []).filter((r) => r.availability === "Released").length;
   if (!lens) return <div className="skeleton" style={{ height: 420 }} />;
   const max = Math.max(...lens.rows.map((r) => r.upgrade));
   const bat = lens.rows.find((r) => r.disc === "bat")!, bowl = lens.rows.find((r) => r.disc === "bowl")!;
+  const status = (r: LensRow) => {
+    const to = r.team ? teamShort[r.team] ?? r.team : "";
+    return r.availability === "Traded" ? `Traded to ${to}` : r.availability === "Retained" ? `Retained by ${to}` : r.availability === "Released" ? "Released" : "No news";
+  };
   return (
     <div className="stack" style={{ gap: 16 }}>
       <div className="lens-head">
-        <p className="lens-claim">All <b>20</b> would walk into the Royals side as their best pressure performer. The batters improve on <b>{bat.rrBest}</b> ({signed(bat.rrBestRating)}), the bowlers on <b>{bowl.rrBest}</b> ({signed(bowl.rrBestRating)}).</p>
+        <p className="lens-claim">All <b>20</b> would walk into the Royals side as their best pressure performer. The batters improve on <b>{bat.rrBest}</b> ({signed(bat.rrBestRating)}), the bowlers on <b>{bowl.rrBest}</b> ({signed(bowl.rrBestRating)}). {released === 0 ? <>But <b>none</b> was released at the retention deadline, so the realistic targets are the players listed above.</> : <><b>{released}</b> of them reached the auction.</>}</p>
         <div className="row" style={{ gap: 10 }}>
           <Seg label="Discipline" value={d} onChange={setD} options={[["all", "All 20"], ["bat", "Batters"], ["bowl", "Bowlers"]] as const} />
-          <Seg label="Order" value={sort} onChange={setSort} options={[["upgrade", "Biggest upgrade"], ["gettable", "Most gettable"]] as const} />
+          <Seg label="Show" value={sort} onChange={setSort} options={[["upgrade", "Biggest upgrade"], ["gettable", "Most gettable"]] as const} />
         </div>
       </div>
+      {sort === "gettable" && rows.length === 0 ? (
+        <div className="card pad stack swap-in" style={{ gap: 8, textAlign: "center", padding: "36px 24px" }}>
+          <h3 className="h3">None of the top 10 {d === "bat" ? "batters" : d === "bowl" ? "bowlers" : "batters or bowlers"} is in the auction</h3>
+          <p className="muted small" style={{ maxWidth: 560, margin: "0 auto" }}>Every one was retained or traded at the IPL 2027 retention deadline ({lens.asOf.split(", after")[0]}). The best players who did reach the auction are in <a className="accent" href="#targets" onClick={(e) => { e.preventDefault(); document.getElementById("targets")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>Who could fill them</a>.</p>
+        </div>
+      ) : (
       <div className="card lens-table" role="table" aria-label="Top 20 players through the Royals lens">
         <div className="lens-row lens-th" role="row">
           <span role="columnheader">#</span><span role="columnheader">Player</span><span role="columnheader" className="hide-md">Role</span>
-          <span role="columnheader">Upgrade on the Royals' best</span><span role="columnheader" className="hide-md">Slot</span><span role="columnheader">Call</span>
+          <span role="columnheader">Upgrade on the Royals' best</span><span role="columnheader" className="hide-md">Slot</span><span role="columnheader">2027 status</span>
         </div>
         <motion.div layout>
           <AnimatePresence initial={false}>
@@ -49,14 +59,15 @@ export function LensBoard() {
                   <span role="cell" className="hide-md">{r.overseas == null ? <span className="tag">n/a</span> : r.overseas
                     ? <span className="tag" title="Uses one of eight overseas places"><Plane size={12} />Overseas</span>
                     : <span className="tag good"><Globe2 size={12} />Indian</span>}</span>
-                  <span role="cell"><span className={`tag ${CALL_TONE[r.call] ?? ""}`}>{r.call}</span></span>
+                  <span role="cell"><span className={`tag ${r.availability === "Released" ? "pink" : ""}`}>{status(r)}</span></span>
                 </Link>
               </motion.div>
             ))}
           </AnimatePresence>
         </motion.div>
       </div>
-      <p className="muted small">Upgrade is the pressure rating minus the Royals' best ranked player in the same discipline. Calls use the IPL 2027 retention lists as of {lens.asOf}. Out of reach means retained or traded.</p>
+      )}
+      <p className="muted small">Upgrade is the pressure rating minus the Royals' best ranked player in the same discipline. Status from the IPL 2027 retention lists as of {lens.asOf}.</p>
     </div>
   );
 }

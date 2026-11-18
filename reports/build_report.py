@@ -546,17 +546,17 @@ def auction_section(d) -> str:
                 cls = {"Priority": "p", "Strong": "n"}.get(r["call"], "")
                 out += (f"<tr><td><span class='rk{' g' if r['rank'] <= 3 else ''}'>{r['rank']}</span></td><td><b>{short(r['name'])}</b></td>"
                         f"<td>{r['role']}</td><td class=r>{sg(r['upgrade'])}</td><td>{slot}</td><td>{r['fit']}</td>"
-                        f"<td><span class='tag {cls}'>{r['call']}</span></td></tr>")
+                        f"<td><span class='tag {cls}'>{r.get('status', r['call'])}</span></td></tr>")
             return out
         b0 = next(x for x in lens["rows"] if x["disc"] == "bat")
         w0 = next(x for x in lens["rows"] if x["disc"] == "bowl")
-        head = "<thead><tr><th>#</th><th>Player</th><th>Role in the data</th><th class=r>Upgrade</th><th>Slot</th><th>How they would strengthen the Royals</th><th>Call</th></tr></thead>"
+        head = "<thead><tr><th>#</th><th>Player</th><th>Role in the data</th><th class=r>Upgrade</th><th>Slot</th><th>How they would strengthen the Royals</th><th>2027 status</th></tr></thead>"
         lens_html = f"""
 <h2>10.3 Each of the top 20 through the Royals lens</h2>
 <p>Every one of the 20 ranked players would be the Royals' best pressure performer in their discipline. "Upgrade" is their rating minus the Royals' best ranked player: {b0['rrBest']} ({sg(b0['rrBestRating'])}) for batting, {w0['rrBest']} ({sg(w0['rrBestRating'])}) for bowling. Role comes from where each player actually batted or bowled in the data. The call combines that fit with the IPL 2027 retention lists.</p>
 <h3>Batters</h3><table class="data tight">{head}<tbody>{lens_rows("bat")}</tbody></table>
 <h3>Bowlers</h3><table class="data tight">{head}<tbody>{lens_rows("bowl")}</tbody></table>
-<p class="cap">Priority, Strong and Watch: released and in the auction pool, in that order. Out of reach: retained or traded at the deadline ({lens['asOf'].split(', after')[0]}). Overseas players need one of the Royals' 3 open overseas places (reported).</p>
+<p class="cap">Status from the IPL 2027 retention lists ({lens['asOf'].split(', after')[0]}). None of the 20 was released, so the realistic targets are those in section 10.2. Overseas players need one of the Royals' 3 open overseas places (reported).</p>
 """
     return f"""
 <h1><span class="no">10</span>What it means for Rajasthan Royals</h1>

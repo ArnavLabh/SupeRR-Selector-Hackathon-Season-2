@@ -17,6 +17,9 @@ ROOT = Path(__file__).resolve().parents[1]
 RANK = ROOT / "outputs" / "rankings"
 DATA = ROOT / "dashboard" / "public" / "data"
 RR = "Rajasthan Royals"
+SHORT = {"Rajasthan Royals": "RR", "Mumbai Indians": "MI", "Chennai Super Kings": "CSK", "Royal Challengers Bengaluru": "RCB",
+         "Kolkata Knight Riders": "KKR", "Sunrisers Hyderabad": "SRH", "Delhi Capitals": "DC", "Punjab Kings": "PBKS",
+         "Gujarat Titans": "GT", "Lucknow Super Giants": "LSG"}
 
 # Nationality for players with no T20I in the data (public record).
 NATIONALITY = {"Sunil Narine": "West Indies", "Mohsin Khan": "India"}
@@ -95,6 +98,8 @@ def main() -> None:
                 "rrBest": best["player"].split(" (")[0], "rrBestRating": round(float(best["pressure"]), 3),
                 "upgrade": round(float(r.pressure - best["pressure"]), 3), "rrRank": rr_rank, "rrSize": int(len(rr)) + 1,
                 "fit": fit, "availability": avail, "availabilityNote": avail_note, "call": call,
+                "status": {"Retained": f"Retained by {SHORT.get(team, team)}", "Traded": f"Traded to {SHORT.get(team, team)}",
+                           "Released": f"Released by {SHORT.get(team, team)}"}.get(avail, avail),
             })
     out = {"asOf": auction["asOf"], "rows": rows,
            "note": f"Ratings and ranks are the frozen primary results. Roles come from where each player bats or bowls in the data; availability comes from the IPL 2027 retention lists as of {when} (ESPNcricinfo)."}

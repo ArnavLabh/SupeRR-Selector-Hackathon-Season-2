@@ -286,7 +286,7 @@ pres.addSection({ title: "Royals" });
   tb(s, `Upgrade = pressure rating minus the Royals' best ranked player: ${bat[0].rrBest} (${sg(bat[0].rrBestRating)}) for batting, ${bowl[0].rrBest} (${sg(bowl[0].rrBestRating)}) for bowling.`,
     { x: M, y: 1.5, w: 12.1, h: 0.35, fontSize: 12.5, color: HEX.muted });
   const callFill = { Priority: HEX.pinkSoft, Strong: "16224F", Watch: HEX.goldSoft, Monitor: HEX.paper, "Out of reach": HEX.paper };
-  const head = ["#", "Player", "Role", "Upgrade", "Slot", "Call"].map((t) => ({ text: t, options: { bold: true, color: HEX.muted, fontSize: 10 } }));
+  const head = ["#", "Player", "Role", "Upgrade", "Slot", "2027 status"].map((t) => ({ text: t, options: { bold: true, color: HEX.muted, fontSize: 10 } }));
   const table = (rows, x, title) => {
     tb(s, title, { x, y: 1.98, w: 5.9, h: 0.35, fontSize: 15, bold: true, color: HEX.ink });
     const body = rows.map((r) => [
@@ -295,14 +295,14 @@ pres.addSection({ title: "Royals" });
       { text: r.role, options: { color: HEX.ink2, fontSize: 10 } },
       { text: sg(r.upgrade), options: { bold: true, color: HEX.ink, align: "right" } },
       { text: r.overseas == null ? "n/a" : r.overseas ? "Overseas" : "Indian", options: { color: r.overseas ? HEX.ink2 : "B8F5D9", fontSize: 10 } },
-      { text: r.call, options: { bold: true, color: HEX.ink, fill: { color: callFill[r.call] ?? HEX.paper }, fontSize: 10 } },
+      { text: r.status ?? r.call, options: { bold: true, color: HEX.ink, fill: { color: callFill[r.call] ?? HEX.paper }, fontSize: 10 } },
     ]);
     s.addTable([head, ...body], { x, y: 2.4, w: 5.95, colW: [0.42, 1.75, 1.2, 0.78, 0.8, 1.0], rowH: 0.39, fontSize: 11.5, fontFace: "Calibri", valign: "middle",
       border: { type: "solid", pt: 0.5, color: HEX.line }, fill: { color: HEX.bg }, margin: [0.02, 0.06, 0.02, 0.06] });
   };
   table(bat, M, "Batters");
   table(bowl, M + 6.2, "Bowlers");
-  tb(s, `Priority, Strong, Watch: released and in the auction pool. Out of reach: retained or traded (lists as of ${D.asOf.split(", after")[0]}). The Royals have 3 open overseas places (reported).`,
+  tb(s, `Status from the IPL 2027 retention lists (${D.asOf.split(", after")[0]}). None of the 20 was released; the realistic targets are on the previous slide.`,
     { x: M, y: 6.84, w: 12.1, h: 0.3, fontSize: 10, color: HEX.muted });
   s.addNotes("This is the brief's last question: how each player could strengthen the Royals. Every one of the 20 improves on the Royals' current best in that discipline. The realistic shortlist is the Priority, Strong and Watch rows; the biggest names are franchise cores and out of reach.");
 }

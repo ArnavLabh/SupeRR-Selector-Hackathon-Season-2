@@ -149,7 +149,7 @@ export default function Auction() {
       </section>
 
       <section className="section anchor" id="lens">
-        <div className="section-head"><div><h2 className="h2">The top 20 through the Royals lens</h2><p className="sub">What every ranked player would add to this squad, and how realistic a bid is.</p></div></div>
+        <div className="section-head"><div><h2 className="h2">The top 20 through the Royals lens</h2><p className="sub">What each of the 20 would add to this squad, and where each one stands for 2027.</p></div></div>
         <LensBoard />
       </section>
 

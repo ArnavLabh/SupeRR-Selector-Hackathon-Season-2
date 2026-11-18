@@ -404,7 +404,8 @@
    "fit": "Fills the gap: a middle-order batter proven in the crunch",
    "availability": "Retained",
    "availabilityNote": "Retained by Mumbai Indians for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by MI"
   },
   {
    "id": 4260,
@@ -425,7 +426,8 @@
    "fit": "Fills the gap: a middle-order batter proven in the crunch",
    "availability": "Retained",
    "availabilityNote": "Retained by Sunrisers Hyderabad for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by SRH"
   },
   {
    "id": 6396,
@@ -446,7 +448,8 @@
    "fit": "Fills the gap: a middle-order batter proven in the crunch",
    "availability": "Retained",
    "availabilityNote": "Retained by Royal Challengers Bengaluru for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by RCB"
   },
   {
    "id": 6288,
@@ -467,7 +470,8 @@
    "fit": "Overlaps with Sooryavanshi and Jaiswal at the top; would need to bat lower",
    "availability": "Retained",
    "availabilityNote": "Retained by Gujarat Titans for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by GT"
   },
   {
    "id": 813,
@@ -488,7 +492,8 @@
    "fit": "Overlaps with Sooryavanshi and Jaiswal at the top; would need to bat lower",
    "availability": "Retained",
    "availabilityNote": "Retained by Gujarat Titans for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by GT"
   },
   {
    "id": 7897,
@@ -509,7 +514,8 @@
    "fit": "Fills the gap: a middle-order batter proven in the crunch",
    "availability": "Retained",
    "availabilityNote": "Retained by Mumbai Indians for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by MI"
   },
   {
    "id": 3647,
@@ -530,7 +536,8 @@
    "fit": "Fills the gap: a middle-order batter proven in the crunch",
    "availability": "Retained",
    "availabilityNote": "Retained by Punjab Kings for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by PBKS"
   },
   {
    "id": 3125,
@@ -551,7 +558,8 @@
    "fit": "Fills the gap: a middle-order batter proven in the crunch",
    "availability": "Retained",
    "availabilityNote": "Retained by Lucknow Super Giants for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by LSG"
   },
   {
    "id": 818,
@@ -572,7 +580,8 @@
    "fit": "Overlaps with Sooryavanshi and Jaiswal at the top; would need to bat lower",
    "availability": "Retained",
    "availabilityNote": "Retained by Lucknow Super Giants for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by LSG"
   },
   {
    "id": 5939,
@@ -593,7 +602,8 @@
    "fit": "Fills the gap: a middle-order batter proven in the crunch",
    "availability": "Retained",
    "availabilityNote": "Retained by Kolkata Knight Riders for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by KKR"
   },
   {
    "id": 781,
@@ -614,7 +624,8 @@
    "fit": "Adds a high-pressure spin option alongside Bishnoi and Jadeja",
    "availability": "Retained",
    "availabilityNote": "Retained by Kolkata Knight Riders for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by KKR"
   },
   {
    "id": 830,
@@ -635,7 +646,8 @@
    "fit": "Fills the gap: a pressure seamer beside Archer, but takes an overseas slot",
    "availability": "Retained",
    "availabilityNote": "Retained by Royal Challengers Bengaluru for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by RCB"
   },
   {
    "id": 3644,
@@ -656,7 +668,8 @@
    "fit": "Adds a high-pressure spin option alongside Bishnoi and Jadeja",
    "availability": "Traded",
    "availabilityNote": "Traded from Delhi Capitals to Lucknow Super Giants, in exchange for Rishabh Pant (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Traded to LSG"
   },
   {
    "id": 6256,
@@ -677,7 +690,8 @@
    "fit": "Adds a high-pressure spin option alongside Bishnoi and Jadeja",
    "availability": "Retained",
    "availabilityNote": "Retained by Kolkata Knight Riders for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by KKR"
   },
   {
    "id": 4722,
@@ -698,7 +712,8 @@
    "fit": "Adds a high-pressure spin option alongside Bishnoi and Jadeja",
    "availability": "Retained",
    "availabilityNote": "Retained by Gujarat Titans for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by GT"
   },
   {
    "id": 2933,
@@ -719,7 +734,8 @@
    "fit": "Fills the gap: an Indian seamer to partner Archer",
    "availability": "Retained",
    "availabilityNote": "Retained by Mumbai Indians for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by MI"
   },
   {
    "id": 6669,
@@ -740,7 +756,8 @@
    "fit": "Fills the gap: an Indian seamer to partner Archer",
    "availability": "Retained",
    "availabilityNote": "Retained by Lucknow Super Giants for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by LSG"
   },
   {
    "id": 2876,
@@ -761,7 +778,8 @@
    "fit": "Adds a high-pressure spin option alongside Bishnoi and Jadeja",
    "availability": "Retained",
    "availabilityNote": "Retained by Delhi Capitals for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by DC"
   },
   {
    "id": 7920,
@@ -782,7 +800,8 @@
    "fit": "Fills the gap: a pressure seamer beside Archer, but takes an overseas slot",
    "availability": "Retained",
    "availabilityNote": "Retained by Chennai Super Kings for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by CSK"
   },
   {
    "id": 1612,
@@ -803,7 +822,8 @@
    "fit": "Adds a high-pressure spin option alongside Bishnoi and Jadeja",
    "availability": "Retained",
    "availabilityNote": "Retained by Punjab Kings for IPL 2027 (17 November 2026, 7 pm IST).",
-   "call": "Out of reach"
+   "call": "Out of reach",
+   "status": "Retained by PBKS"
   }
  ],
  "figures": "C:/Arnav/Coding/SupeRR Selector Hackathon Season 2/reports/figures"
