@@ -4,8 +4,8 @@ Working plan for the SupeRR Selector Season 2 (Round 1) submission.
 
 **Status (16 November 2026):** stages 1 to 12 complete except Vercel deployment, which needs the
 repository owner's Vercel login (see [DEPLOYMENT.md](DEPLOYMENT.md)). The plan below was written
-before implementation; the main change from it is D-08: hold-out tests showed pressure-specific
-lift does not repeat, so the published rating gives it no weight.
+before implementation; the main change from it is D-08: pressure-specific lift is only partly
+repeatable in hold-out tests, so the published rating counts half of it.
 Decisions and their reasons live in [DECISIONS.md](DECISIONS.md).
 
 ## What the brief actually asks

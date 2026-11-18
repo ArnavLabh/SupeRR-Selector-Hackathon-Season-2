@@ -87,17 +87,17 @@ pres.addSection({ title: "Answer" });
   const s = pres.addSlide({ masterName: "DARK", sectionTitle: "Answer" });
   s.addText("SUPERR SELECTOR SEASON 2 · ROUND 1", { placeholder: "kicker" });
   s.addText("The most reliable players under pressure", { placeholder: "title" });
-  tb(s, `Every one of ${D.deliveries.toLocaleString("en-US")} IPL and T20I deliveries since 2022, priced for how much it could swing the result. Players ranked by what predicts their next pressure performance, tested on matches the model never saw.`,
+  tb(s, `Every one of ${D.deliveries.toLocaleString("en-US")} IPL and T20I deliveries since 2022, priced for how much it could swing the result. Players ranked by their level on a high-pressure ball, counting only as much of their pressure lift as repeats in matches the model never saw.`,
     { x: M, y: 3.25, w: 8.6, h: 1.2, fontSize: 18, color: "C5CAE6" });
   const kpis = [[pct(D.highShare, 1), "of live deliveries are High pressure"],
                 [`${D.eligible.bat} + ${D.eligible.bowl}`, "batters and bowlers tested enough to rank"],
-                [pct((D.beat.bat + D.beat.bowl) / 2, 1), "of hold-out tests: past pressure lift did not help predict"]];
+                [`${D.agree} of 20`, "top-10 players also top 10 under at least 4 of 7 ranking methods"]];
   kpis.forEach(([b, l], i) => {
     tb(s, b, { x: M + i * 3.9, y: 5.0, w: 3.6, h: 0.7, fontSize: 34, bold: true, color: i === 2 ? HEX.gold : HEX.white });
     tb(s, l, { x: M + i * 3.9, y: 5.72, w: 3.4, h: 0.7, fontSize: 13, color: "AAB1D9" });
   });
   tb(s, `Arnav Labhasetwar${DASH ? ` · ${DASH}` : ""} · github.com/ArnavLabh/SupeRR-Selector-Hackathon-Season-2`, { x: M, y: 6.85, w: 12, h: 0.3, fontSize: 11, color: "AAB1D9" });
-  s.addNotes("The brief: find who delivers most reliably when it matters, relative to their usual level. We price every ball for how much it can move the result, measure what each player did with those balls, and then test which way of rating players actually predicts pressure performance in matches the rating has not seen.");
+  s.addNotes("The brief: find who delivers most reliably when it matters, relative to their usual level. We price every ball for how much it can move the result, measure what each player did with those balls, and then test how much of each player's pressure-specific shift repeats in matches the rating has not seen.");
 }
 
 // ------------------------------------------------------------------ 2 the two lists
@@ -189,7 +189,7 @@ pres.addSection({ title: "Method" });
 
 // ------------------------------------------------------------------ 6 key finding
 {
-  const s = content("Method", "The finding that decided the ranking", "Rising to the occasion does not repeat. Quality does");
+  const s = content("Method", "How much of the pressure lift counts", "Lift under pressure is real, but only part of it repeats");
   const labels = D.holdout.bat.map((r) => r.label);
   s.addChart(pres.charts.BAR, [
     { name: "Batters", labels, values: D.holdout.bat.map((r) => r.r) },
@@ -203,19 +203,21 @@ pres.addSection({ title: "Method" });
     valGridLine: { color: HEX.line, size: 0.75 }, catGridLine: { style: "none" },
     showLegend: true, legendPos: "b", legendFontSize: 11, legendFontFace: "+mn-lt", legendColor: HEX.ink2, barGapWidthPct: 60,
   });
-  stat(s, 8.4, 1.8, 4.3, pct((D.beat.bat + D.beat.bowl) / 2, 1), "of hold-out splits where leaving out a player's past pressure lift predicted better than using it", HEX.pinkDeep);
-  tb(s, `Players were rated on half the matches and tested on the other half, 40 times, for batters and bowlers. In the data it was fitted to, bowlers' pressure lift looked real (p = ${D.lrP.bowl.toFixed(3)}); in matches it had not seen, it did not repeat.`,
+  stat(s, 8.4, 1.8, 4.3, pct((D.beat.bat + D.beat.bowl) / 2, 1), "of hold-out splits where counting the full pressure lift forecast worse than counting none", HEX.pinkDeep);
+  tb(s, `Players were rated on half the matches and tested on the other half, 40 times. Counting half the lift cost almost nothing, and its top 10s delivered the most in the unseen matches.`,
     { x: 8.4, y: 3.65, w: 4.3, h: 1.7, fontSize: 13.5 });
   card(s, 8.4, 5.4, 4.35, 1.2, HEX.pinkSoft);
-  tb(s, "So the rating is each player's adjusted level, among those actually tested at High pressure. Lift is reported for every player, as record.",
+  tb(s, "So the rating is each player's adjusted level plus half their pressure lift: delivering under pressure counts, one hot patch cannot decide a place.",
     { x: 8.6, y: 5.52, w: 3.95, h: 1.0, fontSize: 13, color: HEX.ink });
-  s.addNotes("This is the most important slide. I expected pressure lift to be a usable trait, especially for bowlers. The hold-out test said otherwise: adding it made predictions worse in about four splits out of five. That changed the ranking method, and the decision is documented with its evidence.");
+  s.addNotes("This is the slide that sets the rating. A rating with no lift ignores what players did under pressure, which is what the brief asks about. The full lift forecast worst in unseen matches. Half the lift forecasts almost as well as none, and its top tens delivered the most later.");
 }
 
 // ------------------------------------------------------------------ 7, 8 evidence
 pres.addSection({ title: "Evidence" });
-[["batters", "Batters", "Suryakumar, Klaasen and Tim David are clear of the field"],
- ["bowlers", "Bowlers", "Narine, Bumrah and Varun lead a tighter bowling list"]].forEach(([k, lab, title]) => {
+const CALL = { "Suryakumar Yadav": "Suryakumar", "Kuldeep Yadav": "Kuldeep", "Tim David": "Tim David", "Varun Chakravarthy": "Varun", "Rashid Khan": "Rashid" };
+const lead = (k) => D.tops[k].slice(0, 3).map((r) => CALL[r.name] ?? r.name.split(" ").slice(-1)[0]).join(", ").replace(/, ([^,]*)$/, " and $1");
+[["batters", "Batters", `${lead("batters")} are clear of the field`],
+ ["bowlers", "Bowlers", `${lead("bowlers")} lead a tighter bowling list`]].forEach(([k, lab, title]) => {
   const s = content("Evidence", `${lab}: the evidence`, title);
   s.addImage({ path: FIG(`top10_${k}`), x: M, y: 1.6, w: 7.6, h: 4.9, sizing: { type: "contain", w: 7.6, h: 4.9 }, altText: `Top 10 ${k}: pressure rating with 80% intervals` });
   const top = D.tops[k];
@@ -226,7 +228,7 @@ pres.addSection({ title: "Evidence" });
   card(s, 8.6, 5.15, 4.15, 1.35);
   tb(s, `Bootstrap: on average ${D.boot[k].toFixed(1)} of the 10 stay in the top 10 when matches are resampled 200 times. The lower places are close calls.`,
     { x: 8.8, y: 5.27, w: 3.8, h: 1.15, fontSize: 12.5, color: HEX.ink2 });
-  tb(s, "Pink dot: rating. Bar: 80% credible interval. Hollow dot: where the player would sit if past pressure lift carried forward.", { x: M, y: 6.55, w: 7.6, h: 0.4, fontSize: 10, color: HEX.muted });
+  tb(s, "Pink dot: rating. Bar: 80% credible interval. Hollow dot: the same player with the full pressure lift.", { x: M, y: 6.55, w: 7.6, h: 0.4, fontSize: 10, color: HEX.muted });
   s.addNotes(`Every name is backed by conventional splits in the report (strike rate or economy by tier, match-by-match record). The hollow dots show the descriptive view: who did better or worse than usual under pressure.`);
 });
 
@@ -235,7 +237,7 @@ pres.addSection({ title: "Evidence" });
   const s = content("Evidence", "Reliability", "How far to trust the lists");
   stat(s, M, 1.8, 3.6, `${D.boot.batters.toFixed(1)} / ${D.boot.bowlers.toFixed(1)}`, "of 10 batters / bowlers stay in the top 10 across 200 resampled datasets");
   stat(s, M, 3.65, 3.6, `${D.robustMinOverlap}+ of 10`, `shared with the published lists in each of ${D.robustRuns} alternative specifications of pressure, data handling and adjustment`, HEX.pinkDeep);
-  tb(s, `${D.sensRuns} specifications were run in all. The ones that move the lists most are those the hold-out test rejected (adding lift, or rating on pressure balls alone) and IPL-only data.`,
+  tb(s, `${D.sensRuns} specifications were run in all. The ones that move the lists most are the alternative lift weights, rating on pressure balls alone, and IPL-only data.`,
     { x: M, y: 5.55, w: 4.1, h: 1.3, fontSize: 12.5, color: HEX.muted });
   s.addImage({ path: FIG("calibration"), x: 5.0, y: 1.6, w: 3.6, h: 3.6, sizing: { type: "contain", w: 3.6, h: 3.6 }, altText: "Calibration of win probability" });
   tb(s, "Win probability is calibrated out of fold: when the model says 70%, the side wins about 70% of the time.", { x: 5.0, y: 5.3, w: 3.6, h: 0.8, fontSize: 12, color: HEX.muted });
@@ -274,7 +276,7 @@ pres.addSection({ title: "Royals" });
   ]);
   s.addTable([head, ...rows], { x: 5.95, y: 1.7, w: 6.8, colW: [1.55, 2.0, 1.15, 0.85, 1.25], rowH: 0.62, fontSize: 12, fontFace: "Calibri", valign: "middle",
     border: { type: "solid", pt: 0.5, color: HEX.line }, margin: [0.03, 0.06, 0.03, 0.06] });
-  s.addNotes("After retentions the Royals released Hetmyer and five seamers and traded in Shami. Archer is still their only seamer in the top third. Hasaranga is the only top-20 player released, and Muzarabani and Pathirana are the best seamers in the pool. No top-10 batter was released, so the middle-order gap cannot be fully bought.");
+  s.addNotes("After retentions the Royals released Hetmyer and five seamers and traded in Shami. Shami is now their highest-rated bowler, just ahead of Archer, both mid-table. None of the top 20 was released; Hasaranga (11th) and Pathirana (19th) are the best bowlers in the pool, and Nissanka (15th) the best batter.");
 }
 
 // ------------------------------------------------------------------ 10b Royals lens
@@ -309,15 +311,15 @@ pres.addSection({ title: "Royals" });
 {
   const s = pres.addSlide({ masterName: "DARK", sectionTitle: "Royals" });
   s.addText("WHAT TO TAKE AWAY", { placeholder: "kicker" });
-  s.addText("Pay for proven quality in the crunch, not for past heroics", { placeholder: "title" });
+  s.addText("Rank on what players do under pressure, at the strength it repeats", { placeholder: "title" });
   tb(s, [
     { text: "Pressure is measurable, and it is concentrated at the death of live chases.", options: { bullet: true, breakLine: true } },
-    { text: "Doing better than usual under pressure did not repeat in unseen matches; overall quality, fairly adjusted, did.", options: { bullet: true, breakLine: true } },
-    { text: "For the Royals: buy pressure bowling. Hasaranga, Muzarabani and Pathirana were all released; no top-10 batter was.", options: { bullet: true, breakLine: true } },
+    { text: "Performance under pressure is mostly quality plus a shift that only partly repeats; the rating counts the shift at half strength.", options: { bullet: true, breakLine: true } },
+    { text: "For the Royals: none of the top 20 reached the auction. Hasaranga and Pathirana are the best pressure bowlers in the pool.", options: { bullet: true, breakLine: true } },
     { text: `Availability from the IPL 2027 retention lists as of ${D.asOf.split(", after")[0]}.`, options: { bullet: true } },
   ], { x: M, y: 3.4, w: 10.5, h: 2.6, fontSize: 18, color: "DCDFF0", paraSpaceAfter: 10 });
   tb(s, `${DASH ? `Live dashboard: ${DASH}   ·   ` : ""}Code and report: github.com/ArnavLabh/SupeRR-Selector-Hackathon-Season-2`, { x: M, y: 6.75, w: 12, h: 0.35, fontSize: 12, color: "AAB1D9" });
-  s.addNotes("Close on the decision rule for the auction table: rank by fairly adjusted quality, require real exposure to high pressure, and treat a player's past lift under pressure as record rather than forecast.");
+  s.addNotes("Close on the decision rule: rank by each player's adjusted level on a high-pressure ball, require real exposure to high pressure, and count past lift at the strength it repeats.");
 }
 
 (async () => {

@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { FileDown } from "lucide-react";
 import { Pipeline, ModelStack } from "../components/pipeline";
 import { EASE, GrowBar, PageHead, Reveal, Seg, useTip, useSeen } from "../components/ui";
-import { eligible, pct, pctCapped, shortName, useData, type Disc } from "../lib/data";
+import { eligible, pct, pctCapped, shortName, useData, useLazy, type Disc } from "../lib/data";
 
 
 function Calibration() {
@@ -34,9 +34,9 @@ function Calibration() {
 function Prediction({ disc }: { disc: Disc }) {
   const { summary: s } = useData();
   const rows = (s.validation?.holdout ?? []).filter((r) => r.discipline === disc).sort((a, b) => b.mean_r - a.mean_r);
-  const pub = "Model: usual level (no pressure-specific term)";
+  const pub = "Model: usual level + half the lift";
   const label = (m: string) => ({
-    [pub]: "Published rating", "Model: usual level + half the lift": "Rating plus half the lift", "Model: pressure rating (usual level + lift)": "Rating plus full lift",
+    [pub]: "Published rating", "Model: usual level (no pressure-specific term)": "Level, no lift", "Model: pressure rating (usual level + lift)": "Level plus full lift",
     "Raw overall mean (no shrinkage)": "Raw value, all balls", "Conventional: pressure strike rate / economy": disc === "bat" ? "Pressure strike rate" : "Pressure economy",
     "Pressure balls only, shrunk and adjusted": "Pressure balls only", "Raw pressure-weighted mean (no shrinkage)": "Raw value, pressure balls", "Model: lift alone": "Past lift alone",
   } as Record<string, string>)[m] ?? m;
@@ -80,6 +80,41 @@ function Stability({ disc }: { disc: Disc }) {
   );
 }
 
+
+type Methods = { rule: string; methods: string[]; bat: { id: number; ranks: (number | null)[]; votes: number }[]; bowl: { id: number; ranks: (number | null)[]; votes: number }[] };
+const SHORT = ["Published", "No lift", "Raw, weighted", "Raw, High", "Situation rule", "SR / econ.", "Consistency"];
+
+/** The published top 10 against six other ways of ranking the same players. */
+function Agreement({ disc }: { disc: Disc }) {
+  const data = useData();
+  const m = useLazy<Methods>("methods");
+  if (!m) return <div className="skeleton" style={{ height: 360 }} />;
+  const byId = new Map(m[disc].map((r) => [r.id, r]));
+  const top = eligible(data, disc).slice(0, 10);
+  return (
+    <div className="stack" style={{ gap: 10 }}>
+      <div className="agree-grid agree-head" aria-hidden="true">
+        <span />{SHORT.map((l) => <span key={l} className="agree-col">{l}</span>)}<span className="agree-col">Top 10 in</span>
+      </div>
+      {top.map((p, i) => {
+        const r = byId.get(p.id);
+        return (
+          <div key={p.id} className="agree-grid" role="row">
+            <span className="small" role="rowheader">{p.rank}. {shortName(p.name)}</span>
+            {(r?.ranks ?? []).map((k, j) => (
+              <motion.span key={j} className={`agree-dot${k != null && k <= 10 ? " on" : ""}`} role="cell"
+                initial={{ opacity: 0, scale: 0.4 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.02 * (i * 7 + j), duration: 0.25 }}
+                title={`${SHORT[j]}: ${k == null ? "too few balls" : `rank ${k}`}`}>{k ?? "n/a"}</motion.span>
+            ))}
+            <span className="small num" style={{ textAlign: "right" }} role="cell"><b>{r?.votes ?? 0}</b> of 7</span>
+          </div>
+        );
+      })}
+      <p className="muted small">Each column ranks the same eligible players a different way; pink is a top-10 place. The raw and rule columns use small samples and are a check, not a rating. Situation rule: {m.rule}.</p>
+    </div>
+  );
+}
+
 function Robustness({ disc }: { disc: Disc }) {
   const { summary: s } = useData();
   const rows = (s.validation?.sensitivity ?? []).filter((r) => r.discipline === disc);
@@ -92,7 +127,7 @@ function Robustness({ disc }: { disc: Disc }) {
           <span className="val">{r.top10_overlap}/10</span>
         </div>
       ))}
-      <p className="muted small">Top-10 names shared with the published list when one choice is changed. The variants that move it most are the ones the prediction test rejected.</p>
+      <p className="muted small">Top-10 names shared with the published list when one choice is changed. The variants that move it most are the other lift weights and rating on pressure balls alone.</p>
     </div>
   );
 }
@@ -100,7 +135,7 @@ function Robustness({ disc }: { disc: Disc }) {
 export default function Method() {
   const data = useData();
   const s = data.summary;
-  const [test, setTest] = useState<"cal" | "pred" | "stab" | "rob">("pred");
+  const [test, setTest] = useState<"cal" | "pred" | "agree" | "stab" | "rob">("pred");
   const [disc, setDisc] = useState<Disc>("bat");
   const boot = s.validation?.bootstrap[disc === "bat" ? "batters" : "bowlers"];
   const LIMITS = [
@@ -127,25 +162,28 @@ export default function Method() {
 
       <section className="section">
         <div className="section-head">
-          <div><h2 className="h2">Tested four ways</h2></div>
+          <div><h2 className="h2">Tested five ways</h2></div>
           <div className="row" style={{ gap: 10 }}>
             {test !== "cal" && <Seg label="Discipline" value={disc} onChange={setDisc} options={[["bat", "Batters"], ["bowl", "Bowlers"]] as const} />}
           </div>
         </div>
         <div className="row" style={{ gap: 8, marginBottom: 18 }} role="tablist" aria-label="Validation tests">
-          {([["pred", "Does it predict?"], ["stab", "Is it stable?"], ["rob", "Is it robust?"], ["cal", "Is the win model right?"]] as const).map(([k, l]) => (
+          {([["pred", "Does it predict?"], ["agree", "Do other methods agree?"], ["stab", "Is it stable?"], ["rob", "Is it robust?"], ["cal", "Is the win model right?"]] as const).map(([k, l]) => (
             <button key={k} type="button" role="tab" aria-selected={test === k} className="chip" aria-pressed={test === k} onClick={() => setTest(k)}>{l}</button>))}
         </div>
         <div className="split">
           <div className="card pad">
             <div key={test + disc} className="swap-in">
-                {test === "cal" ? <Calibration /> : test === "pred" ? <Prediction disc={disc} /> : test === "stab" ? <Stability disc={disc} /> : <Robustness disc={disc} />}
+                {test === "cal" ? <Calibration /> : test === "pred" ? <Prediction disc={disc} /> : test === "agree" ? <Agreement disc={disc} /> : test === "stab" ? <Stability disc={disc} /> : <Robustness disc={disc} />}
               </div>
           </div>
           <div className="card pad stack" style={{ gap: 14 }}>
-            {test === "pred" && (<><span className="tag pink" style={{ justifySelf: "start" }}>The deciding test</span><h3 className="h3">Past lift under pressure does not predict the next match</h3>
-              <p style={{ color: "var(--text-2)" }}>Rated on half the matches, tested on the other half, 40 times. Adding a player's past pressure lift made the forecast worse in {pct(s.validation?.holdout.find((r) => r.discipline === disc && r.method.startsWith("Model: usual level ("))?.share_beating_pressure_rating, 1)} of tests.</p>
-              <p className="muted small">So the rating is each player's fairly adjusted quality, among players genuinely tested at high pressure.</p></>)}
+            {test === "pred" && (<><span className="tag pink" style={{ justifySelf: "start" }}>The deciding test</span><h3 className="h3">Pressure lift is real, but only part of it repeats</h3>
+              <p style={{ color: "var(--text-2)" }}>Rated on half the matches, tested on the other half, 40 times. Counting a player's full pressure lift forecast worse than counting none in {pct(s.validation?.holdout.find((r) => r.discipline === disc && r.method.startsWith("Model: usual level ("))?.share_beating_pressure_rating, 1)} of tests. Counting half cost almost nothing.</p>
+              <p className="muted small">So the rating is each player's adjusted level plus half their pressure lift: performance under pressure counts, without one hot or cold patch deciding a place.</p></>)}
+            {test === "agree" && (<><h3 className="h3">Seven methods, mostly one answer</h3>
+              <p style={{ color: "var(--text-2)" }}>The published list against six other ways of ranking the same players: the model without lift, raw value with no adjustment, a plain cricket rule, strike rate or economy, and match-to-match consistency.</p>
+              <p className="muted small">A name that is top 10 under several methods does not depend on one modelling choice.</p></>)}
             {test === "stab" && (<><h3 className="h3">The leaders are secure</h3><div className="stat"><div className="v">{boot?.mean_top10_overlap.toFixed(1)}<small>of 10</small></div><div className="k">stay in the top 10 on average across 200 resamples</div></div>
               <p className="muted small">The last few places could reasonably go to several players. Each list shows the odds.</p></>)}
             {test === "rob" && (<><h3 className="h3">Reasonable alternatives give similar lists</h3><p style={{ color: "var(--text-2)" }}>Changing the pressure cut-offs, the dead-ball rule, outlier handling, rain-affected games or the competitions included moves at most two of ten names.</p></>)}

@@ -8,9 +8,9 @@ The analysis covers every delivery in the supplied Data Pack: IPL 2022 to 2026 a
 1. **Prices every match situation.** A ball-outcome model and a dynamic programme give a win probability for every state. Every match is priced by a model that never saw it.
 2. **Measures the pressure of every ball.** Pressure is *leverage*: how far the next ball can move the result. Each ball is Ordinary, Elevated or High.
 3. **Values what each player did.** Win probability added, divided by leverage, so ordinary and pressure balls sit on one scale.
-4. **Rates players fairly.** A hierarchical model adjusts for the opponent on every ball, match conditions and sample size. Hold-out tests then decide what the rating should contain.
+4. **Rates players fairly.** A hierarchical model adjusts for the opponent on every ball, match conditions and sample size. Hold-out tests then set how much of each player's pressure-specific shift the rating keeps.
 
-The central finding: **a player's past "lift" under pressure does not predict their next pressure performance; their overall level, fairly measured, does.** The published rating is that level, among players who have actually been tested at High pressure. Each player's lift is still reported as part of their record. See [docs/DECISIONS.md](docs/DECISIONS.md), D-08.
+The rating: **each player's level on a typical high-pressure ball**, adjusted for opposition, conditions and sample size. It is their usual level plus half of how that level shifted under pressure. The shift is real but only partly repeatable in matches the model has not seen, so it counts at half strength. Seven independent ranking methods are compared to show the lists do not hinge on one choice. See [docs/DECISIONS.md](docs/DECISIONS.md), D-08.
 
 ## Results
 

@@ -79,6 +79,8 @@ def load():
     d["sens"] = pd.DataFrame(json.loads((OUT / "validation" / "sensitivity.json").read_text(encoding="utf-8")))
     d["bootsum"] = json.loads((OUT / "validation" / "bootstrap_summary.json").read_text(encoding="utf-8"))
     d["defn"] = json.loads((OUT / "validation" / "pressure_definition_checks.json").read_text(encoding="utf-8"))
+    for k in ("batters", "bowlers"):
+        d[f"meth_{k}"] = pd.read_csv(OUT / "validation" / f"method_comparison_{k}.csv").set_index("player_id")
     d["audit"] = json.loads((OUT / "audit" / "data_audit.json").read_text(encoding="utf-8"))
     ap = ROOT / "research" / "auction.json"
     d["auction"] = json.loads(ap.read_text(encoding="utf-8")) if ap.exists() else None
@@ -219,7 +221,8 @@ MODEL_STACK = [
     ("Machine-learning benchmarks", "Logistic regression; monotone gradient boosting (HistGradientBoosting)", "Fitted to match results with the same folds; out-of-fold log loss 0.521 and 0.529 against 0.519 for the structural model. Not adopted. No deep learning: about 840 match results cannot support it."),
     ("Pressure", "Leverage index", "Standard deviation of the win-probability change over the outcome distribution, divided by the league average; graded intensity s = clip(LI - 1, 0, 2)."),
     ("Player model", "Linear mixed-effects model, REML (Henderson's mixed-model equations)", "Random effects for player level and pressure lift, opponent level and lift, and match; empirical Bayes shrinkage; exact posterior covariance."),
-    ("Rating choice", "Hold-out prediction, 41 splits", "One temporal and 40 random half-splits; past lift made forecasts worse in 82.5% of splits, so it carries no weight."),
+    ("Rating choice", "Hold-out prediction, 41 splits", "One temporal and 40 random half-splits. Rating = usual level + half the demonstrated pressure lift: full lift forecast worst, no lift ignores pressure performance."),
+    ("Method check", "Seven independent ranking methods", "Published rating, model without lift, raw leverage-weighted value, raw High-tier value, a plain situation rule, strike rate or economy against the league, and match-to-match consistency."),
     ("Uncertainty", "Posterior simulation; match-level cluster bootstrap", "4,000 posterior draws for top-10 odds; 200 bootstrap resamples; 18 sensitivity specifications."),
 ]
 
@@ -229,10 +232,15 @@ def build(d) -> str:
     tb, tw = d["top_batters"], d["top_bowlers"]
     hi, od, el = lg.loc["High"], lg.loc["Ordinary"], lg.loc["Elevated"]
     ho = d["ho"].set_index(["discipline", "method"])
-    PUB, FULL = "Model: usual level (no pressure-specific term)", "Model: pressure rating (usual level + lift)"
+    L0, FULL = "Model: usual level (no pressure-specific term)", "Model: pressure rating (usual level + lift)"
     HALF, PONLY, RAWP, LIFT = ("Model: usual level + half the lift", "Pressure balls only, shrunk and adjusted",
                                "Raw pressure-weighted mean (no shrinkage)", "Model: lift alone")
-    beat = (ho.loc[("bat", PUB), "share_beating_pressure_rating"] + ho.loc[("bowl", PUB), "share_beating_pressure_rating"]) / 2
+    PUB = HALF
+    t10 = ho["top10_future_value"].groupby(level="method").mean()
+    half_best = t10.idxmax() == HALF
+    mb_, mw_ = d["meth_batters"], d["meth_bowlers"]
+    agree_b = int((mb_.loc[tb.player_id, "top10_votes"] >= 4).sum())
+    agree_w = int((mw_.loc[tw.player_id, "top10_votes"] >= 4).sum())
     bench = d["bench"][d["bench"]["scope"] == "All"]
     cal = s["calibrationCoefs"]
     k0 = sum(c["slope_at_start"] for c in cal) / len(cal)
@@ -259,7 +267,20 @@ def build(d) -> str:
         b = sens[(sens["variant"] == v) & (sens["discipline"] == "bowl")].iloc[0]
         sens_rows += (f"<tr><td>{v}</td><td class=muted>{a.family}</td><td class=r>{a.spearman:.2f}</td><td class=r>{int(a.top10_overlap)}/10</td>"
                       f"<td class=r>{b.spearman:.2f}</td><td class=r>{int(b.top10_overlap)}/10</td></tr>")
-    min_ov = int(min(sens[~sens["variant"].str.contains("lift|Pressure balls only|IPL only")]["top10_overlap"]))
+    min_ov = int(min(sens[~sens["variant"].str.contains("lift|Pressure balls only|IPL only|Usual level only")]["top10_overlap"]))
+
+    def meth_table(m, t):
+        cols = (("rank_m1", "Published"), ("rank_m2", "No lift"), ("rank_m3", "Raw, weighted"), ("rank_m4", "Raw, High"),
+                ("rank_m5", "Situation rule"), ("rank_m6", "SR / econ."), ("rank_m7", "Consistency"))
+        head = "".join(f"<th class=r>{lab}</th>" for _, lab in cols)
+        body = ""
+        for r in t.itertuples():
+            x = m.loc[r.player_id]
+            hot = ' style="color:#ff6fb5;font-weight:700"'
+            cells = "".join(("<td class=r" + (hot if not pd.isna(x[c]) and x[c] <= 10 else "") + ">"
+                             + ("n/a" if pd.isna(x[c]) else str(int(x[c]))) + "</td>") for c, _ in cols)
+            body += f"<tr><td><b>{short(r.player)}</b></td>{cells}<td class=r><b>{int(x.top10_votes)}</b> of 7</td></tr>"
+        return f"<table class='data tight'><thead><tr><th>Player</th>{head}<th class=r>Top 10 in</th></tr></thead><tbody>{body}</tbody></table>"
 
     tier_rows = "".join(
         f"<tr><td><b>{k}</b> <span class=sub>{lab}</span></td><td class=r>{pc(s['tierShares'][k], 1)}</td><td class=r>{pc(r.chase_share)}</td>"
@@ -275,7 +296,7 @@ def build(d) -> str:
   {logo_tag()}
   <div class="eyebrow">SupeRR Selector Season 2 · Round 1 methodology report</div>
   <h1>The most reliable players under pressure</h1>
-  <p class="dek">A leverage-based pressure index, a context-neutral measure of what each ball was worth, and a ranking chosen by how well it predicts pressure performance in matches it has not seen.</p>
+  <p class="dek">A leverage-based pressure index, a context-neutral measure of what each ball was worth, and a rating of each player's level on a high-pressure ball, tested against seven independent ranking methods.</p>
   <div class="lists">
     <div><h2>Top 10 batters</h2><ol>{cover_list(tb)}</ol></div>
     <div><h2>Top 10 bowlers</h2><ol>{cover_list(tw)}</ol></div>
@@ -285,11 +306,11 @@ def build(d) -> str:
 
 <table class="frame"><thead><tr><td><div class="sp-top"></div></td></tr></thead><tfoot><tr><td><div class="sp-bot"></div></td></tr></tfoot><tbody><tr><td>
 <h1 style="break-before:auto"><span class="no">1</span>Summary</h1>
-<p class="lede">The brief asks who delivers most reliably when it matters, relative to their usual level. This report defines "when it matters" for every one of {s['deliveries']:,} deliveries, measures what each player did with those deliveries on a scale that is comparable with ordinary play, and then asks the question that decides the ranking: does performing above your usual level under pressure repeat?</p>
+<p class="lede">The brief asks how batters and bowlers perform in high-pressure situations compared with their usual level, and who delivers most consistently when it matters. This report defines pressure for every one of {s['deliveries']:,} deliveries, measures what each player did on a scale that is comparable with ordinary play, estimates each player's level on a high-pressure ball, and tests how much of that level repeats in matches the model has not seen.</p>
 <div class="kpis">
   <div><b>{s['deliveries']:,}</b><span>deliveries, {s['matches']} matches, IPL and T20I, 2022 to 2026</span></div>
   <div><b>{pc(s['tierShares']['High'], 1)}</b><span>of live deliveries are High pressure; {pc(hi.death_share)} of those fall in overs 16 to 20</span></div>
-  <div><b>{pc(beat, 1)}</b><span>of 40 hold-out tests in which ignoring past pressure "lift" predicted better than using it</span></div>
+  <div><b>{agree_b + agree_w} of 20</b><span>top-10 players who are also top 10 under at least four of seven independent ranking methods</span></div>
   <div><b>{s['eligible']['bat']} + {s['eligible']['bowl']}</b><span>batters and bowlers with enough High-pressure exposure to be ranked</span></div>
 </div>
 <div class="cols">
@@ -299,15 +320,16 @@ def build(d) -> str:
 <li><b>Pressure is leverage.</b> A win-probability model prices every match situation. The pressure of a ball is the spread of win-probability outcomes it can produce, relative to the average ball (the leverage index, LI). Ordinary is LI below 1, Elevated 1 to 2, High 2 and above.</li>
 <li><b>Performance is win probability added per unit of leverage.</b> That puts a boundary in a quiet over and a boundary in the last over on one scale, so pressure and usual play can be compared like for like.</li>
 <li><b>One model, fair comparisons.</b> A hierarchical model estimates each player's level and pressure response while adjusting for the opponent on every ball, the conditions in every match and the size of the sample.</li>
-<li><b>Validation chooses the rating.</b> Players were rated on half the matches and tested on the other half, forty times, plus once forward in time.</li>
+<li><b>Validation sets the weights.</b> Players were rated on half the matches and tested on the other half, forty times, plus once forward in time. That decides how much of each player's pressure-specific shift the rating keeps.</li>
+<li><b>Seven methods, one answer.</b> The lists are checked against six other ways of ranking the same players, from a plain cricket rule to strike rate and economy.</li>
 </ul>
 </div>
 <div>
 <h2>What was found</h2>
 <ul>
 <li><b>High pressure is rare and specific.</b> It is the death of a live chase. A wicket falls every {100 / hi.wicket_pct:.0f} balls there against every {100 / od.wicket_pct:.0f} in ordinary play.</li>
-<li><b>Rising to the occasion does not repeat.</b> A player's past "lift" under pressure has no predictive value for their next pressure performance, for batters or bowlers. Their overall level, fairly measured, does.</li>
-<li><b>So the most reliable players under pressure are the best players who have been tested there.</b> The published rating is each player's adjusted level, restricted to those with real High-pressure exposure. Every player's pressure record against their usual level is still reported, as record.</li>
+<li><b>Pressure performance is mostly quality, plus a shift that partly repeats.</b> How a player's level moves under pressure ("lift") is real in the data, but only part of it carries over to unseen matches. Counting all of it forecast worst; counting none would ignore what the brief asks for. The rating counts half{', the weight whose top 10s delivered most in unseen matches' if half_best else ''}.</li>
+<li><b>The lists do not hinge on one method.</b> {agree_b} of the ten batters and {agree_w} of the ten bowlers are top 10 under at least four of seven independent ranking methods (section 8.4).</li>
 <li><b>Certainty is uneven.</b> {sure_b} batters and {sure_w} bowlers have at least an 80% chance of a true top-10 place. The lower places are close calls and are labelled with probabilities.</li>
 </ul>
 </div></div>
@@ -396,44 +418,45 @@ def build(d) -> str:
 <h2>4.4 Eligibility</h2>
 <p>A rating at High pressure for someone who has barely met it is extrapolation. To be ranked a player needs pressure exposure (the sum of s) of at least {s['settings']['min_pressure_exposure']:.0f}, at least {s['settings']['min_high_balls']} High-tier balls, and pressure balls in at least {s['settings']['min_pressure_matches']} matches. {s['eligible']['bat']} batters and {s['eligible']['bowl']} bowlers qualify. The floor mainly removes openers, who are usually out, or home, before the crunch: {', '.join(f"{short(r.player)} ({int(r.high_balls)} High-tier balls)" for r in unt.head(3).itertuples())} are excellent and unranked. They are listed as untested, not as failures.</p>
 
-<h1><span class="no">5</span>Does rising under pressure repeat?</h1>
-<p class="lede">This is the question the ranking turns on. If some players reliably lift under pressure, the rating should reward lift. If lift is luck, rewarding it would rank the fortunate.</p>
+<h1><span class="no">5</span>How much of rising under pressure repeats?</h1>
+<p class="lede">This sets the rating. If players reliably lift under pressure, their lift should count in full. If lift were luck, counting it would rank the fortunate. The evidence sits in between.</p>
 <div class="cols"><div>
 <h2>5.1 In the data the model was fitted to</h2>
 <p>For bowlers, the spread in pressure lift is larger than chance alone suggests (likelihood-ratio p = {mw['lrP']:.3f}). For batters the most likely spread is zero (p = {mb['lrP']:.2f}). Because a zero estimate would overstate certainty, the model averages over the plausible range with a flat prior on the standard deviation, so each player receives a shrunk estimate of their lift.</p>
 <h2>5.2 In matches the model had not seen</h2>
 <p>Players were rated on one set of matches. Their pressure-weighted value was then measured in the remaining matches: 40 random half-splits and one split forward in time (rate on 2022 to 24, test on 2025 to 26).</p>
 <ul>
-<li>Lift on its own has no predictive value (r = {ho.loc[('bat', LIFT), 'mean_r']:.2f} for batters, {ho.loc[('bowl', LIFT), 'mean_r']:.2f} for bowlers).</li>
-<li>Adding lift to a player's level makes the prediction worse, in {pc(ho.loc[('bat', PUB), 'share_beating_pressure_rating'], 1)} of splits for batters and {pc(ho.loc[('bowl', PUB), 'share_beating_pressure_rating'], 1)} for bowlers.</li>
-<li>Anything built from pressure balls alone does worst of all. Giving pressure balls extra weight when estimating level also hurt.</li>
+<li>Lift on its own predicts little (r = {ho.loc[('bat', LIFT), 'mean_r']:.2f} for batters, {ho.loc[('bowl', LIFT), 'mean_r']:.2f} for bowlers).</li>
+<li>Counting the full lift forecast worse than counting none in {pc(ho.loc[('bat', L0), 'share_beating_pressure_rating'], 1)} of splits for batters and {pc(ho.loc[('bowl', L0), 'share_beating_pressure_rating'], 1)} for bowlers.</li>
+<li>Counting half costs little: r = {ho.loc[('bat', HALF), 'mean_r']:.2f} against {ho.loc[('bat', L0), 'mean_r']:.2f} for batters and {ho.loc[('bowl', HALF), 'mean_r']:.2f} against {ho.loc[('bowl', L0), 'mean_r']:.2f} for bowlers. Its top 10s went on to add {t10[HALF]:.2f} per 100 pressure balls in unseen matches, averaged over batters and bowlers{', the most of any method' if half_best else ''}.</li>
+<li>Anything built from pressure balls alone does worst of all.</li>
 </ul>
-<div class="callout pink"><b>Decision.</b> The published pressure rating is the player's adjusted level with no weight on lift. It is the best available predictor of what a player will do on a pressure ball. Lift is reported for every player as record.</div>
+<div class="callout pink"><b>Decision.</b> The published pressure rating is each player's adjusted usual level plus half of their demonstrated pressure lift: their expected level on a typical High-tier ball, with the less repeatable part of the shift discounted. A rating with no lift was rejected because it ranks who is good overall rather than who performs under pressure, which is what the brief asks for.</div>
 </div><div>
 <figure class="fig">{img('holdout')}<figcaption>Mean correlation over 40 random half-splits, with standard errors. The published rating is in pink.</figcaption></figure>
 </div></div>
 <table class="data tight"><thead><tr><th rowspan=2>Players rated on the first set of matches by</th><th colspan=3 class=r>Batters</th><th colspan=3 class=r>Bowlers</th></tr>
 <tr><th class=r>r, 40 splits</th><th class=r>r, forward in time</th><th class=r>its top 10, later</th><th class=r>r, 40 splits</th><th class=r>r, forward in time</th><th class=r>its top 10, later</th></tr></thead><tbody>
-{ho_row(PUB, 'Published rating: adjusted level, no lift', 'hl')}{ho_row(HALF, 'Level plus half the demonstrated lift')}{ho_row(FULL, 'Level plus full demonstrated lift')}
+{ho_row(HALF, 'Published rating: level plus half the lift', 'hl')}{ho_row(L0, 'Level, no lift')}{ho_row(FULL, 'Level plus full demonstrated lift')}
 {ho_row('Raw overall mean (no shrinkage)', 'Raw value on all balls, no adjustment')}{ho_row('Conventional: pressure strike rate / economy', 'Pressure strike rate / pressure economy')}
 {ho_row(PONLY, 'Pressure balls only, shrunk and adjusted')}{ho_row(RAWP, 'Raw value on pressure balls')}{ho_row(LIFT, 'Demonstrated lift alone')}
 </tbody></table>
 <p class="cap">"Its top 10, later": mean pressure-weighted value per 100 balls, in unseen matches, of the ten players each method rated highest. Correlations are modest for every method because any player's pressure sample in half the matches is small; the order of the methods is the finding. For batters the forward-in-time split is negative for every method, a measure of how noisy two seasons of batting are.</p>
-<p><b>What this means for the brief.</b> The comparison the brief asks for, pressure against usual level, is made for every player and published. It is treated as what happened, not as what to expect. The players who deliver most reliably when it matters are those whose level is highest, measured in a way that removes the effect of opposition, conditions and small samples, and who have actually faced High pressure.</p>
+<p><b>What this means for the brief.</b> The comparison the brief asks for, pressure against usual level, is each player's lift. It is estimated for every player, counted at half strength in the rating, and published in full beside it. The players who deliver most reliably when it matters are those with the highest level on a high-pressure ball, after removing the effect of opposition, conditions and small samples, among players who have actually faced High pressure.</p>
 
 <h1><span class="no">6</span>The top 10 batters under pressure</h1>
 <div class="cols wide"><div>{img('top10_batters')}</div><div>
 <p>{short(tb.player.iloc[0])}, {short(tb.player.iloc[1])} and {short(tb.player.iloc[2])} are clear of the field: each has at least a {pc(tb.p_top10.iloc[:3].min())} chance of a true top-10 place, and they hold the top three places in {pc(d['boot_batters'].loc[tb.player_id.iloc[:3], 'boot_p_top5'].min())} or more of resampled datasets' top fives. From fourth down the intervals overlap heavily.</p>
-<p class="cap">Pink dot: rating. Bar: 80% credible interval. Hollow blue dot: where the player would sit if their past lift carried forward. Right-hand column: probability of a true top-10 place.</p>
+<p class="cap">Pink dot: rating. Bar: 80% credible interval. Hollow blue dot: the same player with the full demonstrated lift. Right-hand column: probability of a true top-10 place.</p>
 </div></div>
 {top_table(d, 'batters')}
-<p class="cap">SR = strike rate. "Usual" = Ordinary-tier balls; "pressure" = Elevated and High; "High" = LI ≥ 2. Shown lift = demonstrated, shrunk, not used in the rating. Pressure balls = all deliveries in the pressure tiers (the evidence lines below count legal balls only). Matches positive = matches with six or more pressure balls in which the player added win probability. Team = last IPL side in the data.</p>
+<p class="cap">SR = strike rate. "Usual" = Ordinary-tier balls; "pressure" = Elevated and High; "High" = LI ≥ 2. Shown lift = demonstrated and shrunk; half of it is in the rating. Pressure balls = all deliveries in the pressure tiers (the evidence lines below count legal balls only). Matches positive = matches with six or more pressure balls in which the player added win probability. Team = last IPL side in the data.</p>
 <ol class="ev">{''.join(f"<li><b>{short(r.player)}.</b> {sentence(d, 'batters', r)}</li>" for r in tb.itertuples())}</ol>
 
 <h1><span class="no">7</span>The top 10 bowlers under pressure</h1>
 <div class="cols wide"><div>{img('top10_bowlers')}</div><div>
 <p>The bowling list is led by {short(tw.player.iloc[0])}, {short(tw.player.iloc[1])} and {short(tw.player.iloc[2])}. Bowlers' intervals are wider than batters' relative to the gaps between them, so the order within the list is less secure than the membership.</p>
-<p>Several bowlers showed large lifts under pressure in this period (hollow dots well to the right). Section 5 is why those lifts are shown and not rewarded: bowlers who lifted in one half of the matches did not lift in the other.</p>
+<p>Bowlers show the largest pressure lifts (hollow dots further from the pink). Half of each counts, so delivering under pressure moves a bowler up the list, but one strong or weak patch cannot decide a place on its own.</p>
 </div></div>
 {top_table(d, 'bowlers')}
 <ol class="ev">{''.join(f"<li><b>{short(r.player)}.</b> {sentence(d, 'bowlers', r)}</li>" for r in tw.itertuples())}</ol>
@@ -450,13 +473,18 @@ def build(d) -> str:
 </div></div>
 <h2>8.3 Sensitivity to analytical choices</h2>
 <table class="data tight"><thead><tr><th rowspan=2>Alternative specification</th><th rowspan=2>Varies</th><th colspan=2 class=r>Batters</th><th colspan=2 class=r>Bowlers</th></tr><tr><th class=r>Rank corr.</th><th class=r>Top 10 shared</th><th class=r>Rank corr.</th><th class=r>Top 10 shared</th></tr></thead><tbody>{sens_rows}</tbody></table>
-<p class="cap">Each row re-runs the rating with one choice changed and compares it with the published ranking over the same eligible players. Changes to the pressure definition, data handling and adjustment move at most {10 - min_ov} of ten names. The rows that move the list most are the ones section 5 rejected (using lift, or pressure balls alone) and the IPL-only run, which discards more than half the data.</p>
+<p class="cap">Each row re-runs the rating with one choice changed and compares it with the published ranking over the same eligible players. Changes to the pressure definition, data handling and adjustment move at most {10 - min_ov} of ten names. The rows that move the list most are the alternative lift weights and rating on pressure balls alone (section 5), and the IPL-only run, which discards more than half the data.</p>
+<h2>8.4 Seven independent ways of ranking</h2>
+<p>The same eligible players were ranked seven ways. Two use the model (the published rating, and the model with no lift). Two use raw value with no adjustment (weighted by pressure intensity, and on High-tier balls only). One replaces the win-probability model with a plain cricket rule (second innings, overs 16 to 20, needing 8 to 15 an over). One uses strike rate or economy on pressure balls against the league average in the same tier and phase. One is consistency: the share of a player's pressure matches in which they added win probability. Pink marks a top-10 place.</p>
+<h3>Batters</h3>{meth_table(mb_, tb)}
+<h3>Bowlers</h3>{meth_table(mw_, tw)}
+<p class="cap">Ranks among the {len(mb_)} eligible batters and {len(mw_)} eligible bowlers. The raw and rule-based methods use small samples (the rule covers a few dozen balls per player) and are noisy by design; they are a check, not an alternative rating. Full tables, with every eligible player, are in <code>outputs/validation/method_comparison_*.csv</code>.</p>
 
 <h1><span class="no">9</span>Limitations</h1>
 <div class="cols"><div><ul>
 <li><b>High pressure is rare.</b> Only {pc(s['tierShares']['High'], 1)} of live deliveries are High tier. Ranks below the first few are close calls; they are reported with probabilities for that reason.</li>
 <li><b>Pressure here means a live chase.</b> By construction, first-innings balls rarely reach High leverage. A batter rebuilding after a first-innings collapse is under pressure in a way this definition only partly sees.</li>
-<li><b>The rating is not built from pressure balls alone.</b> That is a finding (section 5), but it means the pressure tiers act through eligibility and the dead-ball rule, not through the rating formula. A reader who prefers a purely descriptive ranking will find it in the sensitivity table ("Rating plus full demonstrated lift").</li>
+<li><b>The rating borrows from usual play.</b> A player's level under pressure is estimated from all their live balls, with the pressure-specific shift counted at half strength (section 5). A purely descriptive ranking, with the full shift, is in the sensitivity table ("Full demonstrated lift"); it picks the same twenty players in a different order.</li>
 <li><b>Openers are under-tested</b> and several elite ones are unranked.</li>
 </ul></div><div><ul>
 <li><b>No World Cups, few knockouts.</b> The pack holds {aud['rows']['matches']} matches of which 31 are knockouts.</li>

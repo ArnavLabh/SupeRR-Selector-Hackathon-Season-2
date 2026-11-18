@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { Calculator, Database, Gauge, Pause, Play, Users } from "lucide-react";
 
 import { useData, useLazy, type Moment } from "../lib/data";
 
+const STEP_MS = 5200;
 const fmtDate = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
 type Step ={ icon: typeof Database; title: string; model: string[]; body: string };
@@ -18,11 +19,20 @@ export function Pipeline() {
   const mo = useLazy<{ moments: Moment[] }>("moments");
   const [i, setI] = useState(0);
   const [running, setRunning] = useState(true);   // only the button or a step click changes this
+  const [offset, setOffset] = useState(0);        // ms of the current step already shown when this run began
+  const startRef = useRef(0);
   useEffect(() => {
     if (!running) return;
-    const t = setInterval(() => setI((x) => (x + 1) % 4), 5200);
-    return () => clearInterval(t);
-  }, [running]);
+    startRef.current = performance.now();
+    const t = setTimeout(() => { setOffset(0); setI((x) => (x + 1) % 4); }, Math.max(0, STEP_MS - offset));
+    return () => clearTimeout(t);
+  }, [running, i, offset]);
+  const toggle = () => {
+    if (running) {   // freeze where we are, so play carries on from the same point
+      setOffset((o) => Math.min(STEP_MS, o + performance.now() - startRef.current));
+      setRunning(false);
+    } else setRunning(true);
+  };
 
   const ball = useMemo(() => {
     const ms = mo?.moments ?? [];
@@ -66,8 +76,9 @@ export function Pipeline() {
           <b className="pipe-teams">{ball.batting} <span className="muted">v</span> {ball.bowling}</b>
           <span className="muted small">{ball.comp} · {fmtDate(ball.date)} · {ball.striker} facing {ball.bowler}{ball.freeHit && <> · <span className="gold-text">free hit, after a no-ball</span></>}</span>
         </div>
-        <button type="button" className="pipe-play" onClick={() => setRunning((r) => !r)} aria-pressed={!running}>
-          {running ? <><Pause size={14} /> Pause</> : <><Play size={14} /> Play</>}
+        <button type="button" className="pipe-play" onClick={toggle} aria-pressed={!running}
+          aria-label={running ? "Pause the walkthrough" : "Play the walkthrough"} title={running ? "Pause" : "Play"}>
+          {running ? <Pause size={15} /> : <Play size={15} />}
         </button>
       </div>
 
@@ -75,7 +86,7 @@ export function Pipeline() {
         <div className="pipe-track"><span style={{ transform: `scaleX(${i / 3})` }} /></div>
         {steps.map((st, k) => (
           <button key={st.title} type="button" role="tab" aria-selected={k === i} className={`pipe-node${k <= i ? " done" : ""}${k === i ? " on" : ""}`}
-            onClick={() => { setI(k); setRunning(false); }}>
+            onClick={() => { setI(k); setOffset(0); setRunning(false); }}>
             <span className="pipe-dot"><st.icon size={18} /></span>
             <span className="pipe-label"><small>Step {k + 1}</small>{st.title}</span>
           </button>
@@ -93,7 +104,9 @@ export function Pipeline() {
             <div className="row" style={{ gap: 8, marginTop: 4 }}>{St.model.map((m) => <span key={m} className="tag blue">{m}</span>)}</div>
           </div>
         </div>
-      {running && <motion.div key={`p${i}`} className="pipe-timer" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 5.2, ease: "linear" }} />}
+      {running
+        ? <motion.div key={`p${i}-${offset}`} className="pipe-timer" initial={{ scaleX: offset / STEP_MS }} animate={{ scaleX: 1 }} transition={{ duration: (STEP_MS - offset) / 1000, ease: "linear" }} />
+        : <div className="pipe-timer paused" style={{ transform: `scaleX(${offset / STEP_MS})` }} />}
     </div>
   );
 }
@@ -106,7 +119,8 @@ const STACK: [string, string, string][] = [
   ["Machine-learning benchmarks", "Logistic regression and monotone gradient boosting (HistGradientBoosting)", "Fitted directly to match results with the same folds. Out-of-fold log loss 0.521 and 0.529 against 0.519 for the structural model, so neither was adopted. No deep learning: about 840 match results cannot support it, and it would add variance without a structural advantage."],
   ["Pressure", "Leverage index", "Standard deviation of the win-probability change across the outcome distribution, divided by the league average. Graded intensity s = clip(LI - 1, 0, 2) feeds the player model."],
   ["Player model", "Linear mixed-effects model, REML (Henderson's equations)", "z = fixed effects + player + s x player lift + opponent + s x opponent lift + match + noise. Variances by restricted maximum likelihood (Cholesky, Nelder-Mead on log-variances); lift variances averaged over a grid with a flat prior on the standard deviation. Exact posterior covariance from the inverted system."],
-  ["Rating choice", "Hold-out prediction, 41 splits", "One temporal split and 40 random half-splits of matches. Adding past pressure lift made forecasts worse in 82.5% of splits, so the published rating gives it no weight."],
+  ["Rating choice", "Hold-out prediction, 41 splits", "One temporal split and 40 random half-splits of matches. Rating = usual level + half the demonstrated pressure lift. The full lift forecast worst; no lift would ignore performance under pressure."],
+  ["Method check", "Seven independent ranking methods", "The published rating against the model without lift, raw value (leverage-weighted and High tier only), a plain situation rule, strike rate or economy against the league, and match-to-match consistency."],
   ["Uncertainty", "Posterior simulation and cluster bootstrap", "4,000 joint posterior draws give each player's chance of a true top-10 place. 200 bootstrap resamples of whole matches test list stability; 18 alternative specifications test robustness."],
 ];
 

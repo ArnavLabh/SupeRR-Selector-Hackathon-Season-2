@@ -385,7 +385,7 @@ a.lens-row:hover, a.lens-row:focus-visible { background: var(--s2); }
 .pipe-match .eyebrow-sm { font: 650 11px/1 var(--head); letter-spacing: 0.14em; text-transform: uppercase; color: var(--pink-hi); }
 .pipe-teams { font: 650 19px/1.25 var(--head); letter-spacing: -0.01em; }
 .gold-text { color: var(--gold); }
-.pipe-play { display: inline-flex; align-items: center; gap: 7px; flex: none; height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--s2); color: var(--text); font: 600 13px/1 var(--body, inherit); cursor: pointer; transition: border-color 160ms, background 160ms; }
+.pipe-play { display: inline-grid; place-items: center; flex: none; width: 36px; height: 36px; padding: 0; border-radius: 50%; border: 1px solid var(--line-2); background: var(--s2); color: var(--text); font: 600 13px/1 var(--body, inherit); cursor: pointer; transition: border-color 160ms, background 160ms; }
 .pipe-play:hover { border-color: var(--pink); }
 .pipe-play[aria-pressed="true"] { background: rgba(234, 26, 133, 0.16); border-color: var(--pink); }
 @media (max-width: 560px) { .pipe-ball { align-items: flex-start; } .pipe-teams { font-size: 16px; } }
@@ -403,6 +403,7 @@ a.lens-row:hover, a.lens-row:focus-visible { background: var(--s2); }
 .pipe-readout { display: grid; gap: 8px; padding: 18px 20px; border-radius: 16px; background: var(--s2); border: 1px solid var(--line); }
 .pipe-big { font: 800 44px/1 var(--head); letter-spacing: -0.03em; color: #fff; }
 .pipe-text { display: grid; gap: 8px; }
+.pipe-timer.paused { opacity: 0.4; }
 .pipe-timer { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: var(--pink); transform-origin: left; opacity: 0.7; }
 .stack-table { padding: 6px 4px; }
 .stack-row { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 20px; padding: 16px 18px; border-bottom: 1px solid var(--line); animation: page-in 400ms var(--ease) both; }
@@ -425,3 +426,11 @@ a.lens-row:hover, a.lens-row:focus-visible { background: var(--s2); }
 
 /* In-page jump targets clear the sticky header. */
 .anchor { scroll-margin-top: 92px; }
+
+/* seven-method agreement grid (Methodology) */
+.agree-grid { display: grid; grid-template-columns: minmax(120px, 1.4fr) repeat(7, minmax(0, 1fr)) 56px; gap: 6px; align-items: center; }
+.agree-head { padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.agree-col { font-size: 10.5px; line-height: 1.2; color: var(--muted); text-align: center; }
+.agree-dot { display: grid; place-items: center; height: 26px; border-radius: 8px; background: var(--s2); color: var(--muted); font: 600 11.5px/1 var(--head); font-variant-numeric: tabular-nums; }
+.agree-dot.on { background: rgba(234, 26, 133, 0.22); color: var(--pink-hi); box-shadow: inset 0 0 0 1px rgba(234, 26, 133, 0.5); }
+@media (max-width: 640px) { .agree-grid { grid-template-columns: minmax(96px, 1.2fr) repeat(7, minmax(0, 1fr)) 44px; gap: 4px; } .agree-col { font-size: 9px; } .agree-dot { height: 22px; font-size: 10px; } }

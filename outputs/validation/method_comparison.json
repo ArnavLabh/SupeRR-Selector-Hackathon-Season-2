@@ -1,0 +1,228 @@
+{
+ "rule": "second innings, overs 16 to 20, required rate 8 to 15",
+ "methods": {
+  "m1_published": "Published rating",
+  "m2_usual_level": "Model: usual level",
+  "m3_raw_weighted": "Raw, leverage-weighted",
+  "m4_raw_high": "Raw, High tier only",
+  "m5_rule": "Situation rule",
+  "m6_conventional": "Strike rate / economy vs league",
+  "m7_consistency": "Consistency across matches"
+ },
+ "disciplines": {
+  "bat": {
+   "eligible": 35,
+   "top10": {
+    "m1_published": [
+     "Suryakumar Yadav",
+     "Heinrich Klaasen",
+     "Tim David",
+     "Shubman Gill",
+     "Jos Buttler",
+     "Namboori Tilak Varma",
+     "Shreyas Iyer",
+     "Nicholas Pooran",
+     "Mitchell Marsh",
+     "Cameron Green"
+    ],
+    "m2_usual_level": [
+     "Suryakumar Yadav",
+     "Heinrich Klaasen",
+     "Tim David",
+     "Shubman Gill",
+     "Jos Buttler",
+     "Namboori Tilak Varma",
+     "Mitchell Marsh",
+     "Cameron Green",
+     "Nicholas Pooran",
+     "Lokesh Rahul"
+    ],
+    "m3_raw_weighted": [
+     "Shreyas Iyer",
+     "Heinrich Klaasen",
+     "Rinku Singh",
+     "Tim David",
+     "Cameron Green",
+     "Suryakumar Yadav",
+     "Towhid Hridoy",
+     "Rovman Powell",
+     "Nicholas Pooran",
+     "Pathum Nissanka"
+    ],
+    "m4_raw_high": [
+     "Shreyas Iyer",
+     "Cameron Green",
+     "Rinku Singh",
+     "Jitesh Sharma",
+     "Nicholas Pooran",
+     "Heinrich Klaasen",
+     "Towhid Hridoy",
+     "Sikandar Raza",
+     "Rovman Powell",
+     "Shubman Gill"
+    ],
+    "m5_rule": [
+     "Shreyas Iyer",
+     "Jos Buttler",
+     "Shubman Gill",
+     "Towhid Hridoy",
+     "Sikandar Raza",
+     "Sam Curran",
+     "Nicholas Pooran",
+     "Rinku Singh",
+     "Heinrich Klaasen",
+     "Cameron Green"
+    ],
+    "m6_conventional": [
+     "Heinrich Klaasen",
+     "Tim David",
+     "Suryakumar Yadav",
+     "Cameron Green",
+     "Shreyas Iyer",
+     "Jos Buttler",
+     "Rinku Singh",
+     "Virat Kohli",
+     "Nicholas Pooran",
+     "Mitchell Marsh"
+    ],
+    "m7_consistency": [
+     "Pathum Nissanka",
+     "Heinrich Klaasen",
+     "Suryakumar Yadav",
+     "Rinku Singh",
+     "Cameron Green",
+     "Tim David",
+     "Dhruv Jurel",
+     "Towhid Hridoy",
+     "Tristan Stubbs",
+     "Jos Buttler"
+    ]
+   },
+   "overlap_with_m1": {
+    "m1_published": 10,
+    "m2_usual_level": 9,
+    "m3_raw_weighted": 6,
+    "m4_raw_high": 5,
+    "m5_rule": 6,
+    "m6_conventional": 8,
+    "m7_consistency": 5
+   },
+   "spearman_with_m1": {
+    "m1_published": 1.0,
+    "m2_usual_level": 0.987,
+    "m3_raw_weighted": 0.656,
+    "m4_raw_high": 0.322,
+    "m5_rule": 0.419,
+    "m6_conventional": 0.782,
+    "m7_consistency": 0.524
+   }
+  },
+  "bowl": {
+   "eligible": 64,
+   "top10": {
+    "m1_published": [
+     "Sunil Narine",
+     "Josh Hazlewood",
+     "Kuldeep Yadav",
+     "Varun Chakravarthy",
+     "Rashid Khan (Afghanistan)",
+     "Jasprit Bumrah",
+     "Mohsin Khan",
+     "Axar Patel",
+     "Nathan Ellis",
+     "Yuzvendra Chahal"
+    ],
+    "m2_usual_level": [
+     "Sunil Narine",
+     "Jasprit Bumrah",
+     "Varun Chakravarthy",
+     "Kuldeep Yadav",
+     "Josh Hazlewood",
+     "Rashid Khan (Afghanistan)",
+     "Noor Ahmad",
+     "Mohsin Khan",
+     "Wanindu Hasaranga",
+     "Bhuvneshwar Kumar"
+    ],
+    "m3_raw_weighted": [
+     "Josh Hazlewood",
+     "Sunil Narine",
+     "Taskin Ahmed",
+     "Axar Patel",
+     "Mohsin Khan",
+     "Sikandar Raza",
+     "Rashid Khan (Afghanistan)",
+     "Patrick Cummins",
+     "Lockie Ferguson",
+     "Kuldeep Yadav"
+    ],
+    "m4_raw_high": [
+     "Sikandar Raza",
+     "Mohsin Khan",
+     "Taskin Ahmed",
+     "Axar Patel",
+     "Sunil Narine",
+     "Mohammed Shami",
+     "Josh Hazlewood",
+     "Rashid Khan (Afghanistan)",
+     "Yuzvendra Chahal",
+     "Tim Southee"
+    ],
+    "m5_rule": [
+     "Mohsin Khan",
+     "Akeal Hosein",
+     "Rashid Khan (Afghanistan)",
+     "Patrick Cummins",
+     "Adam Zampa",
+     "Sikandar Raza",
+     "Sunil Narine",
+     "Mujeeb Ur Rahman",
+     "Taskin Ahmed",
+     "Josh Hazlewood"
+    ],
+    "m6_conventional": [
+     "Sikandar Raza",
+     "Taskin Ahmed",
+     "Sunil Narine",
+     "Mark Adair",
+     "Mujeeb Ur Rahman",
+     "Rashid Khan (Afghanistan)",
+     "Mitchell Santner",
+     "Richard Ngarava",
+     "Blessing Muzarabani",
+     "Jasprit Bumrah"
+    ],
+    "m7_consistency": [
+     "Rashid Khan (Afghanistan)",
+     "Adam Zampa",
+     "Axar Patel",
+     "Kuldeep Yadav",
+     "Jofra Archer",
+     "Josh Hazlewood",
+     "Mohsin Khan",
+     "Lockie Ferguson",
+     "Sunil Narine",
+     "Yuzvendra Chahal"
+    ]
+   },
+   "overlap_with_m1": {
+    "m1_published": 10,
+    "m2_usual_level": 7,
+    "m3_raw_weighted": 6,
+    "m4_raw_high": 6,
+    "m5_rule": 4,
+    "m6_conventional": 3,
+    "m7_consistency": 7
+   },
+   "spearman_with_m1": {
+    "m1_published": 1.0,
+    "m2_usual_level": 0.899,
+    "m3_raw_weighted": 0.802,
+    "m4_raw_high": 0.386,
+    "m5_rule": 0.454,
+    "m6_conventional": 0.585,
+    "m7_consistency": 0.745
+   }
+  }
+ }
+}

@@ -36,9 +36,7 @@ and are not stated in the blog text, which gives ₹12.75 crore freed before Het
 labelled "reported". Note that 25 places, minus 8 releases, plus Shami, would leave 7 open places, not 6;
 the difference is unexplained and is left as reported.
 
-**What it means.** Of the 20 ranked players, only Wanindu Hasaranga (9th of 64 bowlers) was released.
-Every top-10 batter was retained. The released pool is deep in pace (Muzarabani 11th, Mustafizur 13th,
-Pathirana 20th, Boult 28th) and thin in crunch-tested batting (Nissanka 17th, an opener; Raza 25th).
+**What it means** (ranks from the published v2 ratings). None of the 20 top-ranked players was released. The best released players sit just outside: Wanindu Hasaranga 11th of 64 bowlers, Pathum Nissanka 15th of 35 batters, Matheesha Pathirana 19th, Mustafizur Rahman 21st and Lockie Ferguson 24th. Mohammed Shami, traded in, is now the Royals' highest-rated bowler (28th), just ahead of Jofra Archer (29th).
 
 ## Royals' 2026 season (confirmed, S1)
 
@@ -82,4 +80,4 @@ The full table with tiers, availability and risks is in `auction.json` and on th
 3. Weigh the rest against the two data-identified needs and the overseas-slot constraint (an Indian seamer is worth more than an overseas one of equal rating).
 4. Flag anything that could still block a signing (fitness, eligibility).
 
-Result after retentions: **Hasaranga** and **Muzarabani** are the priority targets, the two highest-rated bowlers in the pool. **Pathirana** (death overs, 111 High-tier balls) and **Nissanka** (the best released batter) are strong targets. **Raza**, **Chahar** (Indian, so no overseas place) and **Mustafizur** (eligibility unclear) go on the watch list. The pre-retention picks Ellis, Green, Mohsin Khan and Bhuvneshwar Kumar were all retained.
+Result after retentions: **Hasaranga** and **Pathirana** are the priority targets, the two highest-rated bowlers in the pool. **Nissanka** (the best released batter) and **Ferguson** are strong targets. **Raza**, **Avesh Khan** (Indian, the most tested seamer in the pool) and **Mustafizur** (eligibility unclear) go on the watch list.

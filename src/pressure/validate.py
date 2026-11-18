@@ -285,10 +285,10 @@ def sensitivity(ctx) -> pd.DataFrame:
         return _variant_tables(ctx, bb, primary_v, weights=w)
     add("Recency-weighted (20% decay per year)", "scope", recent)
 
-    add("Rating plus full demonstrated lift", "model",
+    add("Usual level only (no pressure-specific term)", "model",
+        lambda: _variant_tables(ctx, ctx["balls"], primary_v, lift_weight=0.0))
+    add("Full demonstrated lift", "model",
         lambda: _variant_tables(ctx, ctx["balls"], primary_v, lift_weight=1.0))
-    add("Rating plus half the demonstrated lift", "model",
-        lambda: _variant_tables(ctx, ctx["balls"], primary_v, lift_weight=0.5))
 
     def no_adjust():
         v = {d: {**primary_v[d], "opp": 1e-9, "opp_pressure": 1e-9, "match": 1e-9}

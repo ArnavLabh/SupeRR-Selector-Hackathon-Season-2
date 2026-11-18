@@ -77,7 +77,7 @@ def main() -> None:
             elif nm in released:
                 tier = targets[nm]["tier"] if nm in targets else "Watch"
                 avail, call, avail_note = "Released", tier, f"Released by {released[nm]} ({when}). In the auction pool."
-            elif active:
+            elif team is not None:   # an IPL side in the data and not on any release list
                 avail, call, avail_note = "Retained", "Out of reach", f"Retained by {team} for IPL 2027 ({when})."
             else:
                 avail, call, avail_note = "Unknown", "Monitor", "No 2027 squad reporting found."

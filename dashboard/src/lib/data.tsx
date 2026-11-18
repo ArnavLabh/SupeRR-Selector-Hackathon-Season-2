@@ -93,7 +93,7 @@ export function get<T>(name: string): Promise<T> {
   return cache.get(name) as Promise<T>;
 }
 /** Warm the cache for data used on other pages. */
-export const prefetchData = () => ["pressure_map", "moments", "auction", "royals_lens"].forEach((n) => { get(n).catch(() => undefined); });
+export const prefetchData = () => ["pressure_map", "moments", "methods", "auction", "royals_lens"].forEach((n) => { get(n).catch(() => undefined); });
 
 const Ctx = createContext<Bundle | null>(null);
 

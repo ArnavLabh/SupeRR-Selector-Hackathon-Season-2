@@ -50,10 +50,12 @@ class Settings:
 
     # --- rating ----------------------------------------------------------------
     # Published rating = usual level + lift_weight * demonstrated pressure lift.
-    # The weight was chosen by hold-out prediction over 41 splits: 0 beat 0.5
-    # and 1 for batters and for bowlers (docs/DECISIONS.md D-10). The lift is
-    # still estimated and reported for every player.
-    lift_weight: float = 0.0
+    # The brief ranks the best performers *under pressure*, so what players did
+    # under pressure must count (weight > 0). Among weights that count it, 0.5
+    # gave the top 10s that delivered most in unseen matches, averaged over
+    # batters and bowlers; the full lift (1.0) forecast worst
+    # (docs/DECISIONS.md D-08). Weights 0 and 1 are sensitivity runs.
+    lift_weight: float = 0.5
 
     # --- win probability -----------------------------------------------------
     n_folds: int = 5

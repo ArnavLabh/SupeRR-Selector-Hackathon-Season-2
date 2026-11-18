@@ -104,41 +104,54 @@ taking a boundary mode, is the standard remedy (Gelman, 2006). The effect is tha
 small, heavily shrunk lift estimate and bowlers a larger one. Whether that lift should enter the
 rating is a separate question, answered in D-08.
 
-## D-08 The published rating gives pressure-specific lift no weight
+## D-08 The published rating counts half of each player's demonstrated pressure lift
 
-**Choice.** Pressure rating = the player's estimated level per 100 balls from the joint model, with
-`lift_weight = 0`. Players are ranked on it, among those eligible under D-09. Each player's
-demonstrated lift is still estimated and published beside the rating.
+**Choice.** Pressure rating = the player's usual level plus half of their demonstrated, shrunk
+pressure lift, per 100 balls at the intensity of a typical High-tier ball (`lift_weight = 0.5`).
+Players are ranked on it, among those eligible under D-09.
 
-**Alternatives.** Rating plus the full demonstrated lift (the model's literal estimate at High
-pressure); plus half of it; pressure balls only; a composite of level, lift and consistency.
+**History.** Version 1 of this project (git tag `primary-results-v1`) used `lift_weight = 0`,
+because past lift did not improve forecasts. A pre-submission review against the brief reversed
+that. The brief asks for "the 10 best-performing batters under pressure" and for a system that
+"measures how batters and bowlers perform in high-pressure match situations compared with their
+usual performance levels". A rating with no weight on what players did under pressure answers a
+different question (who is good overall, among players who have met pressure). The clearest
+symptom: KL Rahul ranked 10th while ranking 28th of 35 on value added per pressure ball and 29th on
+High-pressure strike rate.
 
-**Why.** This was the plan's central open question and it was settled by evidence, against the
-result I expected. Players were rated on one set of matches and scored on their pressure-weighted
-value in unseen matches: one temporal split and 40 random half-splits.
+**Alternatives and evidence.** Players were rated on one set of matches and scored on their
+pressure-weighted value in unseen matches: one temporal split and 40 random half-splits.
 
-| Rated on the first half by | Batters, mean r | Bowlers, mean r |
-|---|---:|---:|
-| Level, no lift (published) | 0.160 | 0.286 |
-| Level plus half the lift | 0.152 | 0.262 |
-| Level plus full lift | 0.142 | 0.227 |
-| Pressure balls only, shrunk and adjusted | 0.073 | 0.188 |
-| Raw pressure-weighted mean | 0.054 | 0.139 |
-| Lift alone | -0.069 | 0.056 |
+| Rated on the first half by | Batters, mean r | Bowlers, mean r | Value of the chosen top 10 in unseen matches (bat / bowl / average) |
+|---|---:|---:|---|
+| Level, no lift (version 1) | 0.160 | 0.286 | 5.24 / 6.64 / 5.94 |
+| **Level plus half the lift (published)** | **0.152** | **0.262** | **4.94 / 7.00 / 5.97** |
+| Level plus full lift | 0.142 | 0.227 | 4.61 / 6.40 / 5.50 |
+| Pressure balls only, shrunk and adjusted | 0.073 | 0.188 | 4.04 / 5.28 / 4.66 |
+| Raw pressure-weighted mean | 0.054 | 0.139 | 2.70 / 4.87 / 3.78 |
+| Lift alone | -0.069 | 0.056 | 1.77 / 3.25 / 2.51 |
 
-Level without lift beat level with lift in 82.5% of the 40 random splits for batters and for
-bowlers. Lift on its own has no predictive value. Up-weighting pressure balls when estimating level
-also made prediction worse (0.169 to 0.138 for batters, 0.272 to 0.228 for bowlers at four times the
-weight). The in-sample signal for bowlers in D-07 therefore does not behave like a repeatable trait.
+The pool average in unseen matches is 3.07 for batters and 1.31 for bowlers.
 
-**What this means in cricket terms.** Performing above your usual level under pressure in one set
-of matches says nothing about doing so in the next. The most reliable players under pressure are
-the best players, measured fairly, who have been tested there. The brief's comparison of pressure
-with usual level is still made for every player; it is reported as record, not used as forecast.
+**Why half.**
+- A weight above zero is required by the brief: performance under pressure has to count.
+- The full lift is the model's literal in-sample estimate, but it forecast worst of the three
+  weights, so part of it is noise that shrinkage alone did not remove.
+- Half the lift forecasts almost as well as no lift (correlation within 0.01 for batters and 0.03
+  for bowlers, inside two standard errors for batters), and its top 10s delivered the most in unseen
+  matches on average across batters and bowlers.
+- Half and full weight pick the same ten batters and the same ten bowlers; only the order moves.
+  No weight swaps one batter (KL Rahul for Shreyas Iyer) and three bowlers.
 
-**Cost.** The rating no longer depends on the pressure tiers except through eligibility and the
-dead-ball rule. That is stated plainly in the report. The "plus full lift" ranking is published as a
-sensitivity run so a reader who prefers the descriptive reading can see exactly what changes.
+**What this means in cricket terms.** A player's level under pressure is mostly their overall
+quality, plus a shift that is real but only partly repeatable. The rating counts the shift at half
+strength: enough that delivering under pressure matters, not so much that one hot or cold patch
+decides a place.
+
+**Checks.** Seven independent ways of ranking the same players (published rating, model without
+lift, raw leverage-weighted value, raw High-tier value, a plain situation rule, strike rate or economy
+against the league, and match-to-match consistency) are compared in
+`outputs/validation/method_comparison_*.csv`.
 
 ## D-09 Eligibility
 
@@ -154,7 +167,7 @@ are reported separately as "untested at high pressure", not ranked.
 
 Hold-out prediction over 41 splits (D-08), a 200-replicate bootstrap over matches, and eighteen
 sensitivity runs. Results are in `outputs/validation/` and discussed in `docs/METHODOLOGY.md`.
-The hold-out result overturned the first version of the rating (level plus lift); see D-08.
+The hold-out comparison, read against the brief, sets the lift weight; see D-08.
 
 ## D-11 Scope
 
@@ -166,8 +179,9 @@ The hold-out result overturned the first version of the rating (level plus lift)
 
 ## D-12 Primary results are frozen before any external research
 
-`git tag primary-results-v1` marks the commit whose `outputs/rankings/*.csv` are the submitted lists.
-Everything under `research/` was gathered after that tag and does not feed the pipeline.
+`git tag primary-results-v1` marks the first frozen lists; `primary-results-v2` marks the submitted
+lists, after the lift-weight review in D-08. That review was driven by the brief and the hold-out
+evidence only. Everything under `research/` was gathered separately and does not feed the pipeline.
 
 ## D-13 Stack
 

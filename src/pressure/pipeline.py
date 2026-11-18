@@ -176,6 +176,8 @@ def main() -> None:
     if args.stage in ("validate", "all"):
         from . import validate
         validate.run(ctx, n_boot=args.bootstrap)
+        from . import methods
+        methods.compare()
     if args.stage in ("export", "all"):
         from . import export
         export.run(ctx)

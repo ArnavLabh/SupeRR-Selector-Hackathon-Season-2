@@ -68,13 +68,18 @@ def collect() -> dict:
                     "rating": round(float(r.pressure), 1), "p10": round(float(r.p_top10), 2),
                     "pb": int(r.pressure_balls), "hb": int(r.high_balls)} for r in t.itertuples()]
     allb = {k: pd.read_csv(OUT / "rankings" / f"{k}_all.csv") for k in ("batters", "bowlers")}
-    methods = [("Model: usual level (no pressure-specific term)", "Published rating (no lift)"),
-               ("Model: usual level + half the lift", "Rating + half the lift"),
-               ("Model: pressure rating (usual level + lift)", "Rating + full lift"),
+    methods = [("Model: usual level + half the lift", "Published: level + half the lift"),
+               ("Model: usual level (no pressure-specific term)", "Level, no lift"),
+               ("Model: pressure rating (usual level + lift)", "Level + full lift"),
                ("Pressure balls only, shrunk and adjusted", "Pressure balls only"),
                ("Model: lift alone", "Lift alone")]
-    PUB = methods[0][0]
-    robust = sens[~sens["variant"].str.contains("lift|Pressure balls only|IPL only")]
+    L0 = "Model: usual level (no pressure-specific term)"
+    robust = sens[~sens["variant"].str.contains("lift|Pressure balls only|IPL only|Usual level only")]
+    agree = 0
+    for k in ("batters", "bowlers"):
+        mc = pd.read_csv(OUT / "validation" / f"method_comparison_{k}.csv").set_index("player_id")
+        top_ids = pd.read_csv(OUT / "rankings" / f"top10_{k}.csv")["player_id"]
+        agree += int((mc.loc[top_ids, "top10_votes"] >= 4).sum())
     for k in ("batters", "bowlers"):
         e = allb[k][allb[k]["eligible"]]
         tops[k + "_sure"] = int((e["p_top10"] >= 0.8).sum())
@@ -96,7 +101,8 @@ def collect() -> dict:
         "holdout": {d: [{"label": lab, "r": round(float(ho.loc[(d, m), "mean_r"]), 3),
                          "se": round(float(ho.loc[(d, m), "se_r"]), 3)} for m, lab in methods]
                     for d in ("bat", "bowl")},
-        "beat": {d: float(ho.loc[(d, PUB), "share_beating_pressure_rating"]) for d in ("bat", "bowl")},
+        "beat": {d: float(ho.loc[(d, L0), "share_beating_pressure_rating"]) for d in ("bat", "bowl")},
+        "agree": agree,
         "lrP": {d: s["models"][d]["lrP"] for d in ("bat", "bowl")},
         "boot": {k: boot[k]["mean_top10_overlap"] for k in ("batters", "bowlers")},
         "robustMinOverlap": int(robust["top10_overlap"].min()),

@@ -88,8 +88,8 @@ export default function Rankings() {
           {rows.length === 0 && <p className="muted" style={{ padding: 28, textAlign: "center" }}>{q.trim() ? "No player in the data matches that name." : "Nobody matches. Widen the list or change the team."}</p>}
         </div>
         <div className="card pad stack" style={{ position: "sticky", top: 92 }}>
-          <h2 className="h3">Quality against lift</h2>
-          <p className="muted small">Right means better under pressure overall. Up means they did better than their usual level. Lift did not repeat in unseen matches, so it is shown, not scored.</p>
+          <h2 className="h3">Rating against lift</h2>
+          <p className="muted small">Right means better under pressure overall. Up means they did better than their usual level. Half of each player's lift counts in the rating; the rest did not repeat in unseen matches.</p>
           <Scatter rows={rated} disc={disc} highlight={hover} />
         </div>
       </div>

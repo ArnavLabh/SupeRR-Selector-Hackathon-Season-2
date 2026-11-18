@@ -270,6 +270,16 @@ def run(ctx: dict) -> None:
         json.dumps(_pressure_map(ctx), separators=(",", ":")), encoding="utf-8")
     (DASHBOARD_DATA / "moments.json").write_text(
         json.dumps(_moments(ctx), separators=(",", ":")), encoding="utf-8")
+    meth = VAL / "method_comparison.json"
+    if meth.exists():   # seven ranking methods side by side (pressure.methods)
+        mj = json.loads(meth.read_text(encoding="utf-8"))
+        bundle = {"rule": mj["rule"], "methods": list(mj["methods"].values())}
+        for disc, name in (("bat", "batters"), ("bowl", "bowlers")):
+            t = pd.read_csv(VAL / f"method_comparison_{name}.csv")
+            rk = [c for c in t.columns if c.startswith("rank_m")]
+            bundle[disc] = [{"id": int(r["player_id"]), "ranks": [None if pd.isna(r[c]) else int(r[c]) for c in rk],
+                             "votes": int(r["top10_votes"])} for _, r in t.iterrows()]
+        write_json(DASHBOARD_DATA / "methods.json", bundle)
     auction = ROOT / "research" / "auction.json"
     if auction.exists():   # secondary research, gathered after the primary results were frozen
         (DASHBOARD_DATA / "auction.json").write_text(auction.read_text(encoding="utf-8"), encoding="utf-8")

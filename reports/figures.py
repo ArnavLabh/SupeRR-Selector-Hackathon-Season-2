@@ -63,7 +63,7 @@ def top10(kind: str):
     y = np.arange(len(t))
     ax.hlines(y, t["pressure_lo"], t["pressure_hi"], color=PINK, alpha=0.32, lw=6, capstyle="round")
     ax.scatter(t["with_lift"], y, s=44, facecolor=BG, edgecolor=BLUE, lw=1.6, zorder=3,
-               label="If past pressure lift carried forward")
+               label="With the full demonstrated lift")
     ax.scatter(t["pressure"], y, s=62, color=PINK, edgecolor=BG, lw=1.4, zorder=4,
                label="Pressure rating (80% interval)")
     ax.set_yticks(y, [f"{int(r)}  {_short(n)}" for r, n in zip(t["rank"], t["player"])])
@@ -136,9 +136,9 @@ def calibration():
 
 
 HO_LABEL = {
-    "Model: usual level (no pressure-specific term)": "Published rating\n(level, no lift)",
-    "Model: usual level + half the lift": "Rating + half the lift",
-    "Model: pressure rating (usual level + lift)": "Rating + full lift",
+    "Model: usual level (no pressure-specific term)": "Level, no lift",
+    "Model: usual level + half the lift": "Published rating\n(level + half the lift)",
+    "Model: pressure rating (usual level + lift)": "Level + full lift",
     "Raw overall mean (no shrinkage)": "Raw value, all balls",
     "Conventional: pressure strike rate / economy": "Pressure strike rate\n/ economy",
     "Pressure balls only, shrunk and adjusted": "Pressure balls only,\nshrunk",
@@ -152,7 +152,7 @@ def holdout():
     fig, axes = plt.subplots(1, 2, figsize=(8.6, 3.5), sharex=True)
     for ax, (disc, title) in zip(axes, (("bat", "Batters"), ("bowl", "Bowlers"))):
         d = h[h["discipline"] == disc].sort_values("mean_r")
-        cols = [PINK if m.startswith("Model: usual level (") else GREY for m in d["method"]]
+        cols = [PINK if m == "Model: usual level + half the lift" else GREY for m in d["method"]]
         ax.barh(range(len(d)), d["mean_r"], xerr=d["se_r"], height=0.55, color=cols,
                 error_kw={"ecolor": INK2, "lw": 1, "capsize": 2})
         ax.set_yticks(range(len(d)), [HO_LABEL[m] for m in d["method"]], fontsize=8.2)

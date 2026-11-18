@@ -94,7 +94,7 @@ z = Xβ + u_player + s·v_player + u_opp + s·v_opp + m_match + ε
 ```
 usual level      U_i = 100 · u_i
 demonstrated lift L_i = 100 · s_ref · v_i        s_ref = mean s of High-tier deliveries
-pressure rating   R_i = U_i + λ · L_i            λ = 0  (chosen by hold-out prediction)
+pressure rating   R_i = U_i + λ · L_i            λ = 0.5  (see DECISIONS.md D-08)
 ```
 
 Eligibility: Σs ≥ 150, High-tier deliveries ≥ 20, pressure deliveries in ≥ 15 matches.
@@ -107,11 +107,16 @@ Eligible players are ranked by `R_i`. Rank probabilities come from 4,000 joint p
 2. **Pressure definition.** League behaviour by tier; overlap with a conventional rule.
 3. **Hold-out prediction.** One temporal split and 40 random half-splits of matches. Each rating
    method is fitted on one part and correlated (weighted by exposure) with players'
-   pressure-weighted mean `z` in the other. This selects λ.
+   pressure-weighted mean `z` in the other. With the brief requiring λ > 0, this selects λ = 0.5:
+   λ = 1 forecasts worst, and λ = 0.5 gives the top 10s with the highest later pressure value.
 4. **Cluster bootstrap.** 200 resamples of matches; ranking rebuilt each time with variance
    components held fixed.
 5. **Sensitivity.** Eighteen alternative specifications covering the pressure definition, data
    handling, scope, model and win probability.
+6. **Seven ranking methods.** `python -m pressure.methods` ranks the same players by the published
+   rating, the model without lift, raw leverage-weighted value, raw High-tier value, a plain
+   situation rule (second innings, overs 16 to 20, needing 8 to 15 an over), strike rate or economy
+   against the league in the same tier and phase, and match-to-match consistency.
 
 ## 8. Reproduction
 

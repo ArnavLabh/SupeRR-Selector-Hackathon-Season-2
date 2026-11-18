@@ -80,12 +80,14 @@ function PhaseShare() {
 function FindingBars() {
   const { summary: s } = useData();
   const ho = s.validation?.holdout ?? [];
-  const get = (d: Disc, m: string) => ho.find((r) => r.discipline === d && r.method.startsWith(m))?.mean_r ?? 0;
+  // What each rating's top 10 went on to add in unseen matches, averaged over batters and bowlers.
+  const get = (d: Disc, m: string) => ho.find((r) => r.discipline === d && r.method.startsWith(m))?.top10_future_value ?? 0;
+  const avg = (m: string) => (get("bat", m) + get("bowl", m)) / 2;
   const rows: [string, number, string][] = [
-    ["Quality, fairly measured", (get("bat", "Model: usual level (") + get("bowl", "Model: usual level (")) / 2, "var(--pink)"],
-    ["Quality plus past lift", (get("bat", "Model: pressure rating") + get("bowl", "Model: pressure rating")) / 2, "var(--tier-el)"],
-    ["Pressure balls only", (get("bat", "Pressure balls only") + get("bowl", "Pressure balls only")) / 2, "var(--tier-ord)"],
-    ["Past lift alone", (get("bat", "Model: lift alone") + get("bowl", "Model: lift alone")) / 2, "var(--s3)"],
+    ["Half the lift (published)", avg("Model: usual level + half"), "var(--pink)"],
+    ["No lift", avg("Model: usual level ("), "var(--tier-el)"],
+    ["Full lift", avg("Model: pressure rating"), "var(--tier-el)"],
+    ["Pressure balls only", avg("Pressure balls only"), "var(--tier-ord)"],
   ];
   const max = Math.max(...rows.map((r) => r[1]));
   return (
@@ -104,8 +106,6 @@ export default function Overview() {
   const data = useData();
   const s = data.summary;
   const bat = eligible(data, "bat"), bowl = eligible(data, "bowl");
-  const ho = s.validation?.holdout.filter((r) => r.method.startsWith("Model: usual level (")) ?? [];
-  const beat = ho.length ? ho.reduce((a, r) => a + r.share_beating_pressure_rating, 0) / ho.length : 0;
   const sure = (d: Disc) => eligible(data, d).filter((p) => (p.pTop10 ?? 0) >= 0.8).length;
 
   return (
@@ -158,8 +158,8 @@ export default function Overview() {
             <PhaseShare />
           </Reveal>
           <Reveal className="card pad stack" delay={0.08}>
-            <h3 className="h3">Rising to the occasion does not repeat. Quality does</h3>
-            <p className="muted small">How well each method predicts unseen matches. Quality won {pct(beat, 1)} of 40 tests.</p>
+            <h3 className="h3">Pressure counts, at the strength it repeats</h3>
+            <p className="muted small">What each rating's top 10 went on to add in matches it had not seen, per 100 pressure balls</p>
             <FindingBars />
           </Reveal>
           <Reveal className="card pad stack" delay={0.16}>
