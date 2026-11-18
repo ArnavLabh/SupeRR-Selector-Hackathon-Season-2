@@ -29,8 +29,11 @@ export default function Rankings() {
       if (sort === "evidence") { const v = ev(p); return v == null ? 1e9 : disc === "bat" ? -v : v; }
       return p.rank ?? 1000 - p.pressure;
     };
-    return all.filter((p) => (pool === "all" || (pool === "top10" ? p.eligible && (p.rank ?? 99) <= 10 : p.eligible)) && (team === "all" || p.team === team) && (!q || p.name.toLowerCase().includes(q.toLowerCase())))
-      .sort((a, b) => key(a) - key(b)).slice(0, pool === "all" ? 120 : 200);
+    const needle = q.trim().toLowerCase();
+    // A search always looks through every player in the data, whatever list is selected.
+    const inPool = (p: Player) => needle !== "" || pool === "all" || (pool === "top10" ? p.eligible && (p.rank ?? 99) <= 10 : p.eligible);
+    return all.filter((p) => inPool(p) && (team === "all" || p.team === team) && (!needle || p.name.toLowerCase().includes(needle)))
+      .sort((a, b) => key(a) - key(b)).slice(0, pool === "all" && !needle ? 120 : 200);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [all, pool, team, q, sort, disc]);
   const max = Math.max(...rated.map((p) => p.pressure));
@@ -82,7 +85,7 @@ export default function Rankings() {
               ))}
             </AnimatePresence>
           </motion.div>
-          {rows.length === 0 && <p className="muted" style={{ padding: 28, textAlign: "center" }}>Nobody matches{pool === "top10" ? " in the top 10" : ""}. Clear the search or widen the list.</p>}
+          {rows.length === 0 && <p className="muted" style={{ padding: 28, textAlign: "center" }}>{q.trim() ? "No player in the data matches that name." : "Nobody matches. Widen the list or change the team."}</p>}
         </div>
         <div className="card pad stack" style={{ position: "sticky", top: 92 }}>
           <h2 className="h3">Quality against lift</h2>
